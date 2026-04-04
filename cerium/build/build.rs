@@ -12,61 +12,61 @@ mod materials;
 
 fn main() {
     // Dynamic Registries
-    // generate(
-    //     "Biome",
-    //     "biomes.rs",
-    //     include_str!("../data/worldgen/biome.json"),
-    // );
-    // generate(
-    //     "CatVariant",
-    //     "cat_variants.rs",
-    //     include_str!("../data/cat_variant.json"),
-    // );
-    // generate(
-    //     "ChickenVariant",
-    //     "chicken_variants.rs",
-    //     include_str!("../data/chicken_variant.json"),
-    // );
-    // generate(
-    //     "CowVariant",
-    //     "cow_variants.rs",
-    //     include_str!("../data/cow_variant.json"),
-    // );
-    // generate(
-    //     "DamageType",
-    //     "damage_types.rs",
-    //     include_str!("../data/damage_type.json"),
-    // );
-    // generate(
-    //     "FrogVariant",
-    //     "frog_variants.rs",
-    //     include_str!("../data/frog_variant.json"),
-    // );
-    // generate(
-    //     "PaintingVariant",
-    //     "painting_variants.rs",
-    //     include_str!("../data/painting_variant.json"),
-    // );
-    // generate(
-    //     "PigVariant",
-    //     "pig_variants.rs",
-    //     include_str!("../data/pig_variant.json"),
-    // );
-    // generate(
-    //     "WolfSoundVariant",
-    //     "wolf_sound_variants.rs",
-    //     include_str!("../data/wolf_sound_variant.json"),
-    // );
-    // generate(
-    //     "WolfVariant",
-    //     "wolf_variants.rs",
-    //     include_str!("../data/wolf_variant.json"),
-    // );
+    generate(
+        "Biome",
+        "biomes.rs",
+        include_str!("../data/worldgen/biome.json"),
+    );
+    generate(
+        "CatVariant",
+        "cat_variants.rs",
+        include_str!("../data/cat_variant.json"),
+    );
+    generate(
+        "ChickenVariant",
+        "chicken_variants.rs",
+        include_str!("../data/chicken_variant.json"),
+    );
+    generate(
+        "CowVariant",
+        "cow_variants.rs",
+        include_str!("../data/cow_variant.json"),
+    );
+    generate(
+        "DamageType",
+        "damage_types.rs",
+        include_str!("../data/damage_type.json"),
+    );
+    generate(
+        "FrogVariant",
+        "frog_variants.rs",
+        include_str!("../data/frog_variant.json"),
+    );
+    generate(
+        "PaintingVariant",
+        "painting_variants.rs",
+        include_str!("../data/painting_variant.json"),
+    );
+    generate(
+        "PigVariant",
+        "pig_variants.rs",
+        include_str!("../data/pig_variant.json"),
+    );
+    generate(
+        "WolfSoundVariant",
+        "wolf_sound_variants.rs",
+        include_str!("../data/wolf_sound_variant.json"),
+    );
+    generate(
+        "WolfVariant",
+        "wolf_variants.rs",
+        include_str!("../data/wolf_variant.json"),
+    );
 
     // Static Registries
     block::generate();
-    // entity_types::generate();
-    // materials::generate();
+    entity_types::generate();
+    materials::generate();
 }
 
 pub fn write_file(content: &TokenStream, dst: &str) {
