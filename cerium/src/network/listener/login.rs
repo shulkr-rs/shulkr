@@ -28,7 +28,9 @@ pub async fn handle_packet(client: Arc<Connection>, id: i32, data: &mut Cursor<&
 }
 
 async fn handle_login_start(client: Arc<Connection>, packet: LoginStartPacket) {
-    for player in client.server().players.lock().clone() {
+    let server = client.server();
+
+    for player in server.players().lock().clone() {
         if player.uuid() == packet.uuid {
             client.kick("Already connected.");
             return;
@@ -51,7 +53,7 @@ async fn handle_login_start(client: Arc<Connection>, packet: LoginStartPacket) {
     }
 
     // todo: check for online mode
-    if false {
+    if true {
         // online mode
         let verify_token: [u8; 4] = rand::random();
         *client.verify_token.lock() = verify_token;

@@ -4,7 +4,7 @@ use crate::{
         packet::{ClientPacket, Packet},
     },
     util::BlockPosition,
-    world::BlockFace,
+    world::block::BlockFace,
 };
 
 #[derive(Debug, Clone)]

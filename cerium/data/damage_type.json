@@ -52,6 +52,11 @@
     "message_id": "sting",
     "scaling": "when_caused_by_living_non_player"
   },
+  "minecraft:spear": {
+    "exhaustion": 0.1,
+    "message_id": "spear",
+    "scaling": "when_caused_by_living_non_player"
+  },
   "minecraft:in_fire": {
     "effects": "burning",
     "exhaustion": 0.1,
@@ -149,10 +154,9 @@
     "message_id": "fall",
     "scaling": "when_caused_by_living_non_player"
   },
-  "minecraft:fall": {
-    "death_message_type": "fall_variants",
-    "exhaustion": 0.0,
-    "message_id": "fall",
+  "minecraft:mob_projectile": {
+    "exhaustion": 0.1,
+    "message_id": "mob",
     "scaling": "when_caused_by_living_non_player"
   },
   "minecraft:mob_attack": {
@@ -160,9 +164,10 @@
     "message_id": "mob",
     "scaling": "when_caused_by_living_non_player"
   },
-  "minecraft:mob_projectile": {
-    "exhaustion": 0.1,
-    "message_id": "mob",
+  "minecraft:fall": {
+    "death_message_type": "fall_variants",
+    "exhaustion": 0.0,
+    "message_id": "fall",
     "scaling": "when_caused_by_living_non_player"
   },
   "minecraft:thrown": {
@@ -231,17 +236,17 @@
     "message_id": "explosion",
     "scaling": "always"
   },
-  "minecraft:bad_respawn_point": {
-    "death_message_type": "intentional_game_design",
-    "exhaustion": 0.1,
-    "message_id": "badRespawnPoint",
-    "scaling": "always"
-  },
   "minecraft:thorns": {
     "effects": "thorns",
     "exhaustion": 0.1,
     "message_id": "thorns",
     "scaling": "when_caused_by_living_non_player"
+  },
+  "minecraft:bad_respawn_point": {
+    "death_message_type": "intentional_game_design",
+    "exhaustion": 0.1,
+    "message_id": "badRespawnPoint",
+    "scaling": "always"
   },
   "minecraft:indirect_magic": {
     "exhaustion": 0.0,

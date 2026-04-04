@@ -1,43 +1,41 @@
-#![allow(unused_imports)]
-
-use crate::util::Identifier;
-use indexmap::{IndexMap, map::Iter};
-use serde::{Deserialize, Serialize, de::DeserializeOwned};
+use crate::{
+    entity::meta::{
+        CatSoundVariant, CatVariant, ChickenSoundVariant, ChickenVariant, CowSoundVariant,
+        CowVariant, FrogVariant, PaintingVariant, PigSoundVariant, PigVariant, WolfSoundVariant,
+        WolfVariant, ZombieNautilusVariant,
+    },
+    util::Identifier,
+    world::{
+        DimensionType, biome::Biome, block::BlockRegistry, clock::WorldClock, timeline::Timeline,
+    },
+};
+use indexmap::IndexMap;
+use serde::{Serialize, de::DeserializeOwned};
 use std::{
-    collections::HashMap,
+    borrow::Cow,
+    cell::UnsafeCell,
     hash::{Hash, Hasher},
     marker::PhantomData,
-    sync::LazyLock,
+    mem::MaybeUninit,
+    ops::Deref,
 };
 
-mod biome;
-mod cat_variant;
-mod chicken_variant;
-mod cow_variant;
+mod banner_pattern;
 mod damage_type;
-mod dimension_type;
-mod frog_variant;
 mod generated;
-mod painting_variant;
-mod pig_variant;
-mod wolf_sound_variant;
-mod wolf_variant;
+mod instrument;
+mod jukebox_song;
+mod tag;
+mod trim_material;
 
-pub use biome::*;
-pub use cat_variant::*;
-pub use chicken_variant::*;
-pub use cow_variant::*;
+pub use banner_pattern::*;
 pub use damage_type::*;
-pub use dimension_type::*;
-pub use dimension_type::*;
-pub use frog_variant::*;
-pub use generated::*;
-pub use painting_variant::*;
-pub use pig_variant::*;
-pub use wolf_sound_variant::*;
-pub use wolf_variant::*;
+pub use instrument::*;
+pub use jukebox_song::*;
+pub use tag::*;
+pub use trim_material::*;
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct DynamicRegistry<T>
 where
     T: Serialize + DeserializeOwned,
@@ -67,7 +65,7 @@ where
         }
 
         for (key, value) in entries {
-            this.register(RegistryKey::of(key), value);
+            this.register(RegistryKey::new(key), value);
         }
 
         this
@@ -97,93 +95,145 @@ where
 pub struct Registries {
     pub biome: DynamicRegistry<Biome>,
     pub cat_variant: DynamicRegistry<CatVariant>,
+    pub cat_sound_variant: DynamicRegistry<CatSoundVariant>,
     pub chicken_variant: DynamicRegistry<ChickenVariant>,
+    pub chicken_sound_variant: DynamicRegistry<ChickenSoundVariant>,
     pub cow_variant: DynamicRegistry<CowVariant>,
+    pub cow_sound_variant: DynamicRegistry<CowSoundVariant>,
     pub damage_type: DynamicRegistry<DamageType>,
     pub dimension_type: DynamicRegistry<DimensionType>,
     pub frog_variant: DynamicRegistry<FrogVariant>,
     pub painting_variant: DynamicRegistry<PaintingVariant>,
     pub pig_variant: DynamicRegistry<PigVariant>,
-    pub wolf_sound_variant: DynamicRegistry<WolfSoundVariant>,
+    pub pig_sound_variant: DynamicRegistry<PigSoundVariant>,
     pub wolf_variant: DynamicRegistry<WolfVariant>,
+    pub wolf_sound_variant: DynamicRegistry<WolfSoundVariant>,
+    pub timeline: DynamicRegistry<Timeline>,
+    pub world_clock: DynamicRegistry<WorldClock>,
+    pub zombie_nautilus_variant: DynamicRegistry<ZombieNautilusVariant>,
+    pub trim_material: DynamicRegistry<TrimMaterial>,
+    pub jukebox_song: DynamicRegistry<JukeBoxSong>,
+    pub banner_pattern: DynamicRegistry<BannerPattern>,
+    pub instrument: DynamicRegistry<Instrument>,
+
+    // Static
+    pub block: &'static BlockRegistry,
 }
 
-pub static REGISTRIES: LazyLock<Registries> = LazyLock::new(|| Registries::new());
+pub fn load<T>(id: Identifier) -> DynamicRegistry<T>
+where
+    T: Serialize + DeserializeOwned,
+{
+    let path = format!("cerium/data/{}.json", id.path());
+    let data = match std::fs::read_to_string(&path) {
+        Ok(data) => data,
+        Err(err) => todo!("Unable to read path {}: {}", path, err),
+    };
+
+    DynamicRegistry::create(id.to_string(), data)
+}
 
 impl Registries {
+    #[rustfmt::skip]
     pub fn new() -> Self {
         Self {
-            biome: DynamicRegistry::create(
-                "minecraft:worldgen/biome".into(),
-                include_str!("../../data/biome.json").to_owned(),
-            ),
-            cat_variant: DynamicRegistry::create(
-                "minecraft:cat_variant".into(),
-                include_str!("../../data/cat_variant.json").to_owned(),
-            ),
-            chicken_variant: DynamicRegistry::create(
-                "minecraft:chicken_variant".into(),
-                include_str!("../../data/chicken_variant.json").to_owned(),
-            ),
-            cow_variant: DynamicRegistry::create(
-                "minecraft:cow_variant".into(),
-                include_str!("../../data/cow_variant.json").to_owned(),
-            ),
-            damage_type: DynamicRegistry::create(
-                "minecraft:damage_type".into(),
-                include_str!("../../data/damage_type.json").to_owned(),
-            ),
-            dimension_type: DynamicRegistry::create(
-                "minecraft:dimension_type".into(),
-                include_str!("../../data/dimension_type.json").to_owned(),
-            ),
-            frog_variant: DynamicRegistry::create(
-                "minecraft:frog_variant".into(),
-                include_str!("../../data/frog_variant.json").to_owned(),
-            ),
-            painting_variant: DynamicRegistry::create(
-                "minecraft:painting_variant".into(),
-                include_str!("../../data/painting_variant.json").to_owned(),
-            ),
-            pig_variant: DynamicRegistry::create(
-                "minecraft:pig_variant".into(),
-                include_str!("../../data/pig_variant.json").to_owned(),
-            ),
-            wolf_sound_variant: DynamicRegistry::create(
-                "minecraft:wolf_sound_variant".into(),
-                include_str!("../../data/wolf_sound_variant.json").to_owned(),
-            ),
-            wolf_variant: DynamicRegistry::create(
-                "minecraft:wolf_variant".into(),
-                include_str!("../../data/wolf_variant.json").to_owned(),
-            ),
+            damage_type: load("minecraft:damage_type".into()),
+            banner_pattern: load("minecraft:banner_pattern".into()),
+            instrument: load("minecraft:instrument".into()),
+            jukebox_song: load("minecraft:jukebox_song".into()),
+            trim_material: load("minecraft:trim_material".into()),
+
+            // World
+            biome:                      load("minecraft:worldgen/biome".into()),
+            dimension_type:             load("minecraft:dimension_type".into()),
+            timeline:                   load("minecraft:timeline".into()),
+            world_clock:                load("minecraft:world_clock".into()),
+
+            // Entities
+            cat_variant:                load("minecraft:cat_variant".into()),
+            cat_sound_variant:          load("minecraft:cat_sound_variant".into()),
+            chicken_variant:            load("minecraft:chicken_variant".into()),
+            chicken_sound_variant:      load("minecraft:chicken_sound_variant".into()),
+            cow_variant:                load("minecraft:cow_variant".into()),
+            cow_sound_variant:          load("minecraft:cow_sound_variant".into()),
+            frog_variant:               load("minecraft:frog_variant".into()),
+            painting_variant:           load("minecraft:painting_variant".into()),
+            pig_variant:                load("minecraft:pig_variant".into()),
+            pig_sound_variant:          load("minecraft:pig_sound_variant".into()),
+            wolf_variant:               load("minecraft:wolf_variant".into()),
+            wolf_sound_variant:         load("minecraft:wolf_sound_variant".into()),
+            zombie_nautilus_variant:    load("minecraft:zombie_nautilus_variant".into()),
+
+            block: BlockRegistry::load()
         }
+    }
+}
+
+/// Represents a static registry object. This works similar to rust's [OnceLock].
+pub struct RegistryHolder<T> {
+    key: &'static str,
+    value: UnsafeCell<MaybeUninit<T>>,
+}
+
+impl<T> RegistryHolder<T> {
+    pub const fn new(key: &'static str) -> Self {
+        Self {
+            key,
+            value: UnsafeCell::new(MaybeUninit::uninit()),
+        }
+    }
+
+    pub fn load(&self, registry: DynamicRegistry<T>)
+    where
+        T: Serialize + DeserializeOwned + Clone,
+    {
+        let value = registry.get(&RegistryKey::of(self.key())).unwrap().clone();
+        self.set(value);
+    }
+
+    pub const fn set(&self, value: T) {
+        unsafe { (&mut *self.value.get()).write(value) };
+    }
+
+    pub const fn key(&self) -> &'static str {
+        self.key
+    }
+}
+
+unsafe impl<T: Sync + Send> Sync for RegistryHolder<T> {}
+unsafe impl<T: Send> Send for RegistryHolder<T> {}
+
+impl<T> const Deref for RegistryHolder<T> {
+    type Target = T;
+
+    fn deref(&self) -> &Self::Target {
+        unsafe { (&*self.value.get()).assume_init_ref() }
     }
 }
 
 #[derive(Debug, Clone)]
 pub struct RegistryKey<T> {
-    key: Identifier,
+    key: Cow<'static, str>,
     _phantom: PhantomData<T>,
 }
 
 impl<T> RegistryKey<T> {
-    pub fn of<S>(key: S) -> Self
-    where
-        S: Into<String>,
-    {
+    pub const fn of(key: &'static str) -> Self {
         Self {
-            key: Identifier::of(key),
+            key: Cow::Borrowed(key),
             _phantom: PhantomData,
         }
     }
 
-    pub fn as_key(&self) -> &Identifier {
-        &self.key
+    pub const fn new(key: String) -> Self {
+        Self {
+            key: Cow::Owned(key),
+            _phantom: PhantomData,
+        }
     }
 
-    pub fn to_key(self) -> Identifier {
-        self.key
+    pub fn to_key(&self) -> Identifier {
+        Identifier::of(self.key.clone())
     }
 }
 
@@ -198,5 +248,11 @@ impl<T> Eq for RegistryKey<T> {}
 impl<T> Hash for RegistryKey<T> {
     fn hash<H: Hasher>(&self, state: &mut H) {
         self.key.hash(state);
+    }
+}
+
+impl<T> From<RegistryKey<T>> for Identifier {
+    fn from(value: RegistryKey<T>) -> Self {
+        value.to_key()
     }
 }

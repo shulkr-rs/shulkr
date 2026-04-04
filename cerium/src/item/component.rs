@@ -6,11 +6,11 @@ use crate::protocol::decode::{DecodeError, PacketRead};
 use crate::protocol::encode::{EncodeError, PacketWrite};
 
 use crate::{
-    item::ItemStack,
-    registry::{
+    entity::meta::{
         CatVariant, ChickenVariant, CowVariant, FrogVariant, PaintingVariant, PigVariant,
         WolfSoundVariant, WolfVariant,
     },
+    item::ItemStack,
     text::TextComponent,
     util::{DyeColor, Identifier},
 };

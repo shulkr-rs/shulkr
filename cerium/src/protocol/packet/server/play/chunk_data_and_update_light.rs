@@ -3,7 +3,7 @@ use crate::{
         encode::{Encode, EncodeError, PacketWrite},
         packet::{Packet, ServerPacket},
     },
-    world::{BlockEntity, heightmap::Heightmap},
+    world::{block::BlockEntity, heightmap::Heightmap},
 };
 
 #[derive(Debug, Clone)]
@@ -48,22 +48,33 @@ pub struct LightData {}
 
 impl Encode for LightData {
     fn encode<W: PacketWrite>(w: &mut W, _this: &Self) -> Result<(), EncodeError> {
-        let num_sections = 26;
+        let num_sections: usize = 26;
+        let all_set: u64 = (1 << num_sections) - 1; // 0x3FFFFFF
 
-        w.write_varint(1)?;
-        w.write_u64(0x3FFFFFF_u64)?;
+        // skyYMask: all 26 sections have sky light data
+        w.write_varint(1)?; // 1 long follows
+        w.write_u64(all_set)?;
 
+        // blockYMask: no block light sections
+        w.write_varint(0)?; // 0 longs (empty BitSet)
+
+        // emptySkyYMask: no empty sky sections
         w.write_varint(0)?;
 
+        // emptyBlockYMask: no empty block sections
         w.write_varint(0)?;
-        w.write_varint(1)?;
-        w.write_u64(0x3FFFFFF_u64)?;
 
-        let light_array = vec![0xFF; 2048];
-        w.write_varint(num_sections as i32)?;
+        // skyUpdates: one 2048-byte array per set bit in skyYMask (26 total)
+        // 0xFF in every nibble = light level 15 everywhere
+        w.write_varint(num_sections as i32)?; // list length
         for _ in 0..num_sections {
-            w.write_array(&light_array.clone(), |w, v| w.write_u8(*v))?;
+            w.write_varint(2048)?; // byte array length prefix
+            for _ in 0..2048 {
+                w.write_u8(0xFF)?;
+            }
         }
+
+        // blockUpdates: empty list
         w.write_varint(0)?;
 
         Ok(())

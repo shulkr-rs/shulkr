@@ -1,71 +1,72 @@
 use std::{fs::File, io::Write as _, path::Path, process::Command};
 
+use convert_case::{Case, Casing};
 use indexmap::IndexMap;
-use proc_macro2::TokenStream;
+use proc_macro2::{Span, TokenStream};
 use quote::{format_ident, quote};
+use syn::Ident;
 
-mod blocks;
+mod block;
 mod entity_types;
 mod materials;
 
 fn main() {
     // Dynamic Registries
-    generate("Biome", "biomes.rs", include_str!("../data/biome.json"));
-    generate(
-        "DimensionType",
-        "dimension_types.rs",
-        include_str!("../data/dimension_type.json"),
-    );
-    generate(
-        "CatVariant",
-        "cat_variants.rs",
-        include_str!("../data/cat_variant.json"),
-    );
-    generate(
-        "ChickenVariant",
-        "chicken_variants.rs",
-        include_str!("../data/chicken_variant.json"),
-    );
-    generate(
-        "CowVariant",
-        "cow_variants.rs",
-        include_str!("../data/cow_variant.json"),
-    );
-    generate(
-        "DamageType",
-        "damage_types.rs",
-        include_str!("../data/damage_type.json"),
-    );
-    generate(
-        "FrogVariant",
-        "frog_variants.rs",
-        include_str!("../data/frog_variant.json"),
-    );
-    generate(
-        "PaintingVariant",
-        "painting_variants.rs",
-        include_str!("../data/painting_variant.json"),
-    );
-    generate(
-        "PigVariant",
-        "pig_variants.rs",
-        include_str!("../data/pig_variant.json"),
-    );
-    generate(
-        "WolfSoundVariant",
-        "wolf_sound_variants.rs",
-        include_str!("../data/wolf_sound_variant.json"),
-    );
-    generate(
-        "WolfVariant",
-        "wolf_variants.rs",
-        include_str!("../data/wolf_variant.json"),
-    );
+    // generate(
+    //     "Biome",
+    //     "biomes.rs",
+    //     include_str!("../data/worldgen/biome.json"),
+    // );
+    // generate(
+    //     "CatVariant",
+    //     "cat_variants.rs",
+    //     include_str!("../data/cat_variant.json"),
+    // );
+    // generate(
+    //     "ChickenVariant",
+    //     "chicken_variants.rs",
+    //     include_str!("../data/chicken_variant.json"),
+    // );
+    // generate(
+    //     "CowVariant",
+    //     "cow_variants.rs",
+    //     include_str!("../data/cow_variant.json"),
+    // );
+    // generate(
+    //     "DamageType",
+    //     "damage_types.rs",
+    //     include_str!("../data/damage_type.json"),
+    // );
+    // generate(
+    //     "FrogVariant",
+    //     "frog_variants.rs",
+    //     include_str!("../data/frog_variant.json"),
+    // );
+    // generate(
+    //     "PaintingVariant",
+    //     "painting_variants.rs",
+    //     include_str!("../data/painting_variant.json"),
+    // );
+    // generate(
+    //     "PigVariant",
+    //     "pig_variants.rs",
+    //     include_str!("../data/pig_variant.json"),
+    // );
+    // generate(
+    //     "WolfSoundVariant",
+    //     "wolf_sound_variants.rs",
+    //     include_str!("../data/wolf_sound_variant.json"),
+    // );
+    // generate(
+    //     "WolfVariant",
+    //     "wolf_variants.rs",
+    //     include_str!("../data/wolf_variant.json"),
+    // );
 
     // Static Registries
-    blocks::generate();
-    entity_types::generate();
-    materials::generate();
+    block::generate();
+    // entity_types::generate();
+    // materials::generate();
 }
 
 pub fn write_file(content: &TokenStream, dst: &str) {
@@ -117,6 +118,47 @@ pub fn generate(strct: &str, dst: &str, content: &str) {
 
         impl #strct {
             #keys
+        }
+
+    };
+
+    write_file(&out, dst);
+}
+
+pub fn generate2(strct: &str, dst: &str, content: &str) {
+    let entries: IndexMap<String, serde_json::Value> = serde_json::from_str(content).unwrap();
+
+    let keys = entries
+        .keys()
+        .map(|key| {
+            let ident = format_ident!(
+                "{}",
+                key.split_once(":")
+                    .map_or(key.clone(), |v| v.1.to_owned())
+                    .to_case(Case::Pascal)
+            );
+
+            let ident_const = key
+                .split_once(':')
+                .map(|(_, path)| path)
+                .unwrap()
+                .to_case(Case::UpperSnake);
+            let ident_const = Ident::new(&ident_const, Span::call_site());
+
+            quote! {
+                #ident = #ident_const = #key
+            }
+        })
+        .collect::<Vec<TokenStream>>();
+
+    let enum_name = format_ident!("{}", strct);
+
+    let out = quote! {
+
+        define_types! {
+            pub enum #enum_name {
+                #(#keys),*
+            }
         }
 
     };

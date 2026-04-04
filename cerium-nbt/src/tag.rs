@@ -401,12 +401,12 @@ impl ser::Serializer for Serializer {
         unimplemented!("only signed variants supported");
     }
 
-    fn serialize_u32(self, _v: u32) -> Result<Self::Ok, Self::Error> {
-        unimplemented!("only signed variants supported");
+    fn serialize_u32(self, v: u32) -> Result<Self::Ok, Self::Error> {
+        Ok(NbtTag::Long(v as i64))
     }
 
-    fn serialize_u64(self, _v: u64) -> Result<Self::Ok, Self::Error> {
-        unimplemented!("only signed variants supported");
+    fn serialize_u64(self, v: u64) -> Result<Self::Ok, Self::Error> {
+        Ok(NbtTag::Long(v as i64))
     }
 
     fn serialize_f32(self, v: f32) -> Result<Self::Ok, Self::Error> {

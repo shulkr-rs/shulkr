@@ -1,6 +1,7 @@
 {
   "minecraft:warm": {
-    "asset_id": "minecraft:entity/chicken/warm_chicken",
+    "asset_id": "minecraft:entity/chicken/chicken_warm",
+    "baby_asset_id": "minecraft:entity/chicken/chicken_warm_baby",
     "spawn_conditions": [
       {
         "condition": {
@@ -11,8 +12,18 @@
       }
     ]
   },
+  "minecraft:temperate": {
+    "asset_id": "minecraft:entity/chicken/chicken_temperate",
+    "baby_asset_id": "minecraft:entity/chicken/chicken_temperate_baby",
+    "spawn_conditions": [
+      {
+        "priority": 0
+      }
+    ]
+  },
   "minecraft:cold": {
-    "asset_id": "minecraft:entity/chicken/cold_chicken",
+    "asset_id": "minecraft:entity/chicken/chicken_cold",
+    "baby_asset_id": "minecraft:entity/chicken/chicken_cold_baby",
     "model": "cold",
     "spawn_conditions": [
       {
@@ -23,9 +34,5 @@
         "priority": 1
       }
     ]
-  },
-  "minecraft:temperate": {
-    "asset_id": "minecraft:entity/chicken/temperate_chicken",
-    "spawn_conditions": [{ "priority": 0 }]
   }
 }

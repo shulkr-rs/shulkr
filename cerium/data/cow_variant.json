@@ -1,6 +1,7 @@
 {
   "minecraft:warm": {
-    "asset_id": "minecraft:entity/cow/warm_cow",
+    "asset_id": "minecraft:entity/cow/cow_warm",
+    "baby_asset_id": "minecraft:entity/cow/cow_warm_baby",
     "model": "warm",
     "spawn_conditions": [
       {
@@ -12,8 +13,18 @@
       }
     ]
   },
+  "minecraft:temperate": {
+    "asset_id": "minecraft:entity/cow/cow_temperate",
+    "baby_asset_id": "minecraft:entity/cow/cow_temperate_baby",
+    "spawn_conditions": [
+      {
+        "priority": 0
+      }
+    ]
+  },
   "minecraft:cold": {
-    "asset_id": "minecraft:entity/cow/cold_cow",
+    "asset_id": "minecraft:entity/cow/cow_cold",
+    "baby_asset_id": "minecraft:entity/cow/cow_cold_baby",
     "model": "cold",
     "spawn_conditions": [
       {
@@ -24,9 +35,5 @@
         "priority": 1
       }
     ]
-  },
-  "minecraft:temperate": {
-    "asset_id": "minecraft:entity/cow/temperate_cow",
-    "spawn_conditions": [{ "priority": 0 }]
   }
 }

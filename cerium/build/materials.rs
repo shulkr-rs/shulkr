@@ -81,7 +81,7 @@ pub fn generate() {
         .collect();
 
     let out = quote! {
-        use crate::world::{BlockState};
+        use crate::world::Block;
 
         #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
         #[repr(i32)]
@@ -103,12 +103,12 @@ pub fn generate() {
                 }
             }
 
-            pub fn block(&self) -> Option<&'static BlockState> {
+            pub fn block(&self) -> Option<Block> {
                 let block_id = match self {
                     #block_arms
                 };
 
-                block_id.map(|block_id| BlockState::from_key(block_id.to_string())).flatten()
+                block_id.map(|block_id| Block::from_key(block_id.to_string())).flatten()
             }
         }
 

@@ -1,0 +1,246 @@
+use std::sync::Arc;
+
+use crate::{
+    entity::{Entity, Player},
+    registry::RegistryKey,
+    util::BlockPosition,
+    world::{
+        DimensionType,
+        block::{BlockFace, BlockState},
+        chunk::Chunk,
+    },
+};
+
+/// A Minecraft world.
+#[derive(Clone)]
+pub struct World(Arc<inner::World>);
+
+impl World {
+    pub fn new(dimension: RegistryKey<DimensionType>) -> Self {
+        Self(Arc::new(inner::World::new(dimension)))
+    }
+
+    pub fn get_chunk(&self, chunk_x: i32, chunk_z: i32) -> Option<Chunk> {
+        self.0.get_chunk(chunk_x, chunk_z)
+    }
+
+    pub fn load_chunk(&self, chunk_x: i32, chunk_z: i32) -> Chunk {
+        self.0.load_chunk(chunk_x, chunk_z)
+    }
+
+    pub fn get_block(&self, x: i32, y: i32, z: i32) -> BlockState {
+        self.0.get_block(x, y, z)
+    }
+
+    pub fn set_block<B>(&self, x: i32, y: i32, z: i32, block: B)
+    where
+        B: Into<BlockState>,
+    {
+        self.0.set_block(x, y, z, block)
+    }
+
+    pub fn get_biome(&self, x: i32, y: i32, z: i32) -> u16 {
+        self.0.get_biome(x, y, z)
+    }
+
+    pub fn set_biome(&self, x: i32, y: i32, z: i32, biome: i32) {
+        self.0.set_biome(x, y, z, biome)
+    }
+
+    pub fn spawn_entity(&self, entity: Entity) {
+        self.0.spawn_entity(entity)
+    }
+
+    pub fn entities(&self) -> Vec<Entity> {
+        self.0.entities()
+    }
+
+    pub fn break_block(&self, player: Player, position: BlockPosition, face: BlockFace) {
+        self.0.break_block(player, position, face);
+    }
+
+    pub fn place_block(
+        &self,
+        player: Player,
+        position: BlockPosition,
+        face: BlockFace,
+        block: BlockState,
+    ) {
+        self.0.place_block(player, position, face, block);
+    }
+}
+
+mod inner {
+    use super::*;
+    use crate::{
+        Server,
+        protocol::packet::{BlockUpdatePacket, WorldEventPacket},
+        world::block::Block,
+    };
+    use parking_lot::RwLock;
+    use std::collections::HashMap;
+
+    pub(super) struct World {
+        dimension_type: DimensionType,
+        chunks: RwLock<HashMap<(i32, i32), Chunk>>,
+        entities: RwLock<Vec<Entity>>,
+    }
+
+    impl World {
+        pub(super) fn new(dimension: RegistryKey<DimensionType>) -> Self {
+            let server = Server::current();
+            let dimension = server.registries().dimension_type.get(&dimension).unwrap();
+            let dimension_type = dimension.clone();
+
+            Self {
+                dimension_type,
+                chunks: RwLock::new(HashMap::new()),
+                entities: RwLock::new(Vec::new()),
+            }
+        }
+
+        pub(super) fn get_chunk(&self, chunk_x: i32, chunk_z: i32) -> Option<Chunk> {
+            let chunks = self.chunks.read();
+            chunks.get(&(chunk_x, chunk_z)).cloned()
+        }
+
+        pub(super) fn load_chunk(&self, chunk_x: i32, chunk_z: i32) -> Chunk {
+            let mut chunks = self.chunks.write();
+
+            let chunk = Chunk::new(chunk_x, chunk_z, self.dimension_type.min_y);
+            chunks.insert((chunk_x, chunk_z), chunk.clone());
+
+            chunk
+        }
+
+        pub(super) fn get_block(&self, x: i32, y: i32, z: i32) -> BlockState {
+            let cx = x / 16;
+            let cz = z / 16;
+
+            let chunk = self.get_chunk(cx, cz).unwrap_or_else(|| {
+                panic!("Chunk ({},{}) is not loaded!", cx, cz);
+            });
+
+            BlockState::from_id(chunk.get_block(x, y, z)).unwrap()
+        }
+
+        pub(super) fn set_block<B>(&self, x: i32, y: i32, z: i32, block: B)
+        where
+            B: Into<BlockState>,
+        {
+            let cx = x / 16;
+            let cz = z / 16;
+
+            let chunk = match self.get_chunk(cx, cz) {
+                Some(chunk) => chunk,
+                None => self.load_chunk(cx, cz),
+            };
+            chunk.set_block(x, y, z, &block.into());
+        }
+
+        pub(super) fn get_biome(&self, x: i32, y: i32, z: i32) -> u16 {
+            let cx = x / 16;
+            let cz = z / 16;
+
+            let chunk = self.get_chunk(cx, cz).unwrap_or_else(|| {
+                panic!("Chunk ({},{}) is not loaded!", cx, cz);
+            });
+
+            chunk.get_biome(x, y, z)
+        }
+
+        pub(super) fn set_biome(&self, x: i32, y: i32, z: i32, biome: i32) {
+            let cx = x / 16;
+            let cz = z / 16;
+
+            let chunk = match self.get_chunk(cx, cz) {
+                Some(chunk) => chunk,
+                None => self.load_chunk(cx, cz),
+            };
+            chunk.set_biome(x, y, z, biome);
+        }
+
+        pub(super) fn spawn_entity(&self, entity: Entity) {
+            self.entities.write().push(entity);
+        }
+
+        pub(super) fn entities(&self) -> Vec<Entity> {
+            self.entities.read().iter().cloned().collect()
+        }
+
+        pub(super) fn break_block(
+            &self,
+            player: Player,
+            position: BlockPosition,
+            _face: BlockFace,
+        ) {
+            // let (cx, cz) = Chunk::to_chunk_pos(position);
+            // let Some(chunk) = self.get_chunk(cx, cz) else {
+            //     return;
+            // };
+
+            let block = self.get_block(
+                position.x() as i32,
+                position.y() as i32,
+                position.z() as i32,
+            );
+            self.set_block(
+                position.x() as i32,
+                position.y() as i32,
+                position.z() as i32,
+                Block::Air.default_state(),
+            );
+
+            // todo: should be only sent to players that are viewing the block/chunk
+            for p in player.server().players().lock().clone() {
+                p.send_packet(&BlockUpdatePacket {
+                    position,
+                    block_id: block.id(),
+                });
+                if p == player {
+                    continue;
+                }
+                p.send_packet(&WorldEventPacket {
+                    event: 2001,
+                    position,
+                    data: block.id() as i32,
+                    disable_relative_volume: false,
+                });
+            }
+        }
+
+        pub(super) fn place_block(
+            &self,
+            player: Player,
+            position: BlockPosition,
+            face: BlockFace,
+            state: impl Into<BlockState>,
+        ) {
+            let state = state.into();
+
+            let new_position = match face {
+                BlockFace::Bottom => position.add(0, -1, 0),
+                BlockFace::East => position.add(1, 0, 0),
+                BlockFace::North => position.add(0, 0, -1),
+                BlockFace::South => position.add(0, 0, 1),
+                BlockFace::Top => position.add(0, 1, 0),
+                BlockFace::West => position.add(-1, 0, 0),
+            };
+
+            self.set_block(
+                new_position.x() as i32,
+                new_position.y() as i32,
+                new_position.z() as i32,
+                state,
+            );
+
+            // todo: should be only sent to players that are viewing the block/chunk
+            for player in player.server().players().lock().clone() {
+                player.send_packet(&BlockUpdatePacket {
+                    position: new_position,
+                    block_id: state.id(),
+                });
+            }
+        }
+    }
+}

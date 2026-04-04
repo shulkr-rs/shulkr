@@ -18,7 +18,9 @@ use tokio::{
 };
 
 use crate::{
-    Server,
+    Server, auth::GameProfile, protocol::{encode::PacketWrite as _, packet::ServerPacket}
+};
+use crate::{
     auth::KeyStore,
     entity::Player,
     network::{reader::StreamReader, writer::StreamWriter},
@@ -28,10 +30,6 @@ use crate::{
         packet::{DisconnectPacket, Packet},
     },
     text::TextComponent,
-};
-use crate::{
-    auth::GameProfile,
-    protocol::{encode::PacketWrite as _, packet::ServerPacket},
 };
 
 pub struct Connection {
@@ -45,18 +43,15 @@ pub struct Connection {
     pub(crate) verify_token: Mutex<[u8; 4]>,
     pub(crate) player: Mutex<Option<Player>>,
     closed: AtomicBool,
-    server: Arc<Server>,
+    server: Server,
 }
 
 impl Connection {
-    pub fn new(
-        addr: SocketAddr,
-        stream: TcpStream,
-        server: Arc<Server>,
-    ) -> (Arc<Self>, Receiver<BytesMut>) {
+    pub fn new(addr: SocketAddr, stream: TcpStream) -> (Arc<Self>, Receiver<BytesMut>) {
         let (rstream, wstream) = stream.into_split();
         let (tx, rx) = mpsc::channel(128);
 
+        let server = Server::current();
         let connection = Arc::new(Self {
             addr,
             sreader: tokio::sync::Mutex::new(StreamReader::new(rstream)),
@@ -64,7 +59,7 @@ impl Connection {
             packet_tx: tx,
             state: RwLock::new(ProtocolState::Handshake),
             game_profile: Mutex::new(None),
-            key_store: server.key_store(),
+            key_store: server.key_store().clone(),
             verify_token: Mutex::new([0; 4]),
             player: Mutex::new(None),
             closed: AtomicBool::new(false),
@@ -74,16 +69,16 @@ impl Connection {
         (connection, rx)
     }
 
-    pub async fn accept(addr: SocketAddr, stream: TcpStream, server: Arc<Server>) {
-        let (conn, mut rx) = Connection::new(addr, stream, server.clone());
+    pub async fn accept(addr: SocketAddr, stream: TcpStream) {
+        let (conn, mut rx) = Connection::new(addr, stream);
 
-        let rtask = server.handle().spawn({
+        let rtask = tokio::spawn({
             let conn = conn.clone();
             async move {
                 conn.read_loop().await;
             }
         });
-        let wtask = server.handle().spawn({
+        let wtask = tokio::spawn({
             let conn = conn.clone();
             async move {
                 conn.write_loop(&mut rx).await;
@@ -97,7 +92,8 @@ impl Connection {
             let player = player.clone().unwrap();
             player.despawn();
         }
-        server.players.lock().retain(|p| p.addr() != addr);
+
+        conn.server().players().lock().retain(|p| p.addr() != addr);
     }
 
     pub async fn set_compression(&self, threshold: i32) {
@@ -229,7 +225,7 @@ impl Connection {
         self.close();
     }
 
-    pub fn server(&self) -> &Arc<Server> {
+    pub fn server(&self) -> &Server {
         &self.server
     }
 

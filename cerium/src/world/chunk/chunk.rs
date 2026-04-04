@@ -5,7 +5,10 @@ use parking_lot::RwLock;
 
 use crate::util::BlockPosition;
 
-use crate::world::{BlockEntity, BlockState, ChunkSection};
+use crate::world::{
+    block::{BlockEntity, BlockState},
+    chunk::ChunkSection,
+};
 
 #[derive(Clone)]
 pub struct Chunk(Arc<RwLock<Inner>>);
@@ -169,8 +172,8 @@ impl Inner {
         )
     }
 
-    fn set_block(&mut self, x: i32, y: i32, z: i32, block: &BlockState) {
-        if let Some(info) = block.block_entity() {
+    fn set_block(&mut self, x: i32, y: i32, z: i32, state: &BlockState) {
+        if let Some(info) = state.block_entity() {
             let packed_xz = Self::pack_xz(x, z);
             let block_entity = BlockEntity {
                 packed_xz,
@@ -190,7 +193,7 @@ impl Inner {
             Self::to_relative(x),
             Self::to_relative(y),
             Self::to_relative(z),
-            block.state_id(),
+            state.id(),
         );
     }
 

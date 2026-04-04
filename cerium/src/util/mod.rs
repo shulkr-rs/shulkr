@@ -31,7 +31,7 @@ pub trait Viewable {
         self.viewers().remove_viewer(player);
     }
 
-    fn send_packet_to_viewers<P>(&self, packet: &P)
+    fn broadcast_packet<P>(&self, packet: &P)
     where
         P: Packet + ServerPacket + 'static,
     {

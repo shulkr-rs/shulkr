@@ -1,2 +1,3 @@
 /target
 cerium/src/registry/generated/*
+/datagen

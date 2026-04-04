@@ -127,7 +127,7 @@ impl Inner {
             if stck.material() == Material::Air {
                 content.insert(ix as i32, stack.clone());
 
-                self.send_packet_to_viewers(&SetContainerSlotPacket {
+                self.broadcast_packet(&SetContainerSlotPacket {
                     window_id: self.id(),
                     state_id: 0,
                     slot: ix as i16,
@@ -141,7 +141,7 @@ impl Inner {
     fn set_item_stack(&self, slot: i32, stack: ItemStack) {
         self.content.lock().insert(slot, stack.clone());
 
-        self.send_packet_to_viewers(&SetContainerSlotPacket {
+        self.broadcast_packet(&SetContainerSlotPacket {
             window_id: self.id(),
             state_id: 0,
             slot: slot as i16,

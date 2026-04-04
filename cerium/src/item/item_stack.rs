@@ -91,7 +91,7 @@ impl ItemStack {
 
 impl From<Material> for ItemStack {
     fn from(value: Material) -> Self {
-        Self::new(value, 1)
+        Self::of(value)
     }
 }
 

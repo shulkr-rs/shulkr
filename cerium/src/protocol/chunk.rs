@@ -6,7 +6,8 @@ use crate::protocol::{
     packet::{ChunkData, ChunkDataAndUpdateLightPacket, LightData},
 };
 use crate::world::{
-    BlockEntity, Chunk, ChunkSection,
+    block::BlockEntity,
+    chunk::{Chunk, ChunkSection},
     heightmap::Heightmap,
     palette::{Palette, PaletteFormat},
 };
@@ -83,6 +84,7 @@ impl Encode for PaletteFormat {
 impl Encode for ChunkSection {
     fn encode<W: PacketWrite>(w: &mut W, this: &Self) -> Result<(), EncodeError> {
         w.write_i16(this.block_states.count() as i16)?;
+        w.write_i16(0)?; // TODO: fluidCount
         Palette::encode(w, &this.block_states)?;
         Palette::encode(w, &this.biomes)?;
         Ok(())

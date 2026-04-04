@@ -1,7 +1,7 @@
-use cerium_nbt::{NbtCompound, NbtTag, ToNbt};
 use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
-pub struct CowVariant {
+pub struct BannerPattern {
     pub asset_id: String,
+    pub translation_key: String,
 }

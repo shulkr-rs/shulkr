@@ -1,0 +1,46 @@
+use crate::{
+    protocol::{
+        encode::{Encode, EncodeError, PacketWrite},
+        packet::{Packet, ServerPacket},
+    },
+    util::Identifier,
+};
+
+#[derive(Debug, Clone)]
+pub struct UpdateTagsPacket {
+    pub registries: Vec<TagRegistry>,
+}
+
+impl Packet for UpdateTagsPacket {}
+impl ServerPacket for UpdateTagsPacket {}
+
+impl Encode for UpdateTagsPacket {
+    fn encode<W: PacketWrite>(w: &mut W, this: &Self) -> Result<(), EncodeError> {
+        w.write_array(&this.registries, TagRegistry::encode)?;
+        Ok(())
+    }
+}
+
+#[derive(Debug, Clone)]
+pub struct TagRegistry {
+    pub registry: Identifier,
+    pub tags: Vec<Tag>,
+}
+
+impl Encode for TagRegistry {
+    fn encode<W: PacketWrite>(w: &mut W, this: &Self) -> Result<(), EncodeError> {
+        w.write_identifier(&this.registry)?;
+        w.write_array(&this.tags, |w, tag| {
+            w.write_identifier(&tag.tag_name)?;
+            w.write_array(&tag.entries, |w, v| w.write_varint(*v))?;
+            Ok(())
+        })?;
+        Ok(())
+    }
+}
+
+#[derive(Debug, Clone)]
+pub struct Tag {
+    pub tag_name: Identifier,
+    pub entries: Vec<i32>,
+}

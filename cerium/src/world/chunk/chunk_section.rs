@@ -23,8 +23,8 @@ impl ChunkSection {
     }
 
     #[inline]
-    pub fn set_block(&mut self, x: usize, y: usize, z: usize, block: i32) {
-        self.block_states.set(x, y, z, block as u16);
+    pub fn set_block(&mut self, x: usize, y: usize, z: usize, block: u16) {
+        self.block_states.set(x, y, z, block);
     }
 
     // Biome

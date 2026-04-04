@@ -14,6 +14,24 @@ use crate::protocol::encode::PacketWrite;
 use crate::text::TextComponent;
 use crate::util::EntityPose;
 
+mod cat_variant;
+mod chicken_variant;
+mod cow_variant;
+mod frog_variant;
+mod painting_variant;
+mod pig_variant;
+mod wolf_variant;
+mod zombie_nautilus;
+
+pub use cat_variant::*;
+pub use chicken_variant::*;
+pub use cow_variant::*;
+pub use frog_variant::*;
+pub use painting_variant::*;
+pub use pig_variant::*;
+pub use wolf_variant::*;
+pub use zombie_nautilus::*;
+
 pub struct MetadataHolder {
     pub entries: FxHashMap<i32, AnyValue>, // i32, Ref((i32, dyn Any), default_value)
 }

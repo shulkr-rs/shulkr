@@ -23,7 +23,8 @@ fn handle_status_request(client: Arc<Connection>, packet: StatusRequestPacket) {
     let _ = packet;
 
     let mut event = ServerListPingEvent::new(SERVER_LIST_PING.to_owned());
-    client.server().events().fire(&mut event);
+    let server = client.server();
+    server.events().fire(&mut event);
 
     client.send_packet(&StatusResponsePacket {
         json_response: event.response,
@@ -39,8 +40,8 @@ fn handle_ping_request(client: Arc<Connection>, packet: PingRequestPacket) {
 const SERVER_LIST_PING: &'static str = r#"
 {
     "version": {
-        "name": "1.21.10",
-        "protocol": 773
+        "name": "26.1.1",
+        "protocol": 775
     },
     "players": {
         "max": 100,

@@ -1,4 +1,4 @@
-use std::{sync::Arc, time::Duration};
+use std::time::Duration;
 use tokio::time::{Interval, interval};
 
 use crate::Server;
@@ -8,12 +8,12 @@ pub trait Tickable {
 }
 
 pub struct Ticker {
-    server: Arc<Server>,
+    server: Server,
     interval: Interval,
 }
 
 impl Ticker {
-    pub fn new(server: Arc<Server>) -> Self {
+    pub fn new(server: Server) -> Self {
         Self {
             server,
             interval: interval(Duration::from_millis(50)),
@@ -23,9 +23,9 @@ impl Ticker {
     pub async fn tick(&mut self) {
         self.interval.tick().await;
 
-        let server = Arc::clone(&self.server);
+        let server = self.server.clone();
 
-        for player in &*server.players.lock() {
+        for player in &*server.players().lock() {
             player.tick();
         }
     }

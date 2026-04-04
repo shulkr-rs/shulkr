@@ -54,7 +54,7 @@ where
             entries: entries
                 .into_iter()
                 .map(|(key, value)| RegistryEntry {
-                    entry_id: key.as_key().clone(),
+                    entry_id: key.to_key(),
                     data: Some(to_nbt_compound(value).unwrap().into()),
                 })
                 .collect(),

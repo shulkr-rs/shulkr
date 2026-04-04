@@ -1,21 +1,37 @@
-use cerium::Server;
+use std::time::Instant;
+
 use cerium::entity::GameMode;
 use cerium::event::player::{PlayerConfigEvent, PlayerEvent, PlayerSpawnEvent};
-use cerium::registry::DimensionType;
-use cerium::world::{BlockState, World};
+use cerium::util::Direction;
+use cerium::world::{
+    DimensionType, World,
+    block::{Block, BlockState},
+};
+use cerium::{Server, p};
 
 fn main() {
+    let start = Instant::now();
+
     let server = Server::new();
+    let _guard = server.enter();
 
-    let world = World::new(&DimensionType::OVERWORLD);
+    let world = World::new(DimensionType::OVERWORLD);
+    println!("elapsed: {:?}", start.elapsed());
 
-    for (ix, pos) in (0..27946).enumerate() {
-        let bz = (pos / 168) + 1;
-        let bx = (pos % 168) + 1;
+    let mut states = BlockState::values();
+    states.sort_by_key(|s| s.id());
 
-        let block = BlockState::from_id(ix as i32).unwrap();
-        world.set_block((bz * 2) - 1, 70, (bx * 2) - 1, block);
+    for (pos, block) in states.iter().enumerate() {
+        let bz = ((pos / 168) + 1) as i32;
+        let bx = ((pos % 168) + 1) as i32;
+        world.set_block((bz * 2) - 1, 70, (bx * 2) - 1, *block);
     }
+
+    let mut state = Block::Hopper.default_state();
+    state.set_property::<p![FacingHopper]>(Direction::West);
+    state.set_property::<p![Enabled]>(false);
+
+    world.set_block(0, 70, 0, state);
 
     server
         .events()

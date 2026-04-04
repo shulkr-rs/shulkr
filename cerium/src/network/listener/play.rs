@@ -12,8 +12,9 @@ use crate::{
             PickItemFromBlockPacket, PlayerActionPacket, PlayerCommand, PlayerCommandPacket,
             PlayerDiggingState, PlayerInputFlags, PlayerInputPacket, PlayerLoadedPacket,
             PlayerMovementFlagsPacket, PlayerPositionAndRotationPacket, PlayerPositionPacket,
-            PlayerRotationPacket, PlayerSessionPacket, PluginMessagePacket,
+            PlayerRotationPacket, PlayerSessionPacket, PluginMessagePacket, SeenAdvancementsPacket,
             SetBlockDestroyStagePacket, SetCreativeModeSlotPacket, SwingArmPacket, UseItemOnPacket,
+            UseItemPacket,
             client::play::{
                 CloseContainerPacket, KeepAlivePacket, PingRequestPacket, PlayerAbilitiesPacket,
                 SetHeldItemPacket,
@@ -27,32 +28,34 @@ use crate::{
 pub fn handle_packet(player: Player, id: i32, data: &mut Cursor<&[u8]>) -> Result<(), DecodeError> {
     match id {
         0x00 => handle_confirm_teleportation(player, ConfirmTeleportationPacket::decode(data)?),
-        0x06 => handle_chat_command(player, ChatCommandPacket::decode(data)?),
-        0x09 => handle_player_session(player, PlayerSessionPacket::decode(data)?),
-        0x0A => handle_chunk_batch_received(player, ChunkBatchReceivedPacket::decode(data)?),
-        0x0C => handle_client_tick_end(player, ClientTickEndPacket::decode(data)?),
-        0x0D => handle_client_info(player, ClientInfoPacket::decode(data)?),
-        0x11 => handle_click_container(player, ClickContainerPacket::decode(data)?),
-        0x12 => handle_close_container(player, CloseContainerPacket::decode(data)?),
-        0x15 => handle_plugin_message(player, PluginMessagePacket::decode(data)?),
-        0x1B => handle_keep_alive(player, KeepAlivePacket::decode(data)?),
-        0x1D => handle_player_position(player, PlayerPositionPacket::decode(data)?),
-        0x1E => handle_player_position_and_rotation(player, PlayerPositionAndRotationPacket::decode(data)?),
-        0x1F => handle_player_rotation(player, PlayerRotationPacket::decode(data)?),
-        0x19 => handle_interact(player, InteractPacket::decode(data)?),
-        0x20 => handle_player_movement_flags(player, PlayerMovementFlagsPacket::decode(data)?),
-        0x23 => handle_pick_item_from_block(player, PickItemFromBlockPacket::decode(data)?),
-        0x25 => handle_ping_request(player, PingRequestPacket::decode(data)?),
-        0x27 => handle_player_abilities(player, PlayerAbilitiesPacket::decode(data)?),
-        0x28 => handle_player_action(player, PlayerActionPacket::decode(data)?),
-        0x29 => handle_player_command(player, PlayerCommandPacket::decode(data)?),
-        0x2A => handle_player_input(player, PlayerInputPacket::decode(data)?),
-        0x2B => handle_player_loaded(player, PlayerLoadedPacket::decode(data)?),
-        0x2D => hande_change_recipe_book_settings(player, ChangeRecipeBookSettingsPacket::decode(data)?),
-        0x34 => handle_set_held_item(player, SetHeldItemPacket::decode(data)?),
-        0x37 => handle_set_creative_mode_slot(player, SetCreativeModeSlotPacket::decode(data)?),
-        0x3C => handle_swing_arm(player, SwingArmPacket::decode(data)?),
-        0x3F => handle_use_item_on(player, UseItemOnPacket::decode(data)?),
+        0x07 => handle_chat_command(player, ChatCommandPacket::decode(data)?),
+        0x0A => handle_player_session(player, PlayerSessionPacket::decode(data)?),
+        0x0B => handle_chunk_batch_received(player, ChunkBatchReceivedPacket::decode(data)?),
+        0x0D => handle_client_tick_end(player, ClientTickEndPacket::decode(data)?),
+        0x0E => handle_client_info(player, ClientInfoPacket::decode(data)?),
+        0x12 => handle_click_container(player, ClickContainerPacket::decode(data)?),
+        0x13 => handle_close_container(player, CloseContainerPacket::decode(data)?),
+        0x16 => handle_plugin_message(player, PluginMessagePacket::decode(data)?),
+        0x1A => handle_interact(player, InteractPacket::decode(data)?),
+        0x1C => handle_keep_alive(player, KeepAlivePacket::decode(data)?),
+        0x1E => handle_player_position(player, PlayerPositionPacket::decode(data)?),
+        0x1F => handle_player_position_and_rotation(player, PlayerPositionAndRotationPacket::decode(data)?),
+        0x20 => handle_player_rotation(player, PlayerRotationPacket::decode(data)?),
+        0x21 => handle_player_movement_flags(player, PlayerMovementFlagsPacket::decode(data)?),
+        0x24 => handle_pick_item_from_block(player, PickItemFromBlockPacket::decode(data)?),
+        0x26 => handle_ping_request(player, PingRequestPacket::decode(data)?),
+        0x28 => handle_player_abilities(player, PlayerAbilitiesPacket::decode(data)?),
+        0x29 => handle_player_action(player, PlayerActionPacket::decode(data)?),
+        0x2A => handle_player_command(player, PlayerCommandPacket::decode(data)?),
+        0x2B => handle_player_input(player, PlayerInputPacket::decode(data)?),
+        0x2C => handle_player_loaded(player, PlayerLoadedPacket::decode(data)?),
+        0x2E => hande_change_recipe_book_settings(player, ChangeRecipeBookSettingsPacket::decode(data)?),
+        0x32 => handle_seen_advancements(player, SeenAdvancementsPacket::decode(data)?),
+        0x35 => handle_set_held_item(player, SetHeldItemPacket::decode(data)?),
+        0x38 => handle_set_creative_mode_slot(player, SetCreativeModeSlotPacket::decode(data)?),
+        0x3F => handle_swing_arm(player, SwingArmPacket::decode(data)?),
+        0x42 => handle_use_item_on(player, UseItemOnPacket::decode(data)?),
+        0x43 => handle_use_item(player, UseItemPacket::decode(data)?),
         _ => return Err(DecodeError::UnkownPacket(id)),
     };
     Ok(())
@@ -85,7 +88,7 @@ fn handle_chunk_batch_received(player: Player, packet: ChunkBatchReceivedPacket)
 }
 
 fn handle_client_tick_end(_player: Player, _packet: ClientTickEndPacket) {
-    // todo: handle_client_tick_end
+    // log::warn!("todo: handle_client_tick_end");
 }
 
 fn handle_client_info(_player: Player, _packet: ClientInfoPacket) {
@@ -218,7 +221,7 @@ fn handle_player_action(player: Player, packet: PlayerActionPacket) {
         destroy_stage: status as u8,
     };
     player.send_packet(&packet);
-    player.send_packet_to_viewers(&packet);
+    player.broadcast_packet(&packet);
 }
 
 fn handle_player_command(player: Player, packet: PlayerCommandPacket) {
@@ -243,6 +246,8 @@ fn hande_change_recipe_book_settings(_player: Player, _packet: ChangeRecipeBookS
     log::warn!("todo: hande_change_recipe_book_settings");
 }
 
+fn handle_seen_advancements(_player: Player, _packet: SeenAdvancementsPacket) {}
+
 fn handle_set_held_item(player: Player, packet: SetHeldItemPacket) {
     player.0.update_held_slot(packet.slot as u8);
 }
@@ -256,7 +261,7 @@ fn handle_set_creative_mode_slot(player: Player, packet: SetCreativeModeSlotPack
 }
 
 fn handle_swing_arm(player: Player, packet: SwingArmPacket) {
-    player.send_packet_to_viewers(&EntityAnimationPacket {
+    player.broadcast_packet(&EntityAnimationPacket {
         entity_id: player.id(),
         animation: if packet.hand == Hand::MainHand {
             EntityAnimation::SwingMainArm
@@ -278,8 +283,10 @@ fn handle_use_item_on(player: Player, packet: UseItemOnPacket) {
         return;
     };
 
-    world.place_block(player.clone(), position, packet.face, block.clone());
+    world.place_block(player.clone(), position, packet.face, block.default_state());
     player.send_packet(&AcknowledgeBlockChangePacket {
         sequence_id: packet.sequence,
     });
 }
+
+fn handle_use_item(_player: Player, _packet: UseItemPacket) {}

@@ -149,7 +149,7 @@ impl<R: Buf> PacketRead for R {
         let identifier = self.read_string()?;
 
         match identifier.split_once(":") {
-            Some((namespace, path)) => Ok(Identifier::new(namespace, path)),
+            Some((namespace, path)) => Ok(Identifier::new(namespace.to_string(), path.to_string())),
             None => Err(DecodeError::Decode("Identifier read")),
         }
     }

@@ -1,14 +1,16 @@
+use std::borrow::Cow;
+
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub struct Identifier {
-    namespace: String,
-    path: String,
+    namespace: Cow<'static, str>,
+    path: Cow<'static, str>,
 }
 
 impl Identifier {
     pub fn new<A, B>(namespace: A, path: B) -> Self
     where
-        A: Into<String>,
-        B: Into<String>,
+        A: Into<Cow<'static, str>>,
+        B: Into<Cow<'static, str>>,
     {
         Self {
             namespace: namespace.into(),
@@ -18,21 +20,29 @@ impl Identifier {
 
     pub fn vanilla<S>(path: S) -> Self
     where
-        S: Into<String>,
+        S: Into<Cow<'static, str>>,
     {
         Self::new("minecraft", path)
     }
 
     pub fn of<S>(key: S) -> Self
     where
-        S: Into<String>,
+        S: Into<Cow<'static, str>>,
     {
-        let key: String = key.into();
-        if let Some((namespace, path)) = key.split_once(":") {
-            Self::new(namespace, path)
+        let key = key.into();
+        if let Some((namespace, path)) = key.split_once(':') {
+            Self::new(namespace.to_string(), path.to_string())
         } else {
             Self::vanilla(key)
         }
+    }
+
+    pub fn namespace(&self) -> &str {
+        &self.namespace
+    }
+
+    pub fn path(&self) -> &str {
+        &self.path
     }
 }
 

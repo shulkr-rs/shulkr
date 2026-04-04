@@ -197,7 +197,7 @@ impl Inner {
     }
 
     fn refresh_meta(&self) {
-        self.send_packet_to_viewers(&self.metadata_packet());
+        self.broadcast_packet(&self.metadata_packet());
     }
 
     pub fn is_sprinting(&self) -> bool {

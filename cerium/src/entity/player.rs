@@ -11,35 +11,24 @@ use std::{
 use uuid::Uuid;
 
 use crate::{
-    Server,
-    auth::GameProfile,
-    entity::{
+    Server, auth::GameProfile, entity::{
         EntityType, GameMode, Hand,
         entity::{Entity, EntityLike},
-    },
-    event::{Cancellable, inventory::InventoryOpenEvent},
-    inventory::{Inventory, PlayerInventory},
-    item::ItemStack,
-    network::client::Connection,
-    protocol::packet::{
-        ChunkBatchStartPacket, ChunkDataAndUpdateLightPacket, EntityPositionRotationPacket,
-        EntityRotationPacket, GameEventPacket, Packet, PlayerAbilities, PlayerAction, PlayerEntry,
-        PlayerInfoFlags, PlayerInfoRemovePacket, PlayerInfoUpdatePacket, ServerPacket,
-        SetCenterChunkPacket, SetHeadRotationPacket, SetTablistHeaderFooterPacket,
-        SyncPlayerPositionPacket, SystemChatMessagePacket, UnloadChunkPacket,
+    }, event::{Cancellable, inventory::InventoryOpenEvent}, inventory::{Inventory, PlayerInventory}, item::ItemStack, network::client::Connection, protocol::packet::{
+        ChunkDataAndUpdateLightPacket, EntityPositionRotationPacket, EntityRotationPacket,
+        GameEventPacket, Packet, PlayerAbilities, PlayerAction, PlayerEntry, PlayerInfoFlags,
+        PlayerInfoRemovePacket, PlayerInfoUpdatePacket, ServerPacket, SetCenterChunkPacket,
+        SetHeadRotationPacket, SetTablistHeaderFooterPacket, SyncPlayerPositionPacket,
+        SystemChatMessagePacket, UnloadChunkPacket,
         server::{PlayerAbilitiesPacket, SetHeldItemPacket, play::KeepAlivePacket},
-    },
-    text::TextComponent,
-    tickable::Tickable,
-    util::{EntityPose, Position, TeleportFlags, Viewable, Viewers},
-    world::{Chunk, World},
+    }, text::TextComponent, tickable::Tickable, util::{EntityPose, Position, TeleportFlags, Viewable, Viewers}, world::{World, chunk::Chunk}
 };
 
 #[derive(Clone, PartialEq)]
 pub struct Player(pub(crate) Arc<Inner>);
 
 impl Player {
-    pub(crate) fn new(connection: Arc<Connection>, server: Arc<Server>) -> Self {
+    pub(crate) fn new(connection: Arc<Connection>, server: Server) -> Self {
         Self(Arc::new(Inner::new(connection, server)))
     }
 
@@ -74,7 +63,7 @@ impl Player {
         self.0.send_packet(packet)
     }
 
-    pub fn server(&self) -> &Arc<Server> {
+    pub fn server(&self) -> &Server {
         &self.0.server()
     }
 
@@ -356,11 +345,11 @@ pub(crate) struct Inner {
     open_inventory: Mutex<Option<Inventory>>,
     held_slot: AtomicU8,
 
-    server: Arc<Server>,
+    server: Server,
 }
 
 impl Inner {
-    fn new(connection: Arc<Connection>, server: Arc<Server>) -> Self {
+    fn new(connection: Arc<Connection>, server: Server) -> Self {
         let game_profile = connection.game_profile.lock().clone().unwrap();
         Self {
             connection,
@@ -411,7 +400,7 @@ impl Inner {
             actions: PlayerInfoFlags::UPDATE_GAME_MODE.bits(),
         };
         self.send_packet(&p);
-        self.send_packet_to_viewers(&p);
+        self.broadcast_packet(&p);
 
         self.update_allow_flying(
             game_mode == GameMode::Creative || game_mode == GameMode::Spectator,
@@ -486,7 +475,7 @@ impl Inner {
         }
     }
 
-    fn server(&self) -> &Arc<Server> {
+    fn server(&self) -> &Server {
         &self.server
     }
 
@@ -606,7 +595,7 @@ impl Inner {
             return;
         }
 
-        self.connection.send_packet(&ChunkBatchStartPacket {});
+        // self.connection.send_packet(&ChunkBatchStartPacket {});
 
         // let mut batch_size = 0;
         while queue.pending_chunks >= 1.
@@ -664,16 +653,16 @@ impl Inner {
                 log::warn!("todo: teleport player because he moved more than 8 blocks.")
             }
             _ if position_changed && rotation_changed => {
-                self.send_packet_to_viewers(&EntityPositionRotationPacket::new(
+                self.broadcast_packet(&EntityPositionRotationPacket::new(
                     self.id(),
                     new_position,
                     old_position,
                     on_ground,
                 ));
-                self.send_packet_to_viewers(&SetHeadRotationPacket::new(self.id(), head_rotation));
+                self.broadcast_packet(&SetHeadRotationPacket::new(self.id(), head_rotation));
             }
             _ if position_changed => {
-                self.send_packet_to_viewers(&EntityPositionRotationPacket::new(
+                self.broadcast_packet(&EntityPositionRotationPacket::new(
                     self.id(),
                     new_position,
                     old_position,
@@ -681,13 +670,13 @@ impl Inner {
                 ));
             }
             _ if rotation_changed => {
-                self.send_packet_to_viewers(&EntityRotationPacket::new(
+                self.broadcast_packet(&EntityRotationPacket::new(
                     self.id(),
                     new_position,
                     old_position,
                     on_ground,
                 ));
-                self.send_packet_to_viewers(&SetHeadRotationPacket::new(self.id(), head_rotation));
+                self.broadcast_packet(&SetHeadRotationPacket::new(self.id(), head_rotation));
             }
             _ => {
                 log::error!("Entered unreachable code.");

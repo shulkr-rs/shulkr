@@ -1,12 +1,11 @@
 use cerium::Server;
 use cerium::event::player::PlayerConfigEvent;
-use cerium::registry::DimensionType;
-use cerium::world::{Block, World};
+use cerium::world::{DimensionType, World, block::Block};
 
 fn main() {
     let server = Server::new();
 
-    let world = World::new(&DimensionType::OVERWORLD);
+    let world = World::new(DimensionType::OVERWORLD);
 
     for bz in 0..16 {
         for bx in 0..16 {

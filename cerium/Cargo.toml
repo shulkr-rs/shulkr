@@ -5,6 +5,9 @@ edition = "2024"
 
 build = "build/build.rs"
 
+[lib]
+doctest = false
+
 [dependencies]
 cerium-nbt = { workspace = true }
 
