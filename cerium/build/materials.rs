@@ -81,7 +81,7 @@ pub fn generate() {
         .collect();
 
     let out = quote! {
-        use crate::world::Block;
+        use crate::world::block::Block;
 
         #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
         #[repr(i32)]
