@@ -1,9 +1,13 @@
-use crate::protocol::{
-    decode::{Decode as _, DecodeError},
-    packet::{
-        PongResponsePacket, StatusRequestPacket, StatusResponsePacket,
-        client::status::PingRequestPacket,
+use crate::{
+    PingResponse, Version,
+    protocol::{
+        decode::{Decode as _, DecodeError},
+        packet::{
+            PongResponsePacket, StatusRequestPacket, StatusResponsePacket,
+            client::status::PingRequestPacket,
+        },
     },
+    text::TextComponent,
 };
 use crate::{event::ServerListPingEvent, network::client::Connection};
 
@@ -19,15 +23,23 @@ pub fn handle_packet(client: Arc<Connection>, id: i32, data: &mut Cursor<&[u8]>)
     Ok(())
 }
 
-fn handle_status_request(client: Arc<Connection>, packet: StatusRequestPacket) {
-    let _ = packet;
+fn handle_status_request(client: Arc<Connection>, _packet: StatusRequestPacket) {
+    use crate::{PROTOCOL_NAME, PROTOCOL_VERSION};
+    use uuid::Uuid;
 
-    let mut event = ServerListPingEvent::new(SERVER_LIST_PING.to_owned());
-    let server = client.server();
-    server.events().fire(&mut event);
+    let version = Version::new(PROTOCOL_VERSION, PROTOCOL_NAME);
+    let default_ping = PingResponse::builder(version)
+        .with_max_players(100)
+        .with_online_players(5)
+        .with_player(("Steve", Uuid::new_v4()).into())
+        .with_description(TextComponent::text("Example Description"))
+        .build();
+
+    let mut event = ServerListPingEvent::new(default_ping);
+    client.server().events().fire(&mut event);
 
     client.send_packet(&StatusResponsePacket {
-        json_response: event.response,
+        json_response: serde_json::to_string(event.get_response()).unwrap(),
     });
 }
 
@@ -36,26 +48,3 @@ fn handle_ping_request(client: Arc<Connection>, packet: PingRequestPacket) {
         timestamp: packet.timestamp,
     });
 }
-
-const SERVER_LIST_PING: &'static str = r#"
-{
-    "version": {
-        "name": "26.1.1",
-        "protocol": 775
-    },
-    "players": {
-        "max": 100,
-        "online": 5,
-        "sample": [
-            {
-                "name": "thinkofdeath",
-                "id": "4566e69f-c907-48ee-8d71-d7ba5aa00d20"
-            }
-        ]
-    },
-    "description": {
-        "text": "Hello, world!"
-    },
-    "enforcesSecureChat": false
-}
-"#;

@@ -41,6 +41,7 @@ rsa-der = { workspace = true }
 sha1 = { workspace = true }
 take_mut = { workspace = true }
 futures = { workspace = true }
+pastey = "0.2.1"
 
 [build-dependencies]
 indexmap = { workspace = true }

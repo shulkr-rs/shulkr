@@ -5,7 +5,6 @@ pub mod advancement;
 pub mod auth;
 pub mod entity;
 pub mod event;
-pub mod handle;
 pub mod inventory;
 pub mod item;
 pub mod protocol;
@@ -19,4 +18,15 @@ pub mod world;
 mod server;
 pub use server::{NoServerError, Server};
 
+mod server_ping;
+pub use server_ping::*;
+
 mod network;
+
+// Constants
+
+/// The current protocol version.
+pub const PROTOCOL_VERSION: i32 = 775;
+
+/// The name of the current protocol version.
+pub const PROTOCOL_NAME: &str = "26.1.1";

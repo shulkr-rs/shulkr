@@ -205,8 +205,6 @@ impl<T> ValueType<T> {
     }
 }
 
-impl ValueType<()> {}
-
 macro_rules! define_types {
     ($(const $name:ident: ValueType<$ty:ty$(, $ser:ty)?> = ValueType::new($id:expr);)*) => {
         impl ValueType<()> {
@@ -273,6 +271,7 @@ macro_rules! encode {
 
 define_types! {
     const BOOL: ValueType<bool> = ValueType::new(-1);
+    const FLOAT: ValueType<f32> = ValueType::new(3);
 
     const BYTE: ValueType<u8> = ValueType::new(0);
     const VAR_INT: ValueType<i32, VarInt> = ValueType::new(1);
@@ -391,3 +390,8 @@ impl DataType2<EntityPose> for EntityPose {
         w.write_varint(*this as i32)
     }
 }
+
+
+
+
+

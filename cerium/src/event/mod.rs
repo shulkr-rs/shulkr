@@ -1,25 +1,27 @@
 mod events;
 pub use events::Events;
 
+use crate::PingResponse;
+
 pub mod inventory;
 pub mod player;
 
 pub trait Event: Send {}
 
 pub struct ServerListPingEvent {
-    pub(crate) response: String,
+    pub(crate) response: PingResponse,
 }
 
 impl ServerListPingEvent {
-    pub fn new(response: String) -> Self {
+    pub fn new(response: PingResponse) -> Self {
         Self { response }
     }
 
-    pub fn get_response(&self) -> String {
-        self.response.to_owned()
+    pub fn get_response(&self) -> &PingResponse {
+        &self.response
     }
 
-    pub fn set_response(&mut self, response: String) {
+    pub fn set_response(&mut self, response: PingResponse) {
         self.response = response;
     }
 }

@@ -141,6 +141,7 @@ impl Inner {
         }
     }
 
+    /// Generates a new unique entity id.
     fn generate_id() -> i32 {
         static CURRENT_ID: AtomicI32 = AtomicI32::new(1);
         CURRENT_ID.fetch_add(1, Ordering::Relaxed)
