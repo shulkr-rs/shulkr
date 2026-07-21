@@ -101,6 +101,10 @@ impl BlockRegistry {
         &self.defs[index as usize]
     }
 
+    pub fn get_id(&self, key: &str) -> Option<u16> {
+        self.by_key.get(key).map(|index| self.defs[*index as usize].id)
+    }
+
     pub fn def_by_state(&self, state_id: u16) -> Option<&BlockDef> {
         let index = self
             .defs

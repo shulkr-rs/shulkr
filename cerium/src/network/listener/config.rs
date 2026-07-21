@@ -110,6 +110,31 @@ where
     }
 }
 
+fn block_tags(data: &str) -> TagRegistry {
+    let resolved_tags = load_tags("minecraft:block", data);
+
+    let packet_tags: Vec<Tag> = resolved_tags
+        .into_iter()
+        .map(|(name, values)| Tag {
+            tag_name: Identifier::of(name),
+            entries: values
+                .into_iter()
+                .filter_map(|v| {
+                    crate::world::block::REGISTRY
+                        .get()?
+                        .get_id(&v)
+                        .map(|id| id as i32)
+                })
+                .collect(),
+        })
+        .collect();
+
+    TagRegistry {
+        registry: Identifier::new("minecraft", "block"),
+        tags: packet_tags,
+    }
+}
+
 fn handle_client_info(client: Arc<Connection>, _packet: ClientInfoPacket) {
     client.send_packet(&server::config::KnownPacksPacket {
         known_packs: Vec::new(),
@@ -181,6 +206,7 @@ fn handle_client_info(client: Arc<Connection>, _packet: ClientInfoPacket) {
                 &registries.instrument,
                 include_str!("../../../data/tags/instrument.json"),
             ),
+            block_tags(include_str!("../../../data/tags/block.json")),
         ],
     });
 
