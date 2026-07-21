@@ -120,49 +120,43 @@ pub struct Registries {
     pub block: &'static BlockRegistry,
 }
 
-pub fn load<T>(id: Identifier) -> DynamicRegistry<T>
+pub fn load<T>(id: Identifier, data: &str) -> DynamicRegistry<T>
 where
     T: Serialize + DeserializeOwned,
 {
-    let path = format!("cerium/data/{}.json", id.path());
-    let data = match std::fs::read_to_string(&path) {
-        Ok(data) => data,
-        Err(err) => todo!("Unable to read path {}: {}", path, err),
-    };
-
-    DynamicRegistry::create(id.to_string(), data)
+    DynamicRegistry::create(id.to_string(), data.to_owned())
 }
 
 impl Registries {
     #[rustfmt::skip]
     pub fn new() -> Self {
         Self {
-            damage_type: load("minecraft:damage_type".into()),
-            banner_pattern: load("minecraft:banner_pattern".into()),
-            instrument: load("minecraft:instrument".into()),
-            jukebox_song: load("minecraft:jukebox_song".into()),
-            trim_material: load("minecraft:trim_material".into()),
+            damage_type: load("minecraft:damage_type".into(), include_str!("../../data/damage_type.json")),
+            banner_pattern: load("minecraft:banner_pattern".into(), include_str!("../../data/banner_pattern.json")),
+            instrument: load("minecraft:instrument".into(), include_str!("../../data/instrument.json")),
+            jukebox_song: load("minecraft:jukebox_song".into(), include_str!("../../data/jukebox_song.json")),
+            trim_material: load("minecraft:trim_material".into(), include_str!("../../data/trim_material.json")),
 
             // World
-            biome:                      load("minecraft:worldgen/biome".into()),
-            dimension_type:             load("minecraft:dimension_type".into()),
-            timeline:                   load("minecraft:timeline".into()),
-            world_clock:                load("minecraft:world_clock".into()),
+            biome:                      load("minecraft:worldgen/biome".into(), include_str!("../../data/worldgen/biome.json")),
+            dimension_type:             load("minecraft:dimension_type".into(), include_str!("../../data/dimension_type.json")),
+            timeline:                   load("minecraft:timeline".into(), include_str!("../../data/timeline.json")),
+            world_clock:                load("minecraft:world_clock".into(), include_str!("../../data/world_clock.json")),
 
             // Entities
-            cat_variant:                load("minecraft:cat_variant".into()),
-            cat_sound_variant:          load("minecraft:cat_sound_variant".into()),
-            chicken_variant:            load("minecraft:chicken_variant".into()),
-            chicken_sound_variant:      load("minecraft:chicken_sound_variant".into()),
-            cow_variant:                load("minecraft:cow_variant".into()),
-            cow_sound_variant:          load("minecraft:cow_sound_variant".into()),
-            frog_variant:               load("minecraft:frog_variant".into()),
-            painting_variant:           load("minecraft:painting_variant".into()),
-            pig_variant:                load("minecraft:pig_variant".into()),
-            pig_sound_variant:          load("minecraft:pig_sound_variant".into()),
-            wolf_variant:               load("minecraft:wolf_variant".into()),
-            wolf_sound_variant:         load("minecraft:wolf_sound_variant".into()),
-            zombie_nautilus_variant:    load("minecraft:zombie_nautilus_variant".into()),
+            cat_variant:                load("minecraft:cat_variant".into(), include_str!("../../data/cat_variant.json")),
+            cat_sound_variant:          load("minecraft:cat_sound_variant".into(), include_str!("../../data/cat_sound_variant.json")),
+            chicken_variant:            load("minecraft:chicken_variant".into(), include_str!("../../data/chicken_variant.json")),
+            chicken_sound_variant:      load("minecraft:chicken_sound_variant".into(), include_str!("../../data/chicken_sound_variant.json")),
+            cow_variant:                load("minecraft:cow_variant".into(), include_str!("../../data/cow_variant.json")),
+            cow_sound_variant:          load("minecraft:cow_sound_variant".into(), include_str!("../../data/cow_sound_variant.json")),
+            frog_variant:               load("minecraft:frog_variant".into(), include_str!("../../data/frog_variant.json")),
+            painting_variant:           load("minecraft:painting_variant".into(), include_str!("../../data/painting_variant.json")),
+            pig_variant:                load("minecraft:pig_variant".into(), include_str!("../../data/pig_variant.json")),
+            pig_sound_variant:          load("minecraft:pig_sound_variant".into(), include_str!("../../data/pig_sound_variant.json")),
+            wolf_variant:               load("minecraft:wolf_variant".into(), include_str!("../../data/wolf_variant.json")),
+            wolf_sound_variant:         load("minecraft:wolf_sound_variant".into(), include_str!("../../data/wolf_sound_variant.json")),
+            zombie_nautilus_variant:    load("minecraft:zombie_nautilus_variant".into(), include_str!("../../data/zombie_nautilus_variant.json")),
 
             block: BlockRegistry::load()
         }
