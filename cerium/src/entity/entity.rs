@@ -243,9 +243,9 @@ impl Inner {
             position,
             head_yaw: position.yaw(),
             data: 0,
-            velocity_x: 0,
-            velocity_y: 0,
-            velocity_z: 0,
+            velocity_x: 0.0,
+            velocity_y: 0.0,
+            velocity_z: 0.0,
         }
     }
 

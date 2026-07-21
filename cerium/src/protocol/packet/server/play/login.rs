@@ -24,6 +24,7 @@ pub struct LoginPacket {
     pub death_location: Option<DeathLocation>,
     pub portal_cooldown: i32,
     pub sea_level: i32,
+    pub online_mode: bool,
     pub enforces_secure_chat: bool,
 }
 
@@ -51,6 +52,7 @@ impl Encode for LoginPacket {
         w.write_option(&this.death_location, DeathLocation::encode)?;
         w.write_varint(this.portal_cooldown)?;
         w.write_varint(this.sea_level)?;
+        w.write_bool(this.online_mode)?;
         w.write_bool(this.enforces_secure_chat)?;
         Ok(())
     }

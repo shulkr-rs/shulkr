@@ -3,6 +3,7 @@ use crate::{
     protocol::{
         decode::{Decode, DecodeError, PacketRead},
         packet::{ClientPacket, Packet},
+        types::slot_delimited,
     },
 };
 
@@ -20,7 +21,7 @@ impl Decode for SetCreativeModeSlotPacket {
     fn decode<R: PacketRead>(r: &mut R) -> Result<Self, DecodeError> {
         Ok(Self {
             slot:         r.read_i16()?,
-            clicked_item: Slot::decode(r)?,
+            clicked_item: slot_delimited::decode(r)?,
         })
     }
 }

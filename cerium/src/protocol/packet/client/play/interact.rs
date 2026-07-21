@@ -4,6 +4,7 @@ use crate::{
         decode::{Decode, DecodeError, PacketRead},
         encode::{Encode, EncodeError, PacketWrite},
         packet::{ClientPacket, Packet},
+        types::read_lp_vec3,
     },
 };
 
@@ -11,9 +12,9 @@ use crate::{
 pub struct InteractPacket {
     pub entity_id: i32,
     pub r#type: InteractType,
-    pub target_x: Option<f32>,
-    pub target_y: Option<f32>,
-    pub target_z: Option<f32>,
+    pub target_x: Option<f64>,
+    pub target_y: Option<f64>,
+    pub target_z: Option<f64>,
     pub hand: Option<Hand>,
     pub sneak_key_pressed: bool,
 }
@@ -27,11 +28,8 @@ impl Decode for InteractPacket {
         let r#type = InteractType::decode(r)?;
 
         let (target_x, target_y, target_z) = if r#type == InteractType::InteractAt {
-            (
-                Some(r.read_f32()?),
-                Some(r.read_f32()?),
-                Some(r.read_f32()?),
-            )
+            let (x, y, z) = read_lp_vec3(r)?;
+            (Some(x), Some(y), Some(z))
         } else {
             (None, None, None)
         };

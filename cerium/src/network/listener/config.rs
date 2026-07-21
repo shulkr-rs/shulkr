@@ -250,6 +250,7 @@ fn handle_acknowledge_finish_config(
         death_location: None,
         portal_cooldown: 4,
         sea_level: 64,
+        online_mode: true,
         enforces_secure_chat: false,
     });
 

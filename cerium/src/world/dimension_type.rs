@@ -89,10 +89,10 @@ pub struct AmbientSounds {
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Mood {
-    pub block_search_extent: u32,
+    pub block_search_extent: i32,
     pub offset: f32,
     pub sound: String,
-    pub tick_delay: u32,
+    pub tick_delay: i32,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -102,8 +102,8 @@ pub struct BackgroundMusic {
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct MusicSettings {
-    pub max_delay: u32,
-    pub min_delay: u32,
+    pub max_delay: i32,
+    pub min_delay: i32,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub replace_current_music: Option<bool>,
     pub sound: String,

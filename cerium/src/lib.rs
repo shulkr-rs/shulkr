@@ -26,7 +26,7 @@ mod network;
 // Constants
 
 /// The current protocol version.
-pub const PROTOCOL_VERSION: i32 = 775;
+pub const PROTOCOL_VERSION: i32 = 776;
 
 /// The name of the current protocol version.
-pub const PROTOCOL_NAME: &str = "26.1.1";
+pub const PROTOCOL_NAME: &str = "26.2";
