@@ -11,4 +11,4 @@ pub use entity_animation::EntityAnimation;
 pub use entity_type::EntityType;
 pub use game_mode::GameMode;
 pub use hand::Hand;
-pub use player::Player;
+pub use player::{MAX_VIEW_DISTANCE, Player};

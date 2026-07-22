@@ -57,66 +57,83 @@ impl Chunk {
 
     pub fn to_chunk_pos(position: impl Into<BlockPosition>) -> (i32, i32) {
         let position = position.into();
-        let chunk_x = (position.x() / 16) as i32;
-        let chunk_z = (position.z() / 16) as i32;
+        let chunk_x = position.x().div_euclid(16) as i32;
+        let chunk_z = position.z().div_euclid(16) as i32;
         (chunk_x, chunk_z)
     }
 
-    // This implementation comes from [Minestom](https://github.com/Minestom/Minestom/blob/7620f3320988e766cb8e34dd640b5a23911fa7e8/src/main/java/net/minestom/server/coordinate/ChunkRange.java#L48),
-    // which comes from [Krypton](https://github.com/KryptonMC/Krypton/blob/a9eff5463328f34072cdaf37aae3e77b14fcac93/server/src/main/kotlin/org/kryptonmc/krypton/util/math/Maths.kt#L62),
-    // which comes from a kotlin port [Esophose](https://github.com/Esophose),
-    // which originally comes from a [StackOverflow answer](https://stackoverflow.com/questions/398299/looping-in-a-spiral).
-    pub fn chunks_in_range(chunk: (i32, i32), range: i32) -> Vec<(i32, i32)> {
+    // Port of `ChunkTrackingView.Positioned.contains`
+    fn in_view(dx: i32, dz: i32, view_distance: i32) -> bool {
+        const BUFFER_RANGE: i32 = 2;
+        let dx = (dx.abs() - BUFFER_RANGE).max(0);
+        let dz = (dz.abs() - BUFFER_RANGE).max(0);
+        dx * dx + dz * dz < view_distance * view_distance
+    }
+
+    pub fn chunks_in_range(chunk: (i32, i32), view_distance: i32) -> Vec<(i32, i32)> {
         let (cx, cz) = chunk;
+        let bound = view_distance + 2;
 
-        // Send in spiral around the center chunk
-        // Note: its not really required to start at the center anymore since the chunk queue is sorted by distance,
-        //       however we still should send a circle so this method is still fine, and good for any other case a
-        //       spiral might be needed.
-        let mut chunks = vec![(cx, cz)];
-
-        for id in 1..(range * 2 + 1) * (range * 2 + 1) {
-            let index = id - 1;
-            // compute radius (inverse arithmetic sum of 8 + 16 + 24 + ...)
-            let radius = ((((index + 1) as f64).sqrt() - 1.0) / 2.0).floor() as i32 + 1;
-            // compute total point on radius -1 (arithmetic sum of 8 + 16 + 24 + ...)
-            let p = 8 * radius * (radius - 1) / 2;
-            // points by face
-            let en = radius * 2;
-            // compute de position and shift it so the first is (-r, -r) but (-r + 1, -r)
-            // so the square can connect
-            let a = (1 + index - p) % (radius * 8);
-
-            match a / (radius * 2) {
-                // find the face (0 = top, 1 = right, 2 = bottom, 3 = left)
-                0 => chunks.push((a - radius + cx, -radius + cz)),
-                1 => chunks.push((radius + cx, a % en - radius + cz)),
-                2 => chunks.push((radius - a % en + cx, radius + cz)),
-                3 => chunks.push((-radius + cx, radius - a % en + cz)),
-                _ => {}
+        let mut chunks = Vec::new();
+        for dz in -bound..=bound {
+            for dx in -bound..=bound {
+                if Self::in_view(dx, dz, view_distance) {
+                    chunks.push((cx + dx, cz + dz));
+                }
             }
         }
-
         chunks
     }
 
     /// Calulates difference between chunks
-    pub fn difference<F>(lhs: (i32, i32), rhs: (i32, i32), range: i32, callback: F)
+    pub fn difference<F>(lhs: (i32, i32), rhs: (i32, i32), view_distance: i32, mut callback: F)
     where
-        F: Fn(i32, i32),
+        F: FnMut(i32, i32),
     {
-        let start_x = lhs.0 - range;
-        let end_x = lhs.0 + range;
-        let start_z = lhs.1 - range;
-        let end_z = lhs.1 + range;
+        let bound = view_distance + 2;
 
-        for x in start_x..=end_x {
-            for z in start_z..=end_z {
-                if (x - rhs.0).abs() > range || (z - rhs.1).abs() > range {
+        for dz in -bound..=bound {
+            for dx in -bound..=bound {
+                if !Self::in_view(dx, dz, view_distance) {
+                    continue;
+                }
+                let x = lhs.0 + dx;
+                let z = lhs.1 + dz;
+                if !Self::in_view(x - rhs.0, z - rhs.1, view_distance) {
                     callback(x, z);
                 }
             }
         }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::Chunk;
+
+    #[test]
+    fn in_view_matches_vanilla_shape() {
+        assert!(Chunk::in_view(0, 0, 8));
+        assert!(Chunk::in_view(2, 0, 8)); // inside bufferRange, always included
+        assert!(Chunk::in_view(9, 0, 8)); // dx=7 after buffer, 49 < 64
+        assert!(!Chunk::in_view(10, 0, 8)); // dx=8, 64 >= 64
+        assert!(!Chunk::in_view(8, 8, 8)); // corner cut by circular falloff: dx=dz=6, 72 >= 64
+    }
+
+    #[test]
+    fn chunks_in_range_matches_in_view() {
+        let view_distance = 4;
+        let chunks = Chunk::chunks_in_range((0, 0), view_distance);
+        for &(x, z) in &chunks {
+            assert!(Chunk::in_view(x, z, view_distance));
+        }
+        let count = chunks.len();
+        let bound = view_distance + 2;
+        let expected = (-bound..=bound)
+            .flat_map(|dz| (-bound..=bound).map(move |dx| (dx, dz)))
+            .filter(|&(dx, dz)| Chunk::in_view(dx, dz, view_distance))
+            .count();
+        assert_eq!(count, expected);
     }
 }
 

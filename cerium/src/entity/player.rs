@@ -1,35 +1,61 @@
 use parking_lot::Mutex;
 use std::{
-    collections::VecDeque,
     net::SocketAddr,
     sync::{
         Arc,
-        atomic::{AtomicBool, AtomicI32, AtomicU8, Ordering},
+        atomic::{AtomicBool, AtomicI32, AtomicU8, AtomicUsize, Ordering},
+        mpsc,
     },
     time::{Duration, Instant},
 };
 use uuid::Uuid;
 
 use crate::{
-    Server, auth::GameProfile, entity::{
+    Server,
+    auth::GameProfile,
+    entity::{
         EntityType, GameMode, Hand,
         entity::{Entity, EntityLike},
-    }, event::{Cancellable, inventory::InventoryOpenEvent}, inventory::{Inventory, PlayerInventory}, item::ItemStack, network::client::Connection, protocol::packet::{
-        ChunkDataAndUpdateLightPacket, EntityPositionRotationPacket, EntityRotationPacket,
-        GameEventPacket, Packet, PlayerAbilities, PlayerAction, PlayerEntry, PlayerInfoFlags,
-        PlayerInfoRemovePacket, PlayerInfoUpdatePacket, ServerPacket, SetCenterChunkPacket,
-        SetHeadRotationPacket, SetTablistHeaderFooterPacket, SyncPlayerPositionPacket,
-        SystemChatMessagePacket, UnloadChunkPacket,
+    },
+    event::{Cancellable, inventory::InventoryOpenEvent},
+    inventory::{Inventory, PlayerInventory},
+    item::ItemStack,
+    network::client::Connection,
+    protocol::packet::{
+        ChunkBatchFinishedPacket, ChunkBatchStartPacket, ChunkDataAndUpdateLightPacket,
+        EntityPositionRotationPacket, EntityRotationPacket, GameEventPacket, Packet,
+        PlayerAbilities, PlayerAction, PlayerEntry, PlayerInfoFlags, PlayerInfoRemovePacket,
+        PlayerInfoUpdatePacket, ServerPacket, SetCenterChunkPacket, SetHeadRotationPacket,
+        SetTablistHeaderFooterPacket, SyncPlayerPositionPacket, SystemChatMessagePacket,
+        UnloadChunkPacket,
         server::{PlayerAbilitiesPacket, SetHeldItemPacket, play::KeepAlivePacket},
-    }, text::TextComponent, tickable::Tickable, util::{EntityPose, Position, TeleportFlags, Viewable, Viewers}, world::{World, chunk::Chunk}
+    },
+    text::TextComponent,
+    tickable::Tickable,
+    util::{EntityPose, Position, TeleportFlags, Viewable, Viewers},
+    world::{World, chunk::Chunk},
 };
+
+pub const MAX_VIEW_DISTANCE: i32 = 32;
 
 #[derive(Clone, PartialEq)]
 pub struct Player(pub(crate) Arc<Inner>);
 
 impl Player {
     pub(crate) fn new(connection: Arc<Connection>, server: Server) -> Self {
-        Self(Arc::new(Inner::new(connection, server)))
+        let (tx, rx) = mpsc::sync_channel::<()>(1);
+        let inner = Arc::new(Inner::new(connection, server.clone(), tx));
+
+        let weak = Arc::downgrade(&inner);
+        std::thread::spawn(move || {
+            let _guard = server.enter();
+            for _ in rx {
+                let Some(inner) = weak.upgrade() else { break };
+                inner.run_chunk_updates_once();
+            }
+        });
+
+        Self(inner)
     }
 
     pub fn addr(&self) -> SocketAddr {
@@ -110,7 +136,9 @@ impl Player {
     // ===== Position & Movement ======
 
     pub fn refresh_position(&self, new_position: Position) {
-        self.0.update_position(new_position)
+        if self.0.update_position(new_position) {
+            let _ = self.0.chunk_wake.try_send(());
+        }
     }
 
     pub fn synchronize_position(
@@ -278,7 +306,7 @@ impl Viewable for Player {
 type SyncChunk = Chunk;
 
 pub struct ChunkQueue {
-    pub queue: VecDeque<SyncChunk>,
+    pub queue: Vec<SyncChunk>,
     pub target_cpt: f32,
     pub pending_chunks: f32,
     pub max_lead: i32,
@@ -288,7 +316,7 @@ pub struct ChunkQueue {
 impl ChunkQueue {
     pub fn new() -> Self {
         Self {
-            queue: VecDeque::new(),
+            queue: Vec::new(),
             target_cpt: 9.,
             pending_chunks: 0.,
             max_lead: 1,
@@ -297,11 +325,19 @@ impl ChunkQueue {
     }
 
     pub fn enqueue(&mut self, chunk: SyncChunk) {
-        self.queue.push_back(chunk);
+        self.queue.push(chunk);
+    }
+
+    pub fn sort_by_distance_to(&mut self, from: (i32, i32)) {
+        self.queue.sort_by_key(|chunk| {
+            let dx = chunk.x() - from.0;
+            let dz = chunk.z() - from.1;
+            std::cmp::Reverse(dx * dx + dz * dz)
+        });
     }
 
     pub fn dequeue(&mut self) -> Option<SyncChunk> {
-        self.queue.pop_front()
+        self.queue.pop()
     }
 }
 
@@ -337,6 +373,9 @@ pub(crate) struct Inner {
     pub(crate) chunk_queue: Mutex<ChunkQueue>,
     teleport_id: AtomicI32,
 
+    loaded_chunk: Mutex<(i32, i32)>,
+    chunk_wake: mpsc::SyncSender<()>,
+
     // Player Abilities
     abilities: Abilities,
 
@@ -349,7 +388,7 @@ pub(crate) struct Inner {
 }
 
 impl Inner {
-    fn new(connection: Arc<Connection>, server: Server) -> Self {
+    fn new(connection: Arc<Connection>, server: Server, chunk_wake: mpsc::SyncSender<()>) -> Self {
         let game_profile = connection.game_profile.lock().clone().unwrap();
         Self {
             connection,
@@ -360,6 +399,8 @@ impl Inner {
             game_mode: Mutex::new(GameMode::Survival),
             chunk_queue: Mutex::new(ChunkQueue::new()),
             teleport_id: AtomicI32::default(),
+            loaded_chunk: Mutex::new((0, 0)),
+            chunk_wake,
             abilities: Abilities::new(),
             inventory: Arc::new(PlayerInventory::new()),
             open_inventory: Mutex::new(None),
@@ -370,6 +411,10 @@ impl Inner {
 
     fn addr(&self) -> SocketAddr {
         self.connection.addr()
+    }
+
+    fn view_distance(&self) -> i32 {
+        self.connection.view_distance()
     }
 
     fn name(&self) -> &String {
@@ -438,21 +483,55 @@ impl Inner {
 
     pub(crate) fn load_chunks(&self) {
         let chunk = Chunk::to_chunk_pos(self.position());
-        let view_distance = 32;
 
         let world = self.world();
-        let chunks = Chunk::chunks_in_range(chunk, view_distance);
-
-        for (cx, cz) in chunks {
-            let chunk = match world.get_chunk(cx, cz) {
-                Some(chunk) => chunk,
-                None => world.load_chunk(cx, cz),
-            };
-
-            self.send_chunk(chunk);
-        }
+        let coords = Chunk::chunks_in_range(chunk, self.view_distance());
+        self.load_chunks_parallel(&world, coords);
 
         self.send_pending_chunks();
+        *self.loaded_chunk.lock() = chunk;
+    }
+
+
+    fn load_chunks_parallel(&self, world: &World, mut coords: Vec<(i32, i32)>) {
+        if coords.is_empty() {
+            return;
+        }
+
+        // Nearest first. The player stands at the centre, so this order makes the chunks
+        // they can actually see the ones that exist soonest.
+        let (center_x, center_z) = Chunk::to_chunk_pos(self.position());
+        coords.sort_by_key(|&(cx, cz)| {
+            let (dx, dz) = ((cx - center_x) as i64, (cz - center_z) as i64);
+            dx * dx + dz * dz
+        });
+
+        let workers = std::thread::available_parallelism()
+            .map(|n| n.get())
+            .unwrap_or(4)
+            .min(coords.len());
+        let next = AtomicUsize::new(0);
+        let coords = &coords;
+
+        std::thread::scope(|scope| {
+            for _ in 0..workers {
+                let next = &next;
+                scope.spawn(move || {
+                    loop {
+                        let index = next.fetch_add(1, Ordering::Relaxed);
+                        let Some(&(cx, cz)) = coords.get(index) else {
+                            break;
+                        };
+                        let chunk = match world.get_chunk(cx, cz) {
+                            Some(chunk) => chunk,
+                            None => world.load_chunk(cx, cz),
+                        };
+                        world.add_viewer(cx, cz);
+                        self.send_chunk(chunk);
+                    }
+                });
+            }
+        });
     }
 
     fn keep_alive(&self) {
@@ -461,13 +540,16 @@ impl Inner {
 
     pub(crate) fn add_to_list_packet(&self) -> PlayerInfoUpdatePacket {
         PlayerInfoUpdatePacket {
-            actions: (PlayerInfoFlags::ADD_PLAYER | PlayerInfoFlags::UPDATE_LISTED).bits(),
+            actions: (PlayerInfoFlags::ADD_PLAYER | PlayerInfoFlags::UPDATE_GAME_MODE | PlayerInfoFlags::UPDATE_LISTED).bits(),
             players: vec![PlayerEntry {
                 uuid: self.uuid(),
                 player_actions: vec![
                     PlayerAction::AddPlayer {
                         name: self.game_profile.name.clone(),
                         properties: self.game_profile.properties.clone(),
+                    },
+                    PlayerAction::UpdateGameMode {
+                        game_mode: self.game_mode(),
                     },
                     PlayerAction::UpdateListed { listed: true },
                 ],
@@ -548,27 +630,29 @@ impl Inner {
 
     // ===== World ======
 
-    fn update_chunks(&self, new_chunk: (i32, i32), old_chunk: (i32, i32)) {
-        let view_distance = 8;
+    /// Runs on the player's persistent chunk-stream thread (see
+    /// `Player::new`).
+    fn run_chunk_updates_once(&self) {
+        loop {
+            let current = Chunk::to_chunk_pos(self.position());
+            let last = *self.loaded_chunk.lock();
+            if current == last {
+                break;
+            }
 
-        Chunk::difference(new_chunk, old_chunk, view_distance, |cx, cz| {
-            self.load_chunk(cx, cz);
-        });
+            let view_distance = self.view_distance();
 
-        Chunk::difference(old_chunk, new_chunk, view_distance, |cx, cz| {
-            self.unload_chunk(cx, cz);
-        });
-    }
+            let mut to_load = Vec::new();
+            Chunk::difference(current, last, view_distance, |cx, cz| {
+                to_load.push((cx, cz))
+            });
+            self.load_chunks_parallel(&self.world(), to_load);
 
-    fn load_chunk(&self, cx: i32, cz: i32) {
-        let world = self.world();
-
-        let chunk = match world.get_chunk(cx, cz) {
-            Some(chunk) => chunk,
-            None => world.load_chunk(cx, cz),
-        };
-
-        self.send_chunk(chunk);
+            Chunk::difference(last, current, view_distance, |cx, cz| {
+                self.unload_chunk(cx, cz);
+            });
+            *self.loaded_chunk.lock() = current;
+        }
     }
 
     fn unload_chunk(&self, cx: i32, cz: i32) {
@@ -576,6 +660,7 @@ impl Inner {
             chunk_x: cx,
             chunk_z: cz,
         });
+        self.world().remove_viewer(cx, cz);
     }
 
     fn send_chunk(&self, chunk: SyncChunk) {
@@ -583,21 +668,31 @@ impl Inner {
         queue.enqueue(chunk);
     }
 
+    fn is_loopback(&self) -> bool {
+        self.addr().ip().is_loopback()
+    }
+
     fn send_pending_chunks(&self) {
+        const MAX_CHUNKS_PER_TICK: f32 = 64.;
+        
         let mut queue = self.chunk_queue.lock();
 
         if queue.queue.is_empty() || queue.lead >= queue.max_lead {
             return;
         }
 
-        queue.pending_chunks = (queue.pending_chunks + queue.target_cpt).min(64.);
+        let per_tick = if self.is_loopback() { MAX_CHUNKS_PER_TICK } else { queue.target_cpt };
+        queue.pending_chunks = (queue.pending_chunks + per_tick).min(64.);
         if queue.pending_chunks < 1. {
             return;
         }
 
-        // self.connection.send_packet(&ChunkBatchStartPacket {});
+        let center = Chunk::to_chunk_pos(self.position());
+        queue.sort_by_distance_to(center);
 
-        // let mut batch_size = 0;
+        self.send_packet(&ChunkBatchStartPacket {});
+
+        let mut batch_size = 0;
         while queue.pending_chunks >= 1.
             && let Some(chunk) = queue.dequeue()
         {
@@ -605,13 +700,11 @@ impl Inner {
             self.send_packet(&packet);
 
             queue.pending_chunks -= 1.;
-            // batch_size += 1;
+            batch_size += 1;
         }
 
-        // Absolutely no idea why the client sets chunks-per-tick to very low values when sending this packet multiple times.
-        // While testing the chunks-per-tick drop from around 5 to near zero.
-        // self.send_packet(ChunkBatchFinishedPacket { batch_size });
-        // queue.lead += 1;
+        self.send_packet(&ChunkBatchFinishedPacket { batch_size });
+        queue.lead += 1;
     }
 
     pub(crate) fn set_world(&self, world: World) {
@@ -620,7 +713,9 @@ impl Inner {
 
     // ===== Position & Movement ======
 
-    fn update_position(&self, new_position: Position) {
+    // Returns `true` if the player crossed into a new chunk and its view
+    // needs updating.
+    fn update_position(&self, new_position: Position) -> bool {
         let old_position = self.position();
 
         self.set_position(new_position);
@@ -629,12 +724,12 @@ impl Inner {
         let old_chunk = Chunk::to_chunk_pos(old_position);
         let new_chunk = Chunk::to_chunk_pos(new_position);
 
-        if old_chunk != new_chunk {
+        let chunk_changed = old_chunk != new_chunk;
+        if chunk_changed {
             self.send_packet(&SetCenterChunkPacket {
                 chunk_x: new_chunk.0,
                 chunk_z: new_chunk.1,
             });
-            self.update_chunks(new_chunk, old_chunk);
         }
 
         let head_rotation = new_position.yaw();
@@ -678,11 +773,10 @@ impl Inner {
                 ));
                 self.broadcast_packet(&SetHeadRotationPacket::new(self.id(), head_rotation));
             }
-            _ => {
-                log::error!("Entered unreachable code.");
-                self.connection.close();
-            }
+            _ => {}
         }
+
+        chunk_changed
     }
 
     fn synchronize_position(&self, position: Position, velocity: Position, flags: TeleportFlags) {
@@ -841,6 +935,12 @@ impl Inner {
         for viewer in self.viewers() {
             self.remove_viewer(viewer);
         }
+
+        let center = *self.loaded_chunk.lock();
+        let world = self.world();
+        Chunk::chunks_in_range(center, self.view_distance())
+            .into_iter()
+            .for_each(|(cx, cz)| world.remove_viewer(cx, cz));
     }
 
     // ===== Scoreboard =====

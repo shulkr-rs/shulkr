@@ -5,7 +5,7 @@ use std::{
     net::SocketAddr,
     sync::{
         Arc,
-        atomic::{AtomicBool, Ordering},
+        atomic::{AtomicBool, AtomicI32, Ordering},
     },
 };
 use tokio::sync::mpsc;
@@ -32,6 +32,8 @@ use crate::{
     text::TextComponent,
 };
 
+pub const MAX_VIEW_DISTANCE: i32 = 32;
+
 pub struct Connection {
     addr: SocketAddr,
     sreader: tokio::sync::Mutex<StreamReader<OwnedReadHalf>>,
@@ -44,12 +46,13 @@ pub struct Connection {
     pub(crate) player: Mutex<Option<Player>>,
     closed: AtomicBool,
     server: Server,
+    view_distance: AtomicI32,
 }
 
 impl Connection {
     pub fn new(addr: SocketAddr, stream: TcpStream) -> (Arc<Self>, Receiver<BytesMut>) {
         let (rstream, wstream) = stream.into_split();
-        let (tx, rx) = mpsc::channel(128);
+        let (tx, rx) = mpsc::channel(4096);
 
         let server = Server::current();
         let connection = Arc::new(Self {
@@ -64,9 +67,18 @@ impl Connection {
             player: Mutex::new(None),
             closed: AtomicBool::new(false),
             server,
+            view_distance: AtomicI32::new(MAX_VIEW_DISTANCE),
         });
 
         (connection, rx)
+    }
+
+    pub fn view_distance(&self) -> i32 {
+        self.view_distance.load(Ordering::Relaxed)
+    }
+
+    pub(crate) fn set_view_distance(&self, requested: i32) {
+        self.view_distance.store(requested.clamp(2, MAX_VIEW_DISTANCE), Ordering::Relaxed);
     }
 
     pub async fn accept(addr: SocketAddr, stream: TcpStream) {
@@ -164,7 +176,7 @@ impl Connection {
 
         // Enqueue packet
         if let Err(_) = self.packet_tx.try_send(data) {
-            log::warn!("Failed to enqueue packet. ({})", std::any::type_name::<P>());
+            log::error!("Failed to enqueue packet, closing connection. ({})", std::any::type_name::<P>());
             self.close();
         }
     }

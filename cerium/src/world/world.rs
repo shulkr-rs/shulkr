@@ -11,13 +11,22 @@ use crate::{
     },
 };
 
+pub type ChunkGenerator = dyn Fn(&Chunk) + Send + Sync;
+
 /// A Minecraft world.
 #[derive(Clone)]
 pub struct World(Arc<inner::World>);
 
 impl World {
     pub fn new(dimension: RegistryKey<DimensionType>) -> Self {
-        Self(Arc::new(inner::World::new(dimension)))
+        Self(Arc::new(inner::World::new(dimension, None)))
+    }
+
+    pub fn with_generator(
+        dimension: RegistryKey<DimensionType>,
+        generator: impl Fn(&Chunk) + Send + Sync + 'static,
+    ) -> Self {
+        Self(Arc::new(inner::World::new(dimension, Some(Arc::new(generator)))))
     }
 
     pub fn get_chunk(&self, chunk_x: i32, chunk_z: i32) -> Option<Chunk> {
@@ -26,6 +35,14 @@ impl World {
 
     pub fn load_chunk(&self, chunk_x: i32, chunk_z: i32) -> Chunk {
         self.0.load_chunk(chunk_x, chunk_z)
+    }
+
+    pub(crate) fn add_viewer(&self, chunk_x: i32, chunk_z: i32) {
+        self.0.add_viewer(chunk_x, chunk_z);
+    }
+
+    pub(crate) fn remove_viewer(&self, chunk_x: i32, chunk_z: i32) {
+        self.0.remove_viewer(chunk_x, chunk_z);
     }
 
     pub fn get_block(&self, x: i32, y: i32, z: i32) -> BlockState {
@@ -82,12 +99,16 @@ mod inner {
 
     pub(super) struct World {
         dimension_type: DimensionType,
-        chunks: RwLock<HashMap<(i32, i32), Chunk>>,
+        chunks: RwLock<HashMap<(i32, i32), (Chunk, usize)>>,
         entities: RwLock<Vec<Entity>>,
+        generator: Option<Arc<super::ChunkGenerator>>,
     }
 
     impl World {
-        pub(super) fn new(dimension: RegistryKey<DimensionType>) -> Self {
+        pub(super) fn new(
+            dimension: RegistryKey<DimensionType>,
+            generator: Option<Arc<super::ChunkGenerator>>,
+        ) -> Self {
             let server = Server::current();
             let dimension = server.registries().dimension_type.get(&dimension).unwrap();
             let dimension_type = dimension.clone();
@@ -96,26 +117,54 @@ mod inner {
                 dimension_type,
                 chunks: RwLock::new(HashMap::new()),
                 entities: RwLock::new(Vec::new()),
+                generator,
             }
         }
 
         pub(super) fn get_chunk(&self, chunk_x: i32, chunk_z: i32) -> Option<Chunk> {
             let chunks = self.chunks.read();
-            chunks.get(&(chunk_x, chunk_z)).cloned()
+            chunks.get(&(chunk_x, chunk_z)).map(|(chunk, _)| chunk.clone())
         }
 
         pub(super) fn load_chunk(&self, chunk_x: i32, chunk_z: i32) -> Chunk {
-            let mut chunks = self.chunks.write();
+            let chunk = {
+                let mut chunks = self.chunks.write();
+                if let Some((existing, _)) = chunks.get(&(chunk_x, chunk_z)) {
+                    return existing.clone();
+                }
+                let chunk = Chunk::new(chunk_x, chunk_z, self.dimension_type.min_y);
+                chunks.insert((chunk_x, chunk_z), (chunk.clone(), 0));
+                chunk
+            };
 
-            let chunk = Chunk::new(chunk_x, chunk_z, self.dimension_type.min_y);
-            chunks.insert((chunk_x, chunk_z), chunk.clone());
+            if let Some(generator) = &self.generator {
+                generator(&chunk);
+            }
 
             chunk
         }
 
+        pub(super) fn add_viewer(&self, chunk_x: i32, chunk_z: i32) {
+            let mut chunks = self.chunks.write();
+            if let Some((_, refcount)) = chunks.get_mut(&(chunk_x, chunk_z)) {
+                *refcount += 1;
+            }
+        }
+
+        pub(super) fn remove_viewer(&self, chunk_x: i32, chunk_z: i32) {
+            let mut chunks = self.chunks.write();
+            if let std::collections::hash_map::Entry::Occupied(mut entry) = chunks.entry((chunk_x, chunk_z)) {
+                let (_, refcount) = entry.get_mut();
+                *refcount = refcount.saturating_sub(1);
+                if *refcount == 0 {
+                    entry.remove();
+                }
+            }
+        }
+
         pub(super) fn get_block(&self, x: i32, y: i32, z: i32) -> BlockState {
-            let cx = x / 16;
-            let cz = z / 16;
+            let cx = x.div_euclid(16);
+            let cz = z.div_euclid(16);
 
             let chunk = self.get_chunk(cx, cz).unwrap_or_else(|| {
                 panic!("Chunk ({},{}) is not loaded!", cx, cz);
@@ -128,8 +177,8 @@ mod inner {
         where
             B: Into<BlockState>,
         {
-            let cx = x / 16;
-            let cz = z / 16;
+            let cx = x.div_euclid(16);
+            let cz = z.div_euclid(16);
 
             let chunk = match self.get_chunk(cx, cz) {
                 Some(chunk) => chunk,
@@ -139,8 +188,8 @@ mod inner {
         }
 
         pub(super) fn get_biome(&self, x: i32, y: i32, z: i32) -> u16 {
-            let cx = x / 16;
-            let cz = z / 16;
+            let cx = x.div_euclid(16);
+            let cz = z.div_euclid(16);
 
             let chunk = self.get_chunk(cx, cz).unwrap_or_else(|| {
                 panic!("Chunk ({},{}) is not loaded!", cx, cz);
@@ -150,8 +199,8 @@ mod inner {
         }
 
         pub(super) fn set_biome(&self, x: i32, y: i32, z: i32, biome: i32) {
-            let cx = x / 16;
-            let cz = z / 16;
+            let cx = x.div_euclid(16);
+            let cz = z.div_euclid(16);
 
             let chunk = match self.get_chunk(cx, cz) {
                 Some(chunk) => chunk,

@@ -135,7 +135,9 @@ fn block_tags(data: &str) -> TagRegistry {
     }
 }
 
-fn handle_client_info(client: Arc<Connection>, _packet: ClientInfoPacket) {
+fn handle_client_info(client: Arc<Connection>, packet: ClientInfoPacket) {
+    client.set_view_distance(packet.view_distance as i32);
+
     client.send_packet(&server::config::KnownPacksPacket {
         known_packs: Vec::new(),
     });
@@ -261,7 +263,7 @@ fn handle_acknowledge_finish_config(
         is_hardcore: false,
         dimension_names: vec![dimension.clone().into()],
         max_players: 20,
-        view_distance: 32,
+        view_distance: client.view_distance(),
         simulation_distance: 8,
         reduced_debug_info: false,
         enable_respawn_screen: true,
@@ -290,29 +292,32 @@ fn handle_acknowledge_finish_config(
         chunk_z: cy,
     });
 
+    {
+        let online_players = &*client.server().players().lock();
+
+        // Add player to tab for already playing players.
+        for online_player in online_players {
+            online_player.send_packet(&player.0.add_to_list_packet());
+            if *online_player != player {
+                player.add_viewer(online_player.clone());
+            }
+        }
+
+        // Add already playing player to tab for player.
+        for online_player in online_players {
+            if *online_player == player {
+                continue;
+            }
+            online_player.add_viewer(player.clone());
+        }
+    }
+
     client.server().events().fire(&mut PlayerSpawnEvent {
         player: player.clone(),
     });
 
-    let online_players = &*client.server().players().lock();
-
-    // Add player to tab for already playing players.
-    for online_player in online_players {
-        online_player.send_packet(&player.0.add_to_list_packet());
-        if *online_player != player {
-            player.add_viewer(online_player.clone());
-        }
-    }
-
-    // Add already playing player to tab for player.
-    for online_player in online_players {
-        if *online_player == player {
-            continue;
-        }
-        online_player.add_viewer(player.clone());
-    }
-
-    player.0.load_chunks();
+    let this = player.clone();
+    tokio::task::spawn_blocking(move || this.0.load_chunks());
 }
 
 fn handle_keep_alive(_client: Arc<Connection>) {}

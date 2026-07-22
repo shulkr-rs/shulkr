@@ -211,9 +211,9 @@ impl BlockPosition {
 impl Into<BlockPosition> for Position {
     fn into(self) -> BlockPosition {
         BlockPosition::new(
-            (self.x() / 16.0) as i64,
-            (self.y() / 16.0) as i64,
-            (self.z() / 16.0) as i64,
+            self.x().floor() as i64,
+            self.y().floor() as i64,
+            self.z().floor() as i64,
         )
     }
 }

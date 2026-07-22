@@ -1,3 +1,5 @@
+#![allow(unused)]
+
 use crate::{item::ItemStack, text::TextComponent, util::Identifier};
 
 #[derive(Debug, Clone)]
