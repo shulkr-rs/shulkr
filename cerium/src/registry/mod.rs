@@ -197,7 +197,7 @@ impl<T> RegistryHolder<T> {
 unsafe impl<T: Sync + Send> Sync for RegistryHolder<T> {}
 unsafe impl<T: Send> Send for RegistryHolder<T> {}
 
-impl<T> const Deref for RegistryHolder<T> {
+impl<T> Deref for RegistryHolder<T> {
     type Target = T;
 
     fn deref(&self) -> &Self::Target {
