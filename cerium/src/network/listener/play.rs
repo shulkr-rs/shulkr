@@ -91,8 +91,8 @@ fn handle_client_tick_end(_player: Player, _packet: ClientTickEndPacket) {
     // log::warn!("todo: handle_client_tick_end");
 }
 
-fn handle_client_info(_player: Player, _packet: ClientInfoPacket) {
-    log::warn!("todo: handle_client_info");
+fn handle_client_info(player: Player, packet: ClientInfoPacket) {
+    player.set_view_distance(packet.view_distance as i32);
 }
 
 fn handle_click_container(player: Player, packet: ClickContainerPacket) {

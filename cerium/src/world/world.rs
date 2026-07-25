@@ -33,8 +33,47 @@ impl World {
         self.0.get_chunk(chunk_x, chunk_z)
     }
 
+    pub fn chunk_count(&self) -> usize {
+        self.0.chunk_count()
+    }
+
     pub fn load_chunk(&self, chunk_x: i32, chunk_z: i32) -> Chunk {
         self.0.load_chunk(chunk_x, chunk_z)
+    }
+
+    pub async fn acquire_load_permit(&self) -> tokio::sync::OwnedSemaphorePermit {
+        self.0
+            .load_semaphore
+            .clone()
+            .acquire_owned()
+            .await
+            .expect("load_semaphore is never closed")
+    }
+
+    pub async fn load_chunk_async(&self, chunk_x: i32, chunk_z: i32) -> Chunk {
+        if let Some(chunk) = self.0.get_chunk(chunk_x, chunk_z) {
+            return chunk;
+        }
+
+        let (mut receiver, spawned_by_us) = self.0.take_or_create_pending(chunk_x, chunk_z);
+
+        if spawned_by_us {
+            let world = self.clone();
+            tokio::task::spawn_blocking(move || {
+                let chunk = world.0.load_chunk(chunk_x, chunk_z);
+                world.0.finish_pending(chunk_x, chunk_z, chunk);
+            });
+        }
+
+        loop {
+            if let Some(chunk) = receiver.borrow_and_update().clone() {
+                return chunk;
+            }
+            
+            if receiver.changed().await.is_err() {
+                return self.0.load_chunk(chunk_x, chunk_z);
+            }
+        }
     }
 
     pub(crate) fn add_viewer(&self, chunk_x: i32, chunk_z: i32) {
@@ -94,14 +133,18 @@ mod inner {
         protocol::packet::{BlockUpdatePacket, WorldEventPacket},
         world::block::Block,
     };
+    use crate::world::chunk::AsyncDedup;
     use parking_lot::RwLock;
     use std::collections::HashMap;
+    use tokio::sync::{Semaphore, watch};
 
     pub(super) struct World {
         dimension_type: DimensionType,
         chunks: RwLock<HashMap<(i32, i32), (Chunk, usize)>>,
         entities: RwLock<Vec<Entity>>,
         generator: Option<Arc<super::ChunkGenerator>>,
+        pending: AsyncDedup<(i32, i32), Chunk>,
+        pub(super) load_semaphore: Arc<Semaphore>,
     }
 
     impl World {
@@ -118,12 +161,32 @@ mod inner {
                 chunks: RwLock::new(HashMap::new()),
                 entities: RwLock::new(Vec::new()),
                 generator,
+                pending: AsyncDedup::new(),
+                load_semaphore: Arc::new(Semaphore::new(
+                    std::thread::available_parallelism().map(|n| n.get()).unwrap_or(4) * 4,
+                )),
             }
+        }
+
+        pub(super) fn take_or_create_pending(
+            &self,
+            chunk_x: i32,
+            chunk_z: i32,
+        ) -> (watch::Receiver<Option<Chunk>>, bool) {
+            self.pending.take_or_create((chunk_x, chunk_z))
+        }
+
+        pub(super) fn finish_pending(&self, chunk_x: i32, chunk_z: i32, chunk: Chunk) {
+            self.pending.finish((chunk_x, chunk_z), chunk);
         }
 
         pub(super) fn get_chunk(&self, chunk_x: i32, chunk_z: i32) -> Option<Chunk> {
             let chunks = self.chunks.read();
             chunks.get(&(chunk_x, chunk_z)).map(|(chunk, _)| chunk.clone())
+        }
+
+        pub(super) fn chunk_count(&self) -> usize {
+            self.chunks.read().len()
         }
 
         pub(super) fn load_chunk(&self, chunk_x: i32, chunk_z: i32) -> Chunk {

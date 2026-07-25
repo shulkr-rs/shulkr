@@ -62,8 +62,7 @@ impl Chunk {
         (chunk_x, chunk_z)
     }
 
-    // Port of `ChunkTrackingView.Positioned.contains`
-    fn in_view(dx: i32, dz: i32, view_distance: i32) -> bool {
+    pub(crate) fn in_view(dx: i32, dz: i32, view_distance: i32) -> bool {
         const BUFFER_RANGE: i32 = 2;
         let dx = (dx.abs() - BUFFER_RANGE).max(0);
         let dz = (dz.abs() - BUFFER_RANGE).max(0);

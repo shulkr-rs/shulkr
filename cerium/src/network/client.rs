@@ -45,6 +45,7 @@ pub struct Connection {
     pub(crate) verify_token: Mutex<[u8; 4]>,
     pub(crate) player: Mutex<Option<Player>>,
     closed: AtomicBool,
+    shutdown: tokio::sync::Notify,
     server: Server,
     view_distance: AtomicI32,
 }
@@ -66,6 +67,7 @@ impl Connection {
             verify_token: Mutex::new([0; 4]),
             player: Mutex::new(None),
             closed: AtomicBool::new(false),
+            shutdown: tokio::sync::Notify::new(),
             server,
             view_distance: AtomicI32::new(MAX_VIEW_DISTANCE),
         });
@@ -138,16 +140,27 @@ impl Connection {
                 break;
             }
         }
+
+        self.close();
     }
 
     pub async fn write_loop(self: Arc<Self>, rx: &mut Receiver<BytesMut>) {
-        while !self.closed() {
-            let Some(data) = rx.recv().await else {
-                self.close();
+        loop {
+            if self.closed() {
                 break;
-            };
+            }
 
-            self.write_packet(data).await;
+            tokio::select! {
+                biased;
+                _ = self.shutdown.notified() => break,
+                data = rx.recv() => match data {
+                    Some(data) => self.write_packet(data).await,
+                    None => {
+                        self.close();
+                        break;
+                    }
+                },
+            }
         }
     }
 
@@ -247,5 +260,6 @@ impl Connection {
 
     pub fn close(&self) {
         self.closed.store(true, Ordering::Release);
+        self.shutdown.notify_one();
     }
 }

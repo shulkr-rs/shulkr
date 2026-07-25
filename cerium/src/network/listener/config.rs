@@ -5,7 +5,7 @@ use cerium_nbt::NbtCompound;
 use serde::de::DeserializeOwned;
 use serde::{Deserialize, Serialize};
 
-use crate::entity::{EntityLike as _, Player};
+use crate::entity::{EntityLike as _, MAX_VIEW_DISTANCE, Player};
 use crate::event::player::PlayerSpawnEvent;
 use crate::protocol::packet::{RegistryEntry, Tag, TagRegistry, UpdateTagsPacket};
 use crate::registry::{DynamicRegistry, RegistryKey};
@@ -263,7 +263,7 @@ fn handle_acknowledge_finish_config(
         is_hardcore: false,
         dimension_names: vec![dimension.clone().into()],
         max_players: 20,
-        view_distance: client.view_distance(),
+        view_distance: MAX_VIEW_DISTANCE,
         simulation_distance: 8,
         reduced_debug_info: false,
         enable_respawn_screen: true,
@@ -315,9 +315,6 @@ fn handle_acknowledge_finish_config(
     client.server().events().fire(&mut PlayerSpawnEvent {
         player: player.clone(),
     });
-
-    let this = player.clone();
-    tokio::task::spawn_blocking(move || this.0.load_chunks());
 }
 
 fn handle_keep_alive(_client: Arc<Connection>) {}
