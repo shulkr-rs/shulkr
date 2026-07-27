@@ -5,7 +5,10 @@ use std::{
 };
 use tokio::net::ToSocketAddrs;
 
-use crate::{auth::KeyStore, entity::Player, event::Events, registry::Registries};
+use crate::{
+    auth::KeyStore, command::dispatcher::CommandDispatcher, entity::Player, event::Events,
+    registry::Registries,
+};
 
 thread_local! {
     static CURRENT: RefCell<Option<Weak<Runtime>>> = RefCell::new(None);
@@ -92,6 +95,10 @@ impl Server {
         &self.inner.players
     }
 
+    pub fn command_dispatcher(&self) -> &Arc<CommandDispatcher> {
+        &self.inner.command_dispatcher
+    }
+
     pub fn key_store(&self) -> &Arc<KeyStore> {
         &self.inner.key_store
     }
@@ -124,6 +131,7 @@ mod __private {
 
     use crate::{
         auth::KeyStore,
+        command::dispatcher::CommandDispatcher,
         entity::Player,
         event::Events,
         network::client::Connection,
@@ -140,6 +148,7 @@ mod __private {
         pub(super) key_store: Arc<KeyStore>,
         pub(super) events: Events,
         pub(super) players: Arc<Mutex<Vec<Player>>>,
+        pub(super) command_dispatcher: Arc<CommandDispatcher>,
     }
 
     impl Runtime {
@@ -157,6 +166,7 @@ mod __private {
                 key_store: Arc::new(KeyStore::new()),
                 events: Events::new(),
                 players: Arc::new(Mutex::new(Vec::new())),
+                command_dispatcher: Arc::new(CommandDispatcher::new()),
             }
         }
 

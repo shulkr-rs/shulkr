@@ -1,5 +1,3 @@
-use rustc_hash::FxHashMap;
-
 use crate::{
     entity::meta::AnyValue,
     protocol::{
@@ -7,12 +5,13 @@ use crate::{
         encode::{Encode, EncodeError, PacketWrite},
         packet::{Packet, ServerPacket},
     },
+    util::HashMap,
 };
 
 #[derive(Debug, Clone)]
 pub struct SetEntityMetadataPacket {
     pub entity_id: i32,
-    pub entries: FxHashMap<i32, AnyValue>,
+    pub entries: HashMap<i32, AnyValue>,
 }
 
 impl Packet for SetEntityMetadataPacket {}
@@ -35,7 +34,7 @@ impl Decode for SetEntityMetadataPacket {
     fn decode<R: PacketRead>(r: &mut R) -> Result<Self, DecodeError> {
         let entity_id = r.read_varint()?;
 
-        let mut entries = FxHashMap::default();
+        let mut entries = HashMap::default();
         loop {
             let index = r.read_varint()?;
             if index == 0xFF {

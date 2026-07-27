@@ -1,5 +1,6 @@
 pub mod advancement;
 pub mod auth;
+pub mod command;
 pub mod entity;
 pub mod event;
 pub mod inventory;

@@ -5,6 +5,7 @@ use std::{any::TypeId, marker::PhantomData};
 use crate::protocol::decode::{DecodeError, PacketRead};
 use crate::protocol::encode::{EncodeError, PacketWrite};
 
+use crate::util::HashMap;
 use crate::{
     entity::meta::{
         CatVariant, ChickenVariant, CowVariant, FrogVariant, PaintingVariant, PigVariant,
@@ -30,13 +31,12 @@ pub use consumable::{Consumable, ConsumeEffect};
 pub use custom_model_data::CustomModelData;
 pub use equippable::Equippable;
 pub use food::Food;
-use rustc_hash::{FxBuildHasher, FxHashMap};
 pub use tool::Tool;
 pub use tooltip_display::TooltipDisplay;
 pub use weapon::Weapon;
 
 pub type ComponentData = Arc<dyn Any + Send + Sync>;
-pub type ComponentMap = FxHashMap<i32, ComponentData>;
+pub type ComponentMap = HashMap<i32, ComponentData>;
 
 // ===== AnyDataComponent =====
 
@@ -314,12 +314,12 @@ where
 }
 
 pub struct ItemBlockState {
-    pub properties: FxHashMap<String, String>,
+    pub properties: HashMap<String, String>,
 }
 
 impl ItemBlockState {
     pub const EMPTY: ItemBlockState = ItemBlockState {
-        properties: FxHashMap::with_hasher(FxBuildHasher),
+        properties: HashMap::with_hasher(rustc_hash::FxBuildHasher),
     };
 }
 

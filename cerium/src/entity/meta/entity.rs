@@ -1,8 +1,6 @@
-use rustc_hash::FxHashMap;
-
 use crate::{
     entity::meta::{MetadataHolder, MetadataRef},
-    util::EntityPose,
+    util::{EntityPose, HashMap},
 };
 
 pub struct EntityMeta {
@@ -13,7 +11,7 @@ impl EntityMeta {
     pub fn new() -> Self {
         Self {
             holder: MetadataHolder {
-                entries: FxHashMap::default(),
+                entries: HashMap::default(),
             },
         }
     }

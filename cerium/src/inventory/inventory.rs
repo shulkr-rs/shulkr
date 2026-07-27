@@ -1,5 +1,5 @@
 use parking_lot::Mutex;
-use rustc_hash::FxHashMap;
+
 use std::sync::{
     Arc,
     atomic::{AtomicI32, Ordering},
@@ -14,7 +14,7 @@ use crate::{
         server::CloseContainerPacket,
     },
     text::TextComponent,
-    util::{Viewable, Viewers},
+    util::{HashMap, Viewable, Viewers},
 };
 
 #[derive(Clone)]
@@ -79,14 +79,14 @@ struct Inner {
     id: i32,
     ty: InventoryType,
     title: TextComponent,
-    content: Mutex<FxHashMap<i32, ItemStack>>,
+    content: Mutex<HashMap<i32, ItemStack>>,
     viewers: Viewers,
 }
 
 impl Inner {
     fn new(ty: InventoryType, title: impl Into<TextComponent>) -> Self {
         let size = ty.size();
-        let mut content = FxHashMap::with_capacity_and_hasher(size as usize, Default::default());
+        let mut content = HashMap::with_capacity_and_hasher(size as usize, Default::default());
         for ix in 0..size {
             content.insert(ix, ItemStack::EMPTY);
         }

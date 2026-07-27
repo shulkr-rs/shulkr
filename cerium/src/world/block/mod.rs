@@ -1,5 +1,4 @@
 use indexmap::IndexMap;
-use rustc_hash::FxHashMap;
 use std::sync::OnceLock;
 
 pub mod property;
@@ -14,12 +13,14 @@ pub use block_state::*;
 mod block_entity;
 pub use block_entity::*;
 
+use crate::util::HashMap;
+
 pub static REGISTRY: OnceLock<BlockRegistry> = OnceLock::new();
 
 pub struct BlockRegistry {
     defs: Vec<BlockDef>,
     by_id: Vec<u16>,
-    by_key: FxHashMap<String, u16>,
+    by_key: HashMap<String, u16>,
     _state_to_block: Vec<u16>,
 }
 
@@ -31,7 +32,7 @@ impl BlockRegistry {
 
         let mut defs = Vec::new();
         let mut by_id = Vec::new();
-        let mut by_key = FxHashMap::default();
+        let mut by_key = HashMap::default();
         let mut state_to_block = Vec::new();
         let mut next_state_id = 0u16;
 
@@ -85,7 +86,7 @@ impl BlockRegistry {
                 default_state,
                 min_state_id,
                 properties,
-                block_entity
+                block_entity,
             });
         }
 
@@ -102,7 +103,9 @@ impl BlockRegistry {
     }
 
     pub fn get_id(&self, key: &str) -> Option<u16> {
-        self.by_key.get(key).map(|index| self.defs[*index as usize].id)
+        self.by_key
+            .get(key)
+            .map(|index| self.defs[*index as usize].id)
     }
 
     pub fn def_by_state(&self, state_id: u16) -> Option<&BlockDef> {

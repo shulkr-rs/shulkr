@@ -5,20 +5,19 @@ use crate::{
     protocol::packet::{Packet, ServerPacket},
 };
 
-mod position;
-pub use position::*;
-
-mod identifier;
-pub use identifier::*;
-
-mod dye_color;
-pub use dye_color::*;
-
 mod direction;
-pub use direction::*;
-
+mod dye_color;
+mod hash_map;
+mod identifier;
 mod pose;
+mod position;
+
+pub use direction::*;
+pub use dye_color::*;
+pub use hash_map::*;
+pub use identifier::*;
 pub use pose::*;
+pub use position::*;
 
 pub trait Viewable {
     fn viewers(&self) -> &Viewers;

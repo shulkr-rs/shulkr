@@ -1,10 +1,11 @@
 use std::{fmt::Debug, sync::Arc};
 
-use rustc_hash::{FxBuildHasher, FxHashMap};
+use rustc_hash::FxBuildHasher;
 
 use crate::{
     inventory::Slot,
     item::{ComponentMap, DataComponent, Material},
+    util::HashMap,
 };
 
 #[derive(Debug, Clone)]
@@ -21,7 +22,7 @@ impl ItemStack {
         Self {
             material,
             amount,
-            components: FxHashMap::with_hasher(FxBuildHasher),
+            components: HashMap::with_hasher(FxBuildHasher),
         }
     }
 
@@ -29,7 +30,7 @@ impl ItemStack {
         Self {
             material,
             amount: 1,
-            components: FxHashMap::with_hasher(FxBuildHasher),
+            components: HashMap::with_hasher(FxBuildHasher),
         }
     }
 

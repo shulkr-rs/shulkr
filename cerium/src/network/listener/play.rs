@@ -2,6 +2,7 @@ use std::io::Cursor;
 
 use crate::{
     entity::{EntityAnimation, EntityLike as _, GameMode, Hand, Player},
+    event::player::CommandResultEvent,
     item::ItemStack,
     protocol::{
         decode::{Decode as _, DecodeError},
@@ -65,8 +66,15 @@ fn handle_confirm_teleportation(_player: Player, _packet: ConfirmTeleportationPa
     log::warn!("todo: handle_confirm_teleportation");
 }
 
-fn handle_chat_command(_player: Player, _packet: ChatCommandPacket) {
-    log::warn!("todo: handle_chat_command");
+fn handle_chat_command(player: Player, packet: ChatCommandPacket) {
+    let server = player.server();
+    let input = &packet.command;
+
+    let result = server.command_dispatcher().parse(input);
+
+    server
+        .events()
+        .fire(&mut CommandResultEvent::new(player.clone(), input, result));
 }
 
 fn handle_player_session(_player: Player, _packet: PlayerSessionPacket) {

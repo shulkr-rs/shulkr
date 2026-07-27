@@ -1,7 +1,5 @@
 use std::{any::Any, marker::PhantomData, sync::Arc};
 
-use rustc_hash::FxHashMap;
-
 pub mod entity;
 
 use crate::item::DataType2;
@@ -13,6 +11,7 @@ use crate::protocol::encode::EncodeError;
 use crate::protocol::encode::PacketWrite;
 use crate::text::TextComponent;
 use crate::util::EntityPose;
+use crate::util::HashMap;
 
 mod cat_variant;
 mod chicken_variant;
@@ -33,7 +32,7 @@ pub use wolf_variant::*;
 pub use zombie_nautilus::*;
 
 pub struct MetadataHolder {
-    pub entries: FxHashMap<i32, AnyValue>, // i32, Ref((i32, dyn Any), default_value)
+    pub entries: HashMap<i32, AnyValue>, // i32, Ref((i32, dyn Any), default_value)
 }
 
 impl MetadataHolder {
@@ -390,8 +389,3 @@ impl DataType2<EntityPose> for EntityPose {
         w.write_varint(*this as i32)
     }
 }
-
-
-
-
-
