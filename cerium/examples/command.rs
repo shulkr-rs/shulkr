@@ -1,10 +1,11 @@
 use cerium::Server;
+use cerium::auth::AuthMode;
 use cerium::command::Command;
 use cerium::event::player::{CommandResultEvent, PlayerConfigEvent, PlayerEvent};
 use cerium::world::{DimensionType, World, block::Block};
 
 fn main() {
-    let server = Server::new();
+    let server = Server::new(AuthMode::Online);
     let world = World::new(DimensionType::OVERWORLD);
 
     for bz in 0..16 {

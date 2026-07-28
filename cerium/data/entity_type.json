@@ -52,6 +52,11 @@
       "minecraft:attack_knockback": 0.0,
       "minecraft:camera_distance": 4.0,
       "minecraft:waypoint_transmit_range": 0.0,
+      "minecraft:bounciness": 0.0,
+      "minecraft:air_drag_modifier": 1.0,
+      "minecraft:friction_modifier": 1.0,
+      "minecraft:name_tag_distance": 64.0,
+      "minecraft:below_name_distance": 10.0,
       "minecraft:follow_range": 16.0,
       "minecraft:flying_speed": 0.10000000149011612,
       "minecraft:attack_damage": 2.0
@@ -97,6 +102,11 @@
       "minecraft:attack_knockback": 0.0,
       "minecraft:camera_distance": 4.0,
       "minecraft:waypoint_transmit_range": 0.0,
+      "minecraft:bounciness": 0.0,
+      "minecraft:air_drag_modifier": 1.0,
+      "minecraft:friction_modifier": 1.0,
+      "minecraft:name_tag_distance": 64.0,
+      "minecraft:below_name_distance": 10.0,
       "minecraft:follow_range": 16.0,
       "minecraft:tempt_range": 10.0
     }
@@ -130,7 +140,12 @@
       "minecraft:movement_efficiency": 0.0,
       "minecraft:attack_knockback": 0.0,
       "minecraft:camera_distance": 4.0,
-      "minecraft:waypoint_transmit_range": 0.0
+      "minecraft:waypoint_transmit_range": 0.0,
+      "minecraft:bounciness": 0.0,
+      "minecraft:air_drag_modifier": 1.0,
+      "minecraft:friction_modifier": 1.0,
+      "minecraft:name_tag_distance": 64.0,
+      "minecraft:below_name_distance": 10.0
     }
   },
   "minecraft:arrow": {
@@ -174,6 +189,11 @@
       "minecraft:attack_knockback": 0.0,
       "minecraft:camera_distance": 4.0,
       "minecraft:waypoint_transmit_range": 0.0,
+      "minecraft:bounciness": 0.0,
+      "minecraft:air_drag_modifier": 1.0,
+      "minecraft:friction_modifier": 1.0,
+      "minecraft:name_tag_distance": 64.0,
+      "minecraft:below_name_distance": 10.0,
       "minecraft:follow_range": 16.0,
       "minecraft:tempt_range": 10.0,
       "minecraft:attack_damage": 2.0
@@ -227,6 +247,11 @@
       "minecraft:attack_knockback": 0.0,
       "minecraft:camera_distance": 4.0,
       "minecraft:waypoint_transmit_range": 0.0,
+      "minecraft:bounciness": 0.0,
+      "minecraft:air_drag_modifier": 1.0,
+      "minecraft:friction_modifier": 1.0,
+      "minecraft:name_tag_distance": 64.0,
+      "minecraft:below_name_distance": 10.0,
       "minecraft:follow_range": 16.0
     }
   },
@@ -234,8 +259,8 @@
     "id": 11,
     "translationKey": "entity.minecraft.bee",
     "packetType": "LIVING",
-    "width": 0.7,
-    "height": 0.6,
+    "width": 0.55,
+    "height": 0.5,
     "eyeHeight": 0.3,
     "clientTrackingRange": 8,
     "defaultAttributes": {
@@ -260,6 +285,11 @@
       "minecraft:attack_knockback": 0.0,
       "minecraft:camera_distance": 4.0,
       "minecraft:waypoint_transmit_range": 0.0,
+      "minecraft:bounciness": 0.0,
+      "minecraft:air_drag_modifier": 1.0,
+      "minecraft:friction_modifier": 1.0,
+      "minecraft:name_tag_distance": 64.0,
+      "minecraft:below_name_distance": 10.0,
       "minecraft:follow_range": 16.0,
       "minecraft:tempt_range": 10.0,
       "minecraft:flying_speed": 0.6000000238418579,
@@ -319,6 +349,11 @@
       "minecraft:attack_knockback": 0.0,
       "minecraft:camera_distance": 4.0,
       "minecraft:waypoint_transmit_range": 0.0,
+      "minecraft:bounciness": 0.0,
+      "minecraft:air_drag_modifier": 1.0,
+      "minecraft:friction_modifier": 1.0,
+      "minecraft:name_tag_distance": 64.0,
+      "minecraft:below_name_distance": 10.0,
       "minecraft:follow_range": 48.0,
       "minecraft:attack_damage": 6.0
     }
@@ -363,6 +398,11 @@
       "minecraft:attack_knockback": 0.0,
       "minecraft:camera_distance": 4.0,
       "minecraft:waypoint_transmit_range": 0.0,
+      "minecraft:bounciness": 0.0,
+      "minecraft:air_drag_modifier": 1.0,
+      "minecraft:friction_modifier": 1.0,
+      "minecraft:name_tag_distance": 64.0,
+      "minecraft:below_name_distance": 10.0,
       "minecraft:follow_range": 16.0,
       "minecraft:attack_damage": 2.0
     }
@@ -397,6 +437,11 @@
       "minecraft:attack_knockback": 0.0,
       "minecraft:camera_distance": 4.0,
       "minecraft:waypoint_transmit_range": 0.0,
+      "minecraft:bounciness": 0.0,
+      "minecraft:air_drag_modifier": 1.0,
+      "minecraft:friction_modifier": 1.0,
+      "minecraft:name_tag_distance": 64.0,
+      "minecraft:below_name_distance": 10.0,
       "minecraft:follow_range": 24.0,
       "minecraft:attack_damage": 3.0
     }
@@ -440,6 +485,11 @@
       "minecraft:attack_knockback": 0.0,
       "minecraft:camera_distance": 4.0,
       "minecraft:waypoint_transmit_range": 0.0,
+      "minecraft:bounciness": 0.0,
+      "minecraft:air_drag_modifier": 1.0,
+      "minecraft:friction_modifier": 1.0,
+      "minecraft:name_tag_distance": 64.0,
+      "minecraft:below_name_distance": 10.0,
       "minecraft:follow_range": 16.0,
       "minecraft:tempt_range": 10.0
     }
@@ -474,6 +524,11 @@
       "minecraft:attack_knockback": 0.0,
       "minecraft:camera_distance": 4.0,
       "minecraft:waypoint_transmit_range": 0.0,
+      "minecraft:bounciness": 0.0,
+      "minecraft:air_drag_modifier": 1.0,
+      "minecraft:friction_modifier": 1.0,
+      "minecraft:name_tag_distance": 64.0,
+      "minecraft:below_name_distance": 10.0,
       "minecraft:follow_range": 16.0,
       "minecraft:tempt_range": 10.0
     }
@@ -509,6 +564,11 @@
       "minecraft:attack_knockback": 0.0,
       "minecraft:camera_distance": 4.0,
       "minecraft:waypoint_transmit_range": 0.0,
+      "minecraft:bounciness": 0.0,
+      "minecraft:air_drag_modifier": 1.0,
+      "minecraft:friction_modifier": 1.0,
+      "minecraft:name_tag_distance": 64.0,
+      "minecraft:below_name_distance": 10.0,
       "minecraft:follow_range": 16.0,
       "minecraft:tempt_range": 10.0,
       "minecraft:attack_damage": 3.0
@@ -544,6 +604,11 @@
       "minecraft:attack_knockback": 0.0,
       "minecraft:camera_distance": 4.0,
       "minecraft:waypoint_transmit_range": 0.0,
+      "minecraft:bounciness": 0.0,
+      "minecraft:air_drag_modifier": 1.0,
+      "minecraft:friction_modifier": 1.0,
+      "minecraft:name_tag_distance": 64.0,
+      "minecraft:below_name_distance": 10.0,
       "minecraft:follow_range": 16.0,
       "minecraft:attack_damage": 2.0
     }
@@ -611,6 +676,11 @@
       "minecraft:attack_knockback": 0.0,
       "minecraft:camera_distance": 4.0,
       "minecraft:waypoint_transmit_range": 0.0,
+      "minecraft:bounciness": 0.0,
+      "minecraft:air_drag_modifier": 1.0,
+      "minecraft:friction_modifier": 1.0,
+      "minecraft:name_tag_distance": 64.0,
+      "minecraft:below_name_distance": 10.0,
       "minecraft:follow_range": 16.0,
       "minecraft:tempt_range": 10.0
     }
@@ -645,6 +715,11 @@
       "minecraft:attack_knockback": 0.0,
       "minecraft:camera_distance": 4.0,
       "minecraft:waypoint_transmit_range": 0.0,
+      "minecraft:bounciness": 0.0,
+      "minecraft:air_drag_modifier": 1.0,
+      "minecraft:friction_modifier": 1.0,
+      "minecraft:name_tag_distance": 64.0,
+      "minecraft:below_name_distance": 10.0,
       "minecraft:follow_range": 16.0
     }
   },
@@ -678,6 +753,11 @@
       "minecraft:attack_knockback": 0.0,
       "minecraft:camera_distance": 4.0,
       "minecraft:waypoint_transmit_range": 0.0,
+      "minecraft:bounciness": 0.0,
+      "minecraft:air_drag_modifier": 1.0,
+      "minecraft:friction_modifier": 1.0,
+      "minecraft:name_tag_distance": 64.0,
+      "minecraft:below_name_distance": 10.0,
       "minecraft:follow_range": 16.0
     }
   },
@@ -722,6 +802,11 @@
       "minecraft:attack_knockback": 0.0,
       "minecraft:camera_distance": 4.0,
       "minecraft:waypoint_transmit_range": 0.0,
+      "minecraft:bounciness": 0.0,
+      "minecraft:air_drag_modifier": 1.0,
+      "minecraft:friction_modifier": 1.0,
+      "minecraft:name_tag_distance": 64.0,
+      "minecraft:below_name_distance": 10.0,
       "minecraft:follow_range": 16.0,
       "minecraft:tempt_range": 10.0
     }
@@ -756,6 +841,11 @@
       "minecraft:attack_knockback": 0.0,
       "minecraft:camera_distance": 4.0,
       "minecraft:waypoint_transmit_range": 0.0,
+      "minecraft:bounciness": 0.0,
+      "minecraft:air_drag_modifier": 1.0,
+      "minecraft:friction_modifier": 1.0,
+      "minecraft:name_tag_distance": 64.0,
+      "minecraft:below_name_distance": 10.0,
       "minecraft:follow_range": 32.0,
       "minecraft:attack_damage": 3.0
     }
@@ -790,6 +880,11 @@
       "minecraft:attack_knockback": 0.0,
       "minecraft:camera_distance": 4.0,
       "minecraft:waypoint_transmit_range": 0.0,
+      "minecraft:bounciness": 0.0,
+      "minecraft:air_drag_modifier": 1.0,
+      "minecraft:friction_modifier": 1.0,
+      "minecraft:name_tag_distance": 64.0,
+      "minecraft:below_name_distance": 10.0,
       "minecraft:follow_range": 16.0,
       "minecraft:attack_damage": 2.0
     }
@@ -846,6 +941,11 @@
       "minecraft:attack_knockback": 0.0,
       "minecraft:camera_distance": 4.0,
       "minecraft:waypoint_transmit_range": 0.0,
+      "minecraft:bounciness": 0.0,
+      "minecraft:air_drag_modifier": 1.0,
+      "minecraft:friction_modifier": 1.0,
+      "minecraft:name_tag_distance": 64.0,
+      "minecraft:below_name_distance": 10.0,
       "minecraft:follow_range": 16.0,
       "minecraft:attack_damage": 3.0
     }
@@ -881,6 +981,11 @@
       "minecraft:attack_knockback": 0.0,
       "minecraft:camera_distance": 4.0,
       "minecraft:waypoint_transmit_range": 0.0,
+      "minecraft:bounciness": 0.0,
+      "minecraft:air_drag_modifier": 1.0,
+      "minecraft:friction_modifier": 1.0,
+      "minecraft:name_tag_distance": 64.0,
+      "minecraft:below_name_distance": 10.0,
       "minecraft:follow_range": 16.0,
       "minecraft:tempt_range": 10.0
     }
@@ -929,6 +1034,11 @@
       "minecraft:attack_knockback": 0.0,
       "minecraft:camera_distance": 4.0,
       "minecraft:waypoint_transmit_range": 0.0,
+      "minecraft:bounciness": 0.0,
+      "minecraft:air_drag_modifier": 1.0,
+      "minecraft:friction_modifier": 1.0,
+      "minecraft:name_tag_distance": 64.0,
+      "minecraft:below_name_distance": 10.0,
       "minecraft:follow_range": 35.0,
       "minecraft:attack_damage": 3.0,
       "minecraft:spawn_reinforcements": 0.0
@@ -976,6 +1086,11 @@
       "minecraft:attack_knockback": 0.0,
       "minecraft:camera_distance": 4.0,
       "minecraft:waypoint_transmit_range": 0.0,
+      "minecraft:bounciness": 0.0,
+      "minecraft:air_drag_modifier": 1.0,
+      "minecraft:friction_modifier": 1.0,
+      "minecraft:name_tag_distance": 64.0,
+      "minecraft:below_name_distance": 10.0,
       "minecraft:follow_range": 16.0,
       "minecraft:attack_damage": 8.0
     }
@@ -1011,6 +1126,11 @@
       "minecraft:attack_knockback": 0.0,
       "minecraft:camera_distance": 4.0,
       "minecraft:waypoint_transmit_range": 0.0,
+      "minecraft:bounciness": 0.0,
+      "minecraft:air_drag_modifier": 1.0,
+      "minecraft:friction_modifier": 1.0,
+      "minecraft:name_tag_distance": 64.0,
+      "minecraft:below_name_distance": 10.0,
       "minecraft:follow_range": 64.0,
       "minecraft:attack_damage": 7.0
     }
@@ -1046,6 +1166,11 @@
       "minecraft:attack_knockback": 0.0,
       "minecraft:camera_distance": 4.0,
       "minecraft:waypoint_transmit_range": 0.0,
+      "minecraft:bounciness": 0.0,
+      "minecraft:air_drag_modifier": 1.0,
+      "minecraft:friction_modifier": 1.0,
+      "minecraft:name_tag_distance": 64.0,
+      "minecraft:below_name_distance": 10.0,
       "minecraft:follow_range": 16.0,
       "minecraft:attack_damage": 2.0
     }
@@ -1082,6 +1207,11 @@
       "minecraft:attack_knockback": 0.0,
       "minecraft:camera_distance": 16.0,
       "minecraft:waypoint_transmit_range": 0.0,
+      "minecraft:bounciness": 0.0,
+      "minecraft:air_drag_modifier": 1.0,
+      "minecraft:friction_modifier": 1.0,
+      "minecraft:name_tag_distance": 64.0,
+      "minecraft:below_name_distance": 10.0,
       "minecraft:follow_range": 16.0
     }
   },
@@ -1140,6 +1270,11 @@
       "minecraft:attack_knockback": 0.0,
       "minecraft:camera_distance": 4.0,
       "minecraft:waypoint_transmit_range": 0.0,
+      "minecraft:bounciness": 0.0,
+      "minecraft:air_drag_modifier": 1.0,
+      "minecraft:friction_modifier": 1.0,
+      "minecraft:name_tag_distance": 64.0,
+      "minecraft:below_name_distance": 10.0,
       "minecraft:follow_range": 12.0,
       "minecraft:attack_damage": 2.0
     }
@@ -1241,6 +1376,11 @@
       "minecraft:attack_knockback": 0.0,
       "minecraft:camera_distance": 4.0,
       "minecraft:waypoint_transmit_range": 0.0,
+      "minecraft:bounciness": 0.0,
+      "minecraft:air_drag_modifier": 1.0,
+      "minecraft:friction_modifier": 1.0,
+      "minecraft:name_tag_distance": 64.0,
+      "minecraft:below_name_distance": 10.0,
       "minecraft:follow_range": 32.0,
       "minecraft:tempt_range": 10.0,
       "minecraft:attack_damage": 2.0
@@ -1277,6 +1417,11 @@
       "minecraft:attack_knockback": 0.0,
       "minecraft:camera_distance": 4.0,
       "minecraft:waypoint_transmit_range": 0.0,
+      "minecraft:bounciness": 0.0,
+      "minecraft:air_drag_modifier": 1.0,
+      "minecraft:friction_modifier": 1.0,
+      "minecraft:name_tag_distance": 64.0,
+      "minecraft:below_name_distance": 10.0,
       "minecraft:follow_range": 16.0,
       "minecraft:tempt_range": 10.0,
       "minecraft:attack_damage": 10.0
@@ -1327,6 +1472,11 @@
       "minecraft:attack_knockback": 0.0,
       "minecraft:camera_distance": 8.0,
       "minecraft:waypoint_transmit_range": 0.0,
+      "minecraft:bounciness": 0.0,
+      "minecraft:air_drag_modifier": 1.0,
+      "minecraft:friction_modifier": 1.0,
+      "minecraft:name_tag_distance": 64.0,
+      "minecraft:below_name_distance": 10.0,
       "minecraft:follow_range": 100.0,
       "minecraft:flying_speed": 0.06
     }
@@ -1370,6 +1520,11 @@
       "minecraft:attack_knockback": 0.0,
       "minecraft:camera_distance": 8.0,
       "minecraft:waypoint_transmit_range": 0.0,
+      "minecraft:bounciness": 0.0,
+      "minecraft:air_drag_modifier": 1.0,
+      "minecraft:friction_modifier": 1.0,
+      "minecraft:name_tag_distance": 64.0,
+      "minecraft:below_name_distance": 10.0,
       "minecraft:follow_range": 16.0,
       "minecraft:tempt_range": 16.0,
       "minecraft:flying_speed": 0.05
@@ -1406,6 +1561,11 @@
       "minecraft:attack_knockback": 0.0,
       "minecraft:camera_distance": 16.0,
       "minecraft:waypoint_transmit_range": 0.0,
+      "minecraft:bounciness": 0.0,
+      "minecraft:air_drag_modifier": 1.0,
+      "minecraft:friction_modifier": 1.0,
+      "minecraft:name_tag_distance": 64.0,
+      "minecraft:below_name_distance": 10.0,
       "minecraft:follow_range": 16.0,
       "minecraft:attack_damage": 50.0
     }
@@ -1449,6 +1609,11 @@
       "minecraft:attack_knockback": 0.0,
       "minecraft:camera_distance": 4.0,
       "minecraft:waypoint_transmit_range": 0.0,
+      "minecraft:bounciness": 0.0,
+      "minecraft:air_drag_modifier": 1.0,
+      "minecraft:friction_modifier": 1.0,
+      "minecraft:name_tag_distance": 64.0,
+      "minecraft:below_name_distance": 10.0,
       "minecraft:follow_range": 16.0
     }
   },
@@ -1483,6 +1648,11 @@
       "minecraft:attack_knockback": 0.0,
       "minecraft:camera_distance": 4.0,
       "minecraft:waypoint_transmit_range": 0.0,
+      "minecraft:bounciness": 0.0,
+      "minecraft:air_drag_modifier": 1.0,
+      "minecraft:friction_modifier": 1.0,
+      "minecraft:name_tag_distance": 64.0,
+      "minecraft:below_name_distance": 10.0,
       "minecraft:follow_range": 16.0,
       "minecraft:tempt_range": 10.0,
       "minecraft:attack_damage": 2.0
@@ -1519,6 +1689,11 @@
       "minecraft:attack_knockback": 0.0,
       "minecraft:camera_distance": 4.0,
       "minecraft:waypoint_transmit_range": 0.0,
+      "minecraft:bounciness": 0.0,
+      "minecraft:air_drag_modifier": 1.0,
+      "minecraft:friction_modifier": 1.0,
+      "minecraft:name_tag_distance": 64.0,
+      "minecraft:below_name_distance": 10.0,
       "minecraft:follow_range": 16.0,
       "minecraft:attack_damage": 6.0
     }
@@ -1554,6 +1729,11 @@
       "minecraft:attack_knockback": 1.0,
       "minecraft:camera_distance": 4.0,
       "minecraft:waypoint_transmit_range": 0.0,
+      "minecraft:bounciness": 0.0,
+      "minecraft:air_drag_modifier": 1.0,
+      "minecraft:friction_modifier": 1.0,
+      "minecraft:name_tag_distance": 64.0,
+      "minecraft:below_name_distance": 10.0,
       "minecraft:follow_range": 16.0,
       "minecraft:attack_damage": 6.0
     }
@@ -1599,6 +1779,11 @@
       "minecraft:attack_knockback": 0.0,
       "minecraft:camera_distance": 4.0,
       "minecraft:waypoint_transmit_range": 0.0,
+      "minecraft:bounciness": 0.0,
+      "minecraft:air_drag_modifier": 1.0,
+      "minecraft:friction_modifier": 1.0,
+      "minecraft:name_tag_distance": 64.0,
+      "minecraft:below_name_distance": 10.0,
       "minecraft:follow_range": 16.0,
       "minecraft:tempt_range": 10.0
     }
@@ -1637,6 +1822,11 @@
       "minecraft:attack_knockback": 0.0,
       "minecraft:camera_distance": 4.0,
       "minecraft:waypoint_transmit_range": 0.0,
+      "minecraft:bounciness": 0.0,
+      "minecraft:air_drag_modifier": 1.0,
+      "minecraft:friction_modifier": 1.0,
+      "minecraft:name_tag_distance": 64.0,
+      "minecraft:below_name_distance": 10.0,
       "minecraft:follow_range": 35.0,
       "minecraft:attack_damage": 3.0,
       "minecraft:spawn_reinforcements": 0.0
@@ -1676,6 +1866,11 @@
       "minecraft:attack_knockback": 0.0,
       "minecraft:camera_distance": 4.0,
       "minecraft:waypoint_transmit_range": 0.0,
+      "minecraft:bounciness": 0.0,
+      "minecraft:air_drag_modifier": 1.0,
+      "minecraft:friction_modifier": 1.0,
+      "minecraft:name_tag_distance": 64.0,
+      "minecraft:below_name_distance": 10.0,
       "minecraft:follow_range": 18.0,
       "minecraft:attack_damage": 2.0
     }
@@ -1719,6 +1914,11 @@
       "minecraft:attack_knockback": 0.0,
       "minecraft:camera_distance": 4.0,
       "minecraft:waypoint_transmit_range": 0.0,
+      "minecraft:bounciness": 0.0,
+      "minecraft:air_drag_modifier": 1.0,
+      "minecraft:friction_modifier": 1.0,
+      "minecraft:name_tag_distance": 64.0,
+      "minecraft:below_name_distance": 10.0,
       "minecraft:follow_range": 16.0,
       "minecraft:attack_damage": 15.0
     }
@@ -1823,6 +2023,11 @@
       "minecraft:attack_knockback": 0.0,
       "minecraft:camera_distance": 4.0,
       "minecraft:waypoint_transmit_range": 0.0,
+      "minecraft:bounciness": 0.0,
+      "minecraft:air_drag_modifier": 1.0,
+      "minecraft:friction_modifier": 1.0,
+      "minecraft:name_tag_distance": 64.0,
+      "minecraft:below_name_distance": 10.0,
       "minecraft:follow_range": 16.0,
       "minecraft:tempt_range": 10.0
     }
@@ -1869,6 +2074,11 @@
       "minecraft:attack_knockback": 0.0,
       "minecraft:camera_distance": 4.0,
       "minecraft:waypoint_transmit_range": 0.0,
+      "minecraft:bounciness": 0.0,
+      "minecraft:air_drag_modifier": 1.0,
+      "minecraft:friction_modifier": 1.0,
+      "minecraft:name_tag_distance": 64.0,
+      "minecraft:below_name_distance": 10.0,
       "minecraft:follow_range": 16.0,
       "minecraft:attack_damage": 2.0
     }
@@ -1925,7 +2135,12 @@
       "minecraft:movement_efficiency": 0.0,
       "minecraft:attack_knockback": 0.0,
       "minecraft:camera_distance": 4.0,
-      "minecraft:waypoint_transmit_range": 0.0
+      "minecraft:waypoint_transmit_range": 0.0,
+      "minecraft:bounciness": 0.0,
+      "minecraft:air_drag_modifier": 1.0,
+      "minecraft:friction_modifier": 1.0,
+      "minecraft:name_tag_distance": 64.0,
+      "minecraft:below_name_distance": 10.0
     }
   },
   "minecraft:marker": {
@@ -1980,6 +2195,11 @@
       "minecraft:attack_knockback": 0.0,
       "minecraft:camera_distance": 4.0,
       "minecraft:waypoint_transmit_range": 0.0,
+      "minecraft:bounciness": 0.0,
+      "minecraft:air_drag_modifier": 1.0,
+      "minecraft:friction_modifier": 1.0,
+      "minecraft:name_tag_distance": 64.0,
+      "minecraft:below_name_distance": 10.0,
       "minecraft:follow_range": 16.0,
       "minecraft:tempt_range": 10.0
     }
@@ -2015,6 +2235,11 @@
       "minecraft:attack_knockback": 0.0,
       "minecraft:camera_distance": 4.0,
       "minecraft:waypoint_transmit_range": 0.0,
+      "minecraft:bounciness": 0.0,
+      "minecraft:air_drag_modifier": 1.0,
+      "minecraft:friction_modifier": 1.0,
+      "minecraft:name_tag_distance": 64.0,
+      "minecraft:below_name_distance": 10.0,
       "minecraft:follow_range": 16.0,
       "minecraft:tempt_range": 10.0
     }
@@ -2050,6 +2275,11 @@
       "minecraft:attack_knockback": 0.0,
       "minecraft:camera_distance": 4.0,
       "minecraft:waypoint_transmit_range": 0.0,
+      "minecraft:bounciness": 0.0,
+      "minecraft:air_drag_modifier": 1.0,
+      "minecraft:friction_modifier": 1.0,
+      "minecraft:name_tag_distance": 64.0,
+      "minecraft:below_name_distance": 10.0,
       "minecraft:follow_range": 16.0,
       "minecraft:tempt_range": 10.0,
       "minecraft:attack_damage": 3.0
@@ -2108,6 +2338,11 @@
       "minecraft:attack_knockback": 0.0,
       "minecraft:camera_distance": 4.0,
       "minecraft:waypoint_transmit_range": 0.0,
+      "minecraft:bounciness": 0.0,
+      "minecraft:air_drag_modifier": 1.0,
+      "minecraft:friction_modifier": 1.0,
+      "minecraft:name_tag_distance": 64.0,
+      "minecraft:below_name_distance": 10.0,
       "minecraft:follow_range": 16.0,
       "minecraft:tempt_range": 10.0,
       "minecraft:attack_damage": 3.0
@@ -2183,6 +2418,11 @@
       "minecraft:attack_knockback": 0.0,
       "minecraft:camera_distance": 4.0,
       "minecraft:waypoint_transmit_range": 0.0,
+      "minecraft:bounciness": 0.0,
+      "minecraft:air_drag_modifier": 1.0,
+      "minecraft:friction_modifier": 1.0,
+      "minecraft:name_tag_distance": 64.0,
+      "minecraft:below_name_distance": 10.0,
       "minecraft:follow_range": 16.0,
       "minecraft:tempt_range": 10.0,
       "minecraft:attack_damage": 6.0
@@ -2219,6 +2459,11 @@
       "minecraft:attack_knockback": 0.0,
       "minecraft:camera_distance": 4.0,
       "minecraft:waypoint_transmit_range": 0.0,
+      "minecraft:bounciness": 0.0,
+      "minecraft:air_drag_modifier": 1.0,
+      "minecraft:friction_modifier": 1.0,
+      "minecraft:name_tag_distance": 64.0,
+      "minecraft:below_name_distance": 10.0,
       "minecraft:follow_range": 16.0,
       "minecraft:attack_damage": 2.0
     }
@@ -2254,6 +2499,11 @@
       "minecraft:attack_knockback": 0.0,
       "minecraft:camera_distance": 4.0,
       "minecraft:waypoint_transmit_range": 0.0,
+      "minecraft:bounciness": 0.0,
+      "minecraft:air_drag_modifier": 1.0,
+      "minecraft:friction_modifier": 1.0,
+      "minecraft:name_tag_distance": 64.0,
+      "minecraft:below_name_distance": 10.0,
       "minecraft:follow_range": 16.0,
       "minecraft:tempt_range": 10.0,
       "minecraft:flying_speed": 0.4000000059604645,
@@ -2294,6 +2544,11 @@
       "minecraft:attack_knockback": 0.0,
       "minecraft:camera_distance": 4.0,
       "minecraft:waypoint_transmit_range": 0.0,
+      "minecraft:bounciness": 0.0,
+      "minecraft:air_drag_modifier": 1.0,
+      "minecraft:friction_modifier": 1.0,
+      "minecraft:name_tag_distance": 64.0,
+      "minecraft:below_name_distance": 10.0,
       "minecraft:follow_range": 16.0,
       "minecraft:attack_damage": 2.0
     }
@@ -2329,6 +2584,11 @@
       "minecraft:attack_knockback": 0.0,
       "minecraft:camera_distance": 4.0,
       "minecraft:waypoint_transmit_range": 0.0,
+      "minecraft:bounciness": 0.0,
+      "minecraft:air_drag_modifier": 1.0,
+      "minecraft:friction_modifier": 1.0,
+      "minecraft:name_tag_distance": 64.0,
+      "minecraft:below_name_distance": 10.0,
       "minecraft:follow_range": 16.0,
       "minecraft:tempt_range": 10.0
     }
@@ -2367,6 +2627,11 @@
       "minecraft:attack_knockback": 0.0,
       "minecraft:camera_distance": 4.0,
       "minecraft:waypoint_transmit_range": 0.0,
+      "minecraft:bounciness": 0.0,
+      "minecraft:air_drag_modifier": 1.0,
+      "minecraft:friction_modifier": 1.0,
+      "minecraft:name_tag_distance": 64.0,
+      "minecraft:below_name_distance": 10.0,
       "minecraft:follow_range": 16.0,
       "minecraft:attack_damage": 5.0
     }
@@ -2405,6 +2670,11 @@
       "minecraft:attack_knockback": 0.0,
       "minecraft:camera_distance": 4.0,
       "minecraft:waypoint_transmit_range": 0.0,
+      "minecraft:bounciness": 0.0,
+      "minecraft:air_drag_modifier": 1.0,
+      "minecraft:friction_modifier": 1.0,
+      "minecraft:name_tag_distance": 64.0,
+      "minecraft:below_name_distance": 10.0,
       "minecraft:follow_range": 12.0,
       "minecraft:attack_damage": 7.0
     }
@@ -2443,6 +2713,11 @@
       "minecraft:attack_knockback": 0.0,
       "minecraft:camera_distance": 4.0,
       "minecraft:waypoint_transmit_range": 0.0,
+      "minecraft:bounciness": 0.0,
+      "minecraft:air_drag_modifier": 1.0,
+      "minecraft:friction_modifier": 1.0,
+      "minecraft:name_tag_distance": 64.0,
+      "minecraft:below_name_distance": 10.0,
       "minecraft:follow_range": 32.0,
       "minecraft:attack_damage": 5.0
     }
@@ -2477,6 +2752,11 @@
       "minecraft:attack_knockback": 0.0,
       "minecraft:camera_distance": 4.0,
       "minecraft:waypoint_transmit_range": 0.0,
+      "minecraft:bounciness": 0.0,
+      "minecraft:air_drag_modifier": 1.0,
+      "minecraft:friction_modifier": 1.0,
+      "minecraft:name_tag_distance": 64.0,
+      "minecraft:below_name_distance": 10.0,
       "minecraft:follow_range": 20.0,
       "minecraft:tempt_range": 10.0,
       "minecraft:attack_damage": 6.0
@@ -2534,6 +2814,11 @@
       "minecraft:attack_knockback": 0.0,
       "minecraft:camera_distance": 4.0,
       "minecraft:waypoint_transmit_range": 0.0,
+      "minecraft:bounciness": 0.0,
+      "minecraft:air_drag_modifier": 1.0,
+      "minecraft:friction_modifier": 1.0,
+      "minecraft:name_tag_distance": 64.0,
+      "minecraft:below_name_distance": 10.0,
       "minecraft:follow_range": 16.0
     }
   },
@@ -2567,6 +2852,11 @@
       "minecraft:attack_knockback": 0.0,
       "minecraft:camera_distance": 4.0,
       "minecraft:waypoint_transmit_range": 0.0,
+      "minecraft:bounciness": 0.0,
+      "minecraft:air_drag_modifier": 1.0,
+      "minecraft:friction_modifier": 1.0,
+      "minecraft:name_tag_distance": 64.0,
+      "minecraft:below_name_distance": 10.0,
       "minecraft:follow_range": 16.0,
       "minecraft:tempt_range": 10.0,
       "minecraft:attack_damage": 3.0
@@ -2603,6 +2893,11 @@
       "minecraft:attack_knockback": 1.5,
       "minecraft:camera_distance": 4.0,
       "minecraft:waypoint_transmit_range": 0.0,
+      "minecraft:bounciness": 0.0,
+      "minecraft:air_drag_modifier": 1.0,
+      "minecraft:friction_modifier": 1.0,
+      "minecraft:name_tag_distance": 64.0,
+      "minecraft:below_name_distance": 10.0,
       "minecraft:follow_range": 32.0,
       "minecraft:attack_damage": 12.0
     }
@@ -2637,6 +2932,11 @@
       "minecraft:attack_knockback": 0.0,
       "minecraft:camera_distance": 4.0,
       "minecraft:waypoint_transmit_range": 0.0,
+      "minecraft:bounciness": 0.0,
+      "minecraft:air_drag_modifier": 1.0,
+      "minecraft:friction_modifier": 1.0,
+      "minecraft:name_tag_distance": 64.0,
+      "minecraft:below_name_distance": 10.0,
       "minecraft:follow_range": 16.0
     }
   },
@@ -2671,6 +2971,11 @@
       "minecraft:attack_knockback": 0.0,
       "minecraft:camera_distance": 4.0,
       "minecraft:waypoint_transmit_range": 0.0,
+      "minecraft:bounciness": 0.0,
+      "minecraft:air_drag_modifier": 1.0,
+      "minecraft:friction_modifier": 1.0,
+      "minecraft:name_tag_distance": 64.0,
+      "minecraft:below_name_distance": 10.0,
       "minecraft:follow_range": 16.0,
       "minecraft:tempt_range": 10.0
     }
@@ -2706,6 +3011,11 @@
       "minecraft:attack_knockback": 0.0,
       "minecraft:camera_distance": 4.0,
       "minecraft:waypoint_transmit_range": 0.0,
+      "minecraft:bounciness": 0.0,
+      "minecraft:air_drag_modifier": 1.0,
+      "minecraft:friction_modifier": 1.0,
+      "minecraft:name_tag_distance": 64.0,
+      "minecraft:below_name_distance": 10.0,
       "minecraft:follow_range": 16.0
     }
   },
@@ -2749,6 +3059,11 @@
       "minecraft:attack_knockback": 0.0,
       "minecraft:camera_distance": 4.0,
       "minecraft:waypoint_transmit_range": 0.0,
+      "minecraft:bounciness": 0.0,
+      "minecraft:air_drag_modifier": 1.0,
+      "minecraft:friction_modifier": 1.0,
+      "minecraft:name_tag_distance": 64.0,
+      "minecraft:below_name_distance": 10.0,
       "minecraft:follow_range": 16.0,
       "minecraft:attack_damage": 1.0
     }
@@ -2784,6 +3099,11 @@
       "minecraft:attack_knockback": 0.0,
       "minecraft:camera_distance": 4.0,
       "minecraft:waypoint_transmit_range": 0.0,
+      "minecraft:bounciness": 0.0,
+      "minecraft:air_drag_modifier": 1.0,
+      "minecraft:friction_modifier": 1.0,
+      "minecraft:name_tag_distance": 64.0,
+      "minecraft:below_name_distance": 10.0,
       "minecraft:follow_range": 16.0,
       "minecraft:attack_damage": 2.0
     }
@@ -2819,6 +3139,11 @@
       "minecraft:attack_knockback": 0.0,
       "minecraft:camera_distance": 4.0,
       "minecraft:waypoint_transmit_range": 0.0,
+      "minecraft:bounciness": 0.0,
+      "minecraft:air_drag_modifier": 1.0,
+      "minecraft:friction_modifier": 1.0,
+      "minecraft:name_tag_distance": 64.0,
+      "minecraft:below_name_distance": 10.0,
       "minecraft:follow_range": 16.0,
       "minecraft:tempt_range": 10.0
     }
@@ -2853,6 +3178,11 @@
       "minecraft:attack_knockback": 0.0,
       "minecraft:camera_distance": 4.0,
       "minecraft:waypoint_transmit_range": 0.0,
+      "minecraft:bounciness": 0.0,
+      "minecraft:air_drag_modifier": 1.0,
+      "minecraft:friction_modifier": 1.0,
+      "minecraft:name_tag_distance": 64.0,
+      "minecraft:below_name_distance": 10.0,
       "minecraft:follow_range": 16.0,
       "minecraft:attack_damage": 2.0
     }
@@ -2900,6 +3230,11 @@
       "minecraft:attack_knockback": 0.0,
       "minecraft:camera_distance": 4.0,
       "minecraft:waypoint_transmit_range": 0.0,
+      "minecraft:bounciness": 0.0,
+      "minecraft:air_drag_modifier": 1.0,
+      "minecraft:friction_modifier": 1.0,
+      "minecraft:name_tag_distance": 64.0,
+      "minecraft:below_name_distance": 10.0,
       "minecraft:follow_range": 16.0,
       "minecraft:tempt_range": 10.0
     }
@@ -2945,6 +3280,11 @@
       "minecraft:attack_knockback": 0.0,
       "minecraft:camera_distance": 4.0,
       "minecraft:waypoint_transmit_range": 0.0,
+      "minecraft:bounciness": 0.0,
+      "minecraft:air_drag_modifier": 1.0,
+      "minecraft:friction_modifier": 1.0,
+      "minecraft:name_tag_distance": 64.0,
+      "minecraft:below_name_distance": 10.0,
       "minecraft:follow_range": 16.0
     }
   },
@@ -3000,6 +3340,11 @@
       "minecraft:attack_knockback": 0.0,
       "minecraft:camera_distance": 4.0,
       "minecraft:waypoint_transmit_range": 0.0,
+      "minecraft:bounciness": 0.0,
+      "minecraft:air_drag_modifier": 1.0,
+      "minecraft:friction_modifier": 1.0,
+      "minecraft:name_tag_distance": 64.0,
+      "minecraft:below_name_distance": 10.0,
       "minecraft:follow_range": 16.0,
       "minecraft:attack_damage": 2.0
     }
@@ -3056,6 +3401,11 @@
       "minecraft:attack_knockback": 0.0,
       "minecraft:camera_distance": 4.0,
       "minecraft:waypoint_transmit_range": 0.0,
+      "minecraft:bounciness": 0.0,
+      "minecraft:air_drag_modifier": 1.0,
+      "minecraft:friction_modifier": 1.0,
+      "minecraft:name_tag_distance": 64.0,
+      "minecraft:below_name_distance": 10.0,
       "minecraft:follow_range": 16.0
     }
   },
@@ -3090,6 +3440,11 @@
       "minecraft:attack_knockback": 0.0,
       "minecraft:camera_distance": 4.0,
       "minecraft:waypoint_transmit_range": 0.0,
+      "minecraft:bounciness": 0.0,
+      "minecraft:air_drag_modifier": 1.0,
+      "minecraft:friction_modifier": 1.0,
+      "minecraft:name_tag_distance": 64.0,
+      "minecraft:below_name_distance": 10.0,
       "minecraft:follow_range": 16.0,
       "minecraft:attack_damage": 2.0
     }
@@ -3125,12 +3480,56 @@
       "minecraft:attack_knockback": 0.0,
       "minecraft:camera_distance": 4.0,
       "minecraft:waypoint_transmit_range": 0.0,
+      "minecraft:bounciness": 0.0,
+      "minecraft:air_drag_modifier": 1.0,
+      "minecraft:friction_modifier": 1.0,
+      "minecraft:name_tag_distance": 64.0,
+      "minecraft:below_name_distance": 10.0,
       "minecraft:follow_range": 16.0,
       "minecraft:tempt_range": 10.0
     }
   },
-  "minecraft:tadpole": {
+  "minecraft:sulfur_cube": {
     "id": 130,
+    "translationKey": "entity.minecraft.sulfur_cube",
+    "packetType": "LIVING",
+    "width": 0.49,
+    "height": 0.49,
+    "eyeHeight": 0.175,
+    "clientTrackingRange": 10,
+    "defaultAttributes": {
+      "minecraft:max_health": 20.0,
+      "minecraft:knockback_resistance": 0.0,
+      "minecraft:movement_speed": 0.7,
+      "minecraft:armor": 0.0,
+      "minecraft:armor_toughness": 0.0,
+      "minecraft:max_absorption": 0.0,
+      "minecraft:step_height": 0.6,
+      "minecraft:scale": 1.0,
+      "minecraft:gravity": 0.08,
+      "minecraft:safe_fall_distance": 3.0,
+      "minecraft:fall_damage_multiplier": 1.0,
+      "minecraft:jump_strength": 0.41999998688697815,
+      "minecraft:entity_interaction_range": 3.0,
+      "minecraft:oxygen_bonus": 0.0,
+      "minecraft:burning_time": 1.0,
+      "minecraft:explosion_knockback_resistance": 0.0,
+      "minecraft:water_movement_efficiency": 0.0,
+      "minecraft:movement_efficiency": 0.0,
+      "minecraft:attack_knockback": 0.0,
+      "minecraft:camera_distance": 4.0,
+      "minecraft:waypoint_transmit_range": 0.0,
+      "minecraft:bounciness": 0.0,
+      "minecraft:air_drag_modifier": 1.0,
+      "minecraft:friction_modifier": 1.0,
+      "minecraft:name_tag_distance": 64.0,
+      "minecraft:below_name_distance": 10.0,
+      "minecraft:follow_range": 16.0,
+      "minecraft:tempt_range": 8.0
+    }
+  },
+  "minecraft:tadpole": {
+    "id": 131,
     "translationKey": "entity.minecraft.tadpole",
     "packetType": "LIVING",
     "width": 0.4,
@@ -3159,12 +3558,17 @@
       "minecraft:attack_knockback": 0.0,
       "minecraft:camera_distance": 4.0,
       "minecraft:waypoint_transmit_range": 0.0,
+      "minecraft:bounciness": 0.0,
+      "minecraft:air_drag_modifier": 1.0,
+      "minecraft:friction_modifier": 1.0,
+      "minecraft:name_tag_distance": 64.0,
+      "minecraft:below_name_distance": 10.0,
       "minecraft:follow_range": 16.0,
       "minecraft:tempt_range": 10.0
     }
   },
   "minecraft:text_display": {
-    "id": 131,
+    "id": 132,
     "translationKey": "entity.minecraft.text_display",
     "packetType": "BASE",
     "width": 0.0,
@@ -3173,7 +3577,7 @@
     "clientTrackingRange": 10
   },
   "minecraft:tnt": {
-    "id": 132,
+    "id": 133,
     "translationKey": "entity.minecraft.tnt",
     "packetType": "BASE",
     "fireImmune": true,
@@ -3184,7 +3588,7 @@
     "clientTrackingRange": 10
   },
   "minecraft:tnt_minecart": {
-    "id": 133,
+    "id": 134,
     "translationKey": "entity.minecraft.tnt_minecart",
     "packetType": "BASE",
     "width": 0.98,
@@ -3194,7 +3598,7 @@
     "clientTrackingRange": 8
   },
   "minecraft:trader_llama": {
-    "id": 134,
+    "id": 135,
     "translationKey": "entity.minecraft.trader_llama",
     "packetType": "LIVING",
     "width": 0.9,
@@ -3224,12 +3628,17 @@
       "minecraft:attack_knockback": 0.0,
       "minecraft:camera_distance": 4.0,
       "minecraft:waypoint_transmit_range": 0.0,
+      "minecraft:bounciness": 0.0,
+      "minecraft:air_drag_modifier": 1.0,
+      "minecraft:friction_modifier": 1.0,
+      "minecraft:name_tag_distance": 64.0,
+      "minecraft:below_name_distance": 10.0,
       "minecraft:follow_range": 16.0,
       "minecraft:tempt_range": 10.0
     }
   },
   "minecraft:trident": {
-    "id": 135,
+    "id": 136,
     "translationKey": "entity.minecraft.trident",
     "packetType": "BASE",
     "width": 0.5,
@@ -3240,7 +3649,7 @@
     "clientTrackingRange": 4
   },
   "minecraft:tropical_fish": {
-    "id": 136,
+    "id": 137,
     "translationKey": "entity.minecraft.tropical_fish",
     "packetType": "LIVING",
     "width": 0.5,
@@ -3269,11 +3678,16 @@
       "minecraft:attack_knockback": 0.0,
       "minecraft:camera_distance": 4.0,
       "minecraft:waypoint_transmit_range": 0.0,
+      "minecraft:bounciness": 0.0,
+      "minecraft:air_drag_modifier": 1.0,
+      "minecraft:friction_modifier": 1.0,
+      "minecraft:name_tag_distance": 64.0,
+      "minecraft:below_name_distance": 10.0,
       "minecraft:follow_range": 16.0
     }
   },
   "minecraft:turtle": {
-    "id": 137,
+    "id": 138,
     "translationKey": "entity.minecraft.turtle",
     "packetType": "LIVING",
     "width": 1.2,
@@ -3303,12 +3717,17 @@
       "minecraft:attack_knockback": 0.0,
       "minecraft:camera_distance": 4.0,
       "minecraft:waypoint_transmit_range": 0.0,
+      "minecraft:bounciness": 0.0,
+      "minecraft:air_drag_modifier": 1.0,
+      "minecraft:friction_modifier": 1.0,
+      "minecraft:name_tag_distance": 64.0,
+      "minecraft:below_name_distance": 10.0,
       "minecraft:follow_range": 16.0,
       "minecraft:tempt_range": 10.0
     }
   },
   "minecraft:vex": {
-    "id": 138,
+    "id": 139,
     "translationKey": "entity.minecraft.vex",
     "packetType": "LIVING",
     "fireImmune": true,
@@ -3342,12 +3761,17 @@
       "minecraft:attack_knockback": 0.0,
       "minecraft:camera_distance": 4.0,
       "minecraft:waypoint_transmit_range": 0.0,
+      "minecraft:bounciness": 0.0,
+      "minecraft:air_drag_modifier": 1.0,
+      "minecraft:friction_modifier": 1.0,
+      "minecraft:name_tag_distance": 64.0,
+      "minecraft:below_name_distance": 10.0,
       "minecraft:follow_range": 16.0,
       "minecraft:attack_damage": 4.0
     }
   },
   "minecraft:villager": {
-    "id": 139,
+    "id": 140,
     "translationKey": "entity.minecraft.villager",
     "packetType": "LIVING",
     "width": 0.6,
@@ -3376,11 +3800,16 @@
       "minecraft:attack_knockback": 0.0,
       "minecraft:camera_distance": 4.0,
       "minecraft:waypoint_transmit_range": 0.0,
+      "minecraft:bounciness": 0.0,
+      "minecraft:air_drag_modifier": 1.0,
+      "minecraft:friction_modifier": 1.0,
+      "minecraft:name_tag_distance": 64.0,
+      "minecraft:below_name_distance": 10.0,
       "minecraft:follow_range": 16.0
     }
   },
   "minecraft:vindicator": {
-    "id": 140,
+    "id": 141,
     "translationKey": "entity.minecraft.vindicator",
     "packetType": "LIVING",
     "width": 0.6,
@@ -3413,12 +3842,17 @@
       "minecraft:attack_knockback": 0.0,
       "minecraft:camera_distance": 4.0,
       "minecraft:waypoint_transmit_range": 0.0,
+      "minecraft:bounciness": 0.0,
+      "minecraft:air_drag_modifier": 1.0,
+      "minecraft:friction_modifier": 1.0,
+      "minecraft:name_tag_distance": 64.0,
+      "minecraft:below_name_distance": 10.0,
       "minecraft:follow_range": 12.0,
       "minecraft:attack_damage": 5.0
     }
   },
   "minecraft:wandering_trader": {
-    "id": 141,
+    "id": 142,
     "translationKey": "entity.minecraft.wandering_trader",
     "packetType": "LIVING",
     "width": 0.6,
@@ -3447,11 +3881,16 @@
       "minecraft:attack_knockback": 0.0,
       "minecraft:camera_distance": 4.0,
       "minecraft:waypoint_transmit_range": 0.0,
+      "minecraft:bounciness": 0.0,
+      "minecraft:air_drag_modifier": 1.0,
+      "minecraft:friction_modifier": 1.0,
+      "minecraft:name_tag_distance": 64.0,
+      "minecraft:below_name_distance": 10.0,
       "minecraft:follow_range": 16.0
     }
   },
   "minecraft:warden": {
-    "id": 142,
+    "id": 143,
     "translationKey": "entity.minecraft.warden",
     "packetType": "LIVING",
     "fireImmune": true,
@@ -3485,12 +3924,17 @@
       "minecraft:attack_knockback": 1.5,
       "minecraft:camera_distance": 4.0,
       "minecraft:waypoint_transmit_range": 0.0,
+      "minecraft:bounciness": 0.0,
+      "minecraft:air_drag_modifier": 1.0,
+      "minecraft:friction_modifier": 1.0,
+      "minecraft:name_tag_distance": 64.0,
+      "minecraft:below_name_distance": 10.0,
       "minecraft:follow_range": 24.0,
       "minecraft:attack_damage": 30.0
     }
   },
   "minecraft:wind_charge": {
-    "id": 143,
+    "id": 144,
     "translationKey": "entity.minecraft.wind_charge",
     "packetType": "BASE",
     "width": 0.3125,
@@ -3499,7 +3943,7 @@
     "clientTrackingRange": 4
   },
   "minecraft:witch": {
-    "id": 144,
+    "id": 145,
     "translationKey": "entity.minecraft.witch",
     "packetType": "LIVING",
     "width": 0.6,
@@ -3529,12 +3973,17 @@
       "minecraft:attack_knockback": 0.0,
       "minecraft:camera_distance": 4.0,
       "minecraft:waypoint_transmit_range": 0.0,
+      "minecraft:bounciness": 0.0,
+      "minecraft:air_drag_modifier": 1.0,
+      "minecraft:friction_modifier": 1.0,
+      "minecraft:name_tag_distance": 64.0,
+      "minecraft:below_name_distance": 10.0,
       "minecraft:follow_range": 16.0,
       "minecraft:attack_damage": 2.0
     }
   },
   "minecraft:wither": {
-    "id": 145,
+    "id": 146,
     "translationKey": "entity.minecraft.wither",
     "packetType": "LIVING",
     "fireImmune": true,
@@ -3564,13 +4013,18 @@
       "minecraft:attack_knockback": 0.0,
       "minecraft:camera_distance": 4.0,
       "minecraft:waypoint_transmit_range": 0.0,
+      "minecraft:bounciness": 0.0,
+      "minecraft:air_drag_modifier": 1.0,
+      "minecraft:friction_modifier": 1.0,
+      "minecraft:name_tag_distance": 64.0,
+      "minecraft:below_name_distance": 10.0,
       "minecraft:follow_range": 40.0,
       "minecraft:attack_damage": 2.0,
       "minecraft:flying_speed": 0.6000000238418579
     }
   },
   "minecraft:wither_skeleton": {
-    "id": 146,
+    "id": 147,
     "translationKey": "entity.minecraft.wither_skeleton",
     "packetType": "LIVING",
     "fireImmune": true,
@@ -3601,12 +4055,17 @@
       "minecraft:attack_knockback": 0.0,
       "minecraft:camera_distance": 4.0,
       "minecraft:waypoint_transmit_range": 0.0,
+      "minecraft:bounciness": 0.0,
+      "minecraft:air_drag_modifier": 1.0,
+      "minecraft:friction_modifier": 1.0,
+      "minecraft:name_tag_distance": 64.0,
+      "minecraft:below_name_distance": 10.0,
       "minecraft:follow_range": 16.0,
       "minecraft:attack_damage": 2.0
     }
   },
   "minecraft:wither_skull": {
-    "id": 147,
+    "id": 148,
     "translationKey": "entity.minecraft.wither_skull",
     "packetType": "BASE",
     "width": 0.3125,
@@ -3616,7 +4075,7 @@
     "clientTrackingRange": 4
   },
   "minecraft:wolf": {
-    "id": 148,
+    "id": 149,
     "translationKey": "entity.minecraft.wolf",
     "packetType": "LIVING",
     "width": 0.6,
@@ -3646,13 +4105,18 @@
       "minecraft:attack_knockback": 0.0,
       "minecraft:camera_distance": 4.0,
       "minecraft:waypoint_transmit_range": 0.0,
+      "minecraft:bounciness": 0.0,
+      "minecraft:air_drag_modifier": 1.0,
+      "minecraft:friction_modifier": 1.0,
+      "minecraft:name_tag_distance": 64.0,
+      "minecraft:below_name_distance": 10.0,
       "minecraft:follow_range": 16.0,
       "minecraft:tempt_range": 10.0,
       "minecraft:attack_damage": 4.0
     }
   },
   "minecraft:zoglin": {
-    "id": 149,
+    "id": 150,
     "translationKey": "entity.minecraft.zoglin",
     "packetType": "LIVING",
     "fireImmune": true,
@@ -3683,12 +4147,17 @@
       "minecraft:attack_knockback": 1.0,
       "minecraft:camera_distance": 4.0,
       "minecraft:waypoint_transmit_range": 0.0,
+      "minecraft:bounciness": 0.0,
+      "minecraft:air_drag_modifier": 1.0,
+      "minecraft:friction_modifier": 1.0,
+      "minecraft:name_tag_distance": 64.0,
+      "minecraft:below_name_distance": 10.0,
       "minecraft:follow_range": 16.0,
       "minecraft:attack_damage": 6.0
     }
   },
   "minecraft:zombie": {
-    "id": 150,
+    "id": 151,
     "translationKey": "entity.minecraft.zombie",
     "packetType": "LIVING",
     "width": 0.6,
@@ -3721,13 +4190,18 @@
       "minecraft:attack_knockback": 0.0,
       "minecraft:camera_distance": 4.0,
       "minecraft:waypoint_transmit_range": 0.0,
+      "minecraft:bounciness": 0.0,
+      "minecraft:air_drag_modifier": 1.0,
+      "minecraft:friction_modifier": 1.0,
+      "minecraft:name_tag_distance": 64.0,
+      "minecraft:below_name_distance": 10.0,
       "minecraft:follow_range": 35.0,
       "minecraft:attack_damage": 3.0,
       "minecraft:spawn_reinforcements": 0.0
     }
   },
   "minecraft:zombie_horse": {
-    "id": 151,
+    "id": 152,
     "translationKey": "entity.minecraft.zombie_horse",
     "packetType": "LIVING",
     "width": 1.3964844,
@@ -3757,12 +4231,17 @@
       "minecraft:attack_knockback": 0.0,
       "minecraft:camera_distance": 4.0,
       "minecraft:waypoint_transmit_range": 0.0,
+      "minecraft:bounciness": 0.0,
+      "minecraft:air_drag_modifier": 1.0,
+      "minecraft:friction_modifier": 1.0,
+      "minecraft:name_tag_distance": 64.0,
+      "minecraft:below_name_distance": 10.0,
       "minecraft:follow_range": 16.0,
       "minecraft:tempt_range": 10.0
     }
   },
   "minecraft:zombie_nautilus": {
-    "id": 152,
+    "id": 153,
     "translationKey": "entity.minecraft.zombie_nautilus",
     "packetType": "LIVING",
     "width": 0.875,
@@ -3792,13 +4271,18 @@
       "minecraft:attack_knockback": 0.0,
       "minecraft:camera_distance": 4.0,
       "minecraft:waypoint_transmit_range": 0.0,
+      "minecraft:bounciness": 0.0,
+      "minecraft:air_drag_modifier": 1.0,
+      "minecraft:friction_modifier": 1.0,
+      "minecraft:name_tag_distance": 64.0,
+      "minecraft:below_name_distance": 10.0,
       "minecraft:follow_range": 16.0,
       "minecraft:tempt_range": 10.0,
       "minecraft:attack_damage": 3.0
     }
   },
   "minecraft:zombie_villager": {
-    "id": 153,
+    "id": 154,
     "translationKey": "entity.minecraft.zombie_villager",
     "packetType": "LIVING",
     "width": 0.6,
@@ -3831,13 +4315,18 @@
       "minecraft:attack_knockback": 0.0,
       "minecraft:camera_distance": 4.0,
       "minecraft:waypoint_transmit_range": 0.0,
+      "minecraft:bounciness": 0.0,
+      "minecraft:air_drag_modifier": 1.0,
+      "minecraft:friction_modifier": 1.0,
+      "minecraft:name_tag_distance": 64.0,
+      "minecraft:below_name_distance": 10.0,
       "minecraft:follow_range": 35.0,
       "minecraft:attack_damage": 3.0,
       "minecraft:spawn_reinforcements": 0.0
     }
   },
   "minecraft:zombified_piglin": {
-    "id": 154,
+    "id": 155,
     "translationKey": "entity.minecraft.zombified_piglin",
     "packetType": "LIVING",
     "fireImmune": true,
@@ -3871,13 +4360,18 @@
       "minecraft:attack_knockback": 0.0,
       "minecraft:camera_distance": 4.0,
       "minecraft:waypoint_transmit_range": 0.0,
+      "minecraft:bounciness": 0.0,
+      "minecraft:air_drag_modifier": 1.0,
+      "minecraft:friction_modifier": 1.0,
+      "minecraft:name_tag_distance": 64.0,
+      "minecraft:below_name_distance": 10.0,
       "minecraft:follow_range": 35.0,
       "minecraft:attack_damage": 5.0,
       "minecraft:spawn_reinforcements": 0.0
     }
   },
   "minecraft:player": {
-    "id": 155,
+    "id": 156,
     "translationKey": "entity.minecraft.player",
     "packetType": "PLAYER",
     "width": 0.6,
@@ -3907,6 +4401,11 @@
       "minecraft:attack_knockback": 0.0,
       "minecraft:camera_distance": 4.0,
       "minecraft:waypoint_transmit_range": 6.0e7,
+      "minecraft:bounciness": 0.0,
+      "minecraft:air_drag_modifier": 1.0,
+      "minecraft:friction_modifier": 1.0,
+      "minecraft:name_tag_distance": 64.0,
+      "minecraft:below_name_distance": 10.0,
       "minecraft:attack_damage": 1.0,
       "minecraft:attack_speed": 4.0,
       "minecraft:luck": 0.0,
@@ -3920,7 +4419,7 @@
     }
   },
   "minecraft:fishing_bobber": {
-    "id": 156,
+    "id": 157,
     "translationKey": "entity.minecraft.fishing_bobber",
     "packetType": "BASE",
     "width": 0.25,

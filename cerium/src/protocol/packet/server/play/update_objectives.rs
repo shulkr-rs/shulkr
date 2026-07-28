@@ -3,17 +3,14 @@ use crate::{
         encode::{Encode, EncodeError, PacketWrite},
         packet::{Packet, ServerPacket},
     },
+    scoreboard::{NumberFormat, RenderType},
     text::TextComponent,
 };
 
 #[derive(Debug, Clone)]
 pub struct UpdateObjectivesPacket {
     pub objective_name: String,
-    pub mode: i8,
-    pub objective_value: Option<TextComponent>,
-    pub ty: Option<i32>,
-    pub has_number_format: Option<bool>,
-    pub number_format: Option<i32>,
+    pub action: UpdateObjectivesAction,
 }
 
 impl Packet for UpdateObjectivesPacket {}
@@ -22,18 +19,52 @@ impl ServerPacket for UpdateObjectivesPacket {}
 impl Encode for UpdateObjectivesPacket {
     fn encode<W: PacketWrite>(w: &mut W, this: &Self) -> Result<(), EncodeError> {
         w.write_string(&this.objective_name)?;
-        w.write_i8(this.mode)?;
+        UpdateObjectivesAction::encode(w, &this.action)?;
+        Ok(())
+    }
+}
 
-        if !matches!(this.mode, 0 | 2) {
-            return Ok(());
+#[derive(Debug, Clone)]
+pub enum UpdateObjectivesAction {
+    CreateScoreboard {
+        value: TextComponent,
+        ty: RenderType,
+        number_format: Option<NumberFormat>,
+    },
+    RemoveScoreboard,
+    UpdateScoreboard {
+        value: TextComponent,
+        ty: RenderType,
+        number_format: Option<NumberFormat>,
+    },
+}
+
+impl Encode for UpdateObjectivesAction {
+    fn encode<W: PacketWrite>(w: &mut W, this: &Self) -> Result<(), EncodeError> {
+        w.write_u8(match this {
+            Self::CreateScoreboard { .. } => 0,
+            Self::RemoveScoreboard => 1,
+            Self::UpdateScoreboard { .. } => 2,
+        })?;
+
+        match this {
+            Self::CreateScoreboard {
+                value,
+                ty,
+                number_format,
+            }
+            | Self::UpdateScoreboard {
+                value,
+                ty,
+                number_format,
+            } => {
+                w.write_component(value)?;
+                RenderType::encode(w, ty)?;
+                w.write_option(number_format, |w, v| NumberFormat::encode(w, v))?;
+            }
+            _ => {}
         }
 
-        w.write_component(this.objective_value.as_ref().unwrap())?;
-        w.write_varint(this.ty.unwrap())?;
-        w.write_bool(this.has_number_format.unwrap())?;
-        if this.has_number_format.unwrap() {
-            w.write_varint(this.number_format.unwrap())?;
-        }
         Ok(())
     }
 }

@@ -18,6 +18,13 @@ impl Identifier {
         }
     }
 
+    pub const fn const_new(namespace: &'static str, path: &'static str) -> Self {
+        Self {
+            namespace: Cow::Borrowed(namespace),
+            path: Cow::Borrowed(path),
+        }
+    }
+
     pub fn vanilla<S>(path: S) -> Self
     where
         S: Into<Cow<'static, str>>,

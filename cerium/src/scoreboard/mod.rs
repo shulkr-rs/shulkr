@@ -1,60 +1,49 @@
-use crate::{
-    entity::Player,
-    protocol::packet::{DisplayObjectivePacket, UpdateObjectivesPacket},
-    text::TextComponent,
-    util::{Viewable, Viewers},
-};
-
+pub mod below_name;
+pub mod objective;
+pub mod sidebar;
 pub mod team;
 
-pub struct Objective {
-    name: String,
-    display_name: TextComponent,
-    display_slot: DisplaySlot,
-    viewers: Viewers,
+use crate::{
+    protocol::encode::{Encode, EncodeError, PacketWrite},
+    text::TextComponent,
+};
+
+#[derive(Debug, Clone)]
+pub enum RenderType {
+    Integer,
+    Hearts,
 }
 
-impl Objective {
-    pub fn new(name: impl Into<String>, display_name: impl Into<TextComponent>) -> Self {
-        Self {
-            name: name.into(),
-            display_name: display_name.into(),
-            display_slot: DisplaySlot::Sidebar,
-            viewers: Viewers::new(),
+impl Encode for RenderType {
+    fn encode<W: PacketWrite>(w: &mut W, this: &Self) -> Result<(), EncodeError> {
+        match this {
+            Self::Integer => w.write_varint(0)?,
+            Self::Hearts => w.write_varint(1)?,
         }
+        Ok(())
     }
 }
 
-impl Viewable for Objective {
-    fn add_viewer(&self, player: Player) {
-        self.viewers.add_viewer(player.clone());
-
-        player.send_packet(&UpdateObjectivesPacket {
-            objective_name: self.name.clone(),
-            mode: 0,
-            objective_value: Some(self.display_name.clone()),
-            ty: Some(1),
-            has_number_format: Some(false),
-            number_format: None,
-        });
-        player.send_packet(&DisplayObjectivePacket {
-            position: self.display_slot as i32,
-            score_name: self.name.clone(),
-        });
-    }
-
-    fn remove_viewer(&self, player: Player) {
-        self.viewers.remove_viewer(player);
-    }
-
-    fn viewers(&self) -> &Viewers {
-        &self.viewers
-    }
+#[derive(Debug, Clone)]
+pub enum NumberFormat {
+    Blank,
+    Styled(TextComponent),
+    Fixed(TextComponent),
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
-pub enum DisplaySlot {
-    List,
-    Sidebar,
-    BelowName,
+impl Encode for NumberFormat {
+    fn encode<W: PacketWrite>(w: &mut W, this: &Self) -> Result<(), EncodeError> {
+        match this {
+            Self::Blank => w.write_varint(0)?,
+            Self::Styled(c) => {
+                w.write_varint(1)?;
+                w.write_component(c)?;
+            }
+            Self::Fixed(c) => {
+                w.write_varint(2)?;
+                w.write_component(c)?;
+            }
+        }
+        Ok(())
+    }
 }

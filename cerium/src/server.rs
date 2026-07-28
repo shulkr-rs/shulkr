@@ -3,7 +3,10 @@ use std::sync::{Arc, OnceLock, atomic::Ordering};
 use tokio::net::ToSocketAddrs;
 
 use crate::{
-    auth::KeyStore, command::dispatcher::CommandDispatcher, entity::Player, event::Events,
+    auth::{AuthMode, KeyStore},
+    command::dispatcher::CommandDispatcher,
+    entity::Player,
+    event::Events,
     registry::Registries,
 };
 
@@ -13,8 +16,8 @@ static CURRENT: OnceLock<Arc<imp::Server>> = OnceLock::new();
 pub struct Server(Arc<imp::Server>);
 
 impl Server {
-    pub fn new() -> Self {
-        let imp = Arc::new(imp::Server::new());
+    pub fn new(auth_mode: AuthMode) -> Self {
+        let imp = Arc::new(imp::Server::new(auth_mode));
 
         CURRENT
             .set(imp.clone())
@@ -38,6 +41,10 @@ impl Server {
     pub fn bind<A: ToSocketAddrs>(&self, addr: A) -> Result<(), ServerError> {
         let imp = self.0.clone();
         imp.clone().runtime.block_on(imp.bind(addr))
+    }
+
+    pub fn auth_mode(&self) -> &AuthMode {
+        &self.auth_mode
     }
 
     pub fn registries(&self) -> &Registries {
@@ -89,14 +96,21 @@ mod imp {
     use tokio::net::{TcpListener, ToSocketAddrs};
 
     use crate::{
-        auth::KeyStore, command::dispatcher::CommandDispatcher, entity::Player, event::Events,
-        network::client::Connection, registry::Registries, server::ServerError, tickable::Ticker,
+        auth::{AuthMode, KeyStore},
+        command::dispatcher::CommandDispatcher,
+        entity::Player,
+        event::Events,
+        network::client::Connection,
+        registry::Registries,
+        server::ServerError,
+        tickable::Ticker,
     };
 
     pub struct Server {
         pub(super) runtime: tokio::runtime::Runtime,
         pub(super) closed: AtomicBool,
 
+        pub(super) auth_mode: AuthMode,
         pub(super) registries: Registries,
         pub(super) key_store: Arc<KeyStore>,
         pub(super) events: Events,
@@ -105,7 +119,7 @@ mod imp {
     }
 
     impl Server {
-        pub(super) fn new() -> Self {
+        pub(super) fn new(auth_mode: AuthMode) -> Self {
             let runtime = tokio::runtime::Builder::new_multi_thread()
                 .enable_all()
                 .build()
@@ -115,6 +129,7 @@ mod imp {
                 runtime,
                 closed: AtomicBool::new(false),
 
+                auth_mode,
                 registries: Registries::new(),
                 key_store: Arc::new(KeyStore::new()),
                 events: Events::new(),

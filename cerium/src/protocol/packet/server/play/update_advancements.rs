@@ -9,7 +9,7 @@ use crate::{
 };
 
 #[derive(Debug, Clone)]
-pub struct UpdateAdvancemensPacket {
+pub struct UpdateAdvancementsPacket {
     pub reset: bool,
     pub advancements: AdvancementTree,
     pub to_remove: Vec<Identifier>,
@@ -17,10 +17,10 @@ pub struct UpdateAdvancemensPacket {
     pub show_advancements: bool,
 }
 
-impl Packet for UpdateAdvancemensPacket {}
-impl ServerPacket for UpdateAdvancemensPacket {}
+impl Packet for UpdateAdvancementsPacket {}
+impl ServerPacket for UpdateAdvancementsPacket {}
 
-impl Encode for UpdateAdvancemensPacket {
+impl Encode for UpdateAdvancementsPacket {
     fn encode<W: PacketWrite>(w: &mut W, this: &Self) -> Result<(), EncodeError> {
         w.write_bool(this.reset)?;
         AdvancementTree::encode(w, &this.advancements)?;

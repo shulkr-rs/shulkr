@@ -9,6 +9,12 @@ pub struct DisplayObjectivePacket {
     pub score_name: String,
 }
 
+impl DisplayObjectivePacket {
+    pub const LIST: i32 = 0;
+    pub const SIDEBAR: i32 = 1;
+    pub const BELOW_NAME: i32 = 2;
+}
+
 impl Packet for DisplayObjectivePacket {}
 impl ServerPacket for DisplayObjectivePacket {}
 

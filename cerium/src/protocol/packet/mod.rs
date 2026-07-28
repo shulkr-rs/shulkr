@@ -19,10 +19,12 @@ pub mod client {
         mod encryption_response;
         mod login_acknowledged;
         mod login_start;
+        mod login_plugin_response;
 
         pub use encryption_response::EncryptionResponsePacket;
         pub use login_acknowledged::LoginAcknowledgePacket;
         pub use login_start::LoginStartPacket;
+        pub use login_plugin_response::LoginPluginResponsePacket;
     }
 
     pub mod config {
@@ -121,11 +123,13 @@ pub mod server {
     pub mod login {
         mod encryption_request;
         mod login_disconnect;
+        mod login_plugin_request;
         mod login_success;
         mod set_compression;
 
         pub use encryption_request::*;
         pub use login_disconnect::LoginDisconnectPacket;
+        pub use login_plugin_request::LoginPluginRequestPacket;
         pub use login_success::*;
         pub use set_compression::SetCompressionPacket;
     }
@@ -167,6 +171,7 @@ pub mod server {
         mod player_info_remove;
         mod player_info_update;
         mod remove_entities;
+        mod reset_score;
         mod set_block_destroy_stage;
         mod set_center_chunk;
         mod set_container_content;
@@ -207,6 +212,7 @@ pub mod server {
         pub use player_info_remove::PlayerInfoRemovePacket;
         pub use player_info_update::*;
         pub use remove_entities::RemoveEntitiesPacket;
+        pub use reset_score::ResetScorePacket;
         pub use set_block_destroy_stage::SetBlockDestroyStagePacket;
         pub use set_center_chunk::SetCenterChunkPacket;
         pub use set_container_content::SetContainerContentPacket;
@@ -219,8 +225,8 @@ pub mod server {
         pub use sync_player_position::SyncPlayerPositionPacket;
         pub use system_chat_message::SystemChatMessagePacket;
         pub use unload_chunk::UnloadChunkPacket;
-        pub use update_advancements::UpdateAdvancemensPacket;
-        pub use update_objectives::UpdateObjectivesPacket;
+        pub use update_advancements::UpdateAdvancementsPacket;
+        pub use update_objectives::{UpdateObjectivesAction, UpdateObjectivesPacket};
         pub use update_score::UpdateScorePacket;
         pub use update_teams::*;
         pub use world_event::WorldEventPacket;

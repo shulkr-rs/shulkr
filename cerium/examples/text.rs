@@ -1,13 +1,14 @@
 use cerium::Server;
+use cerium::auth::AuthMode;
 use cerium::entity::Player;
 use cerium::event::player::{PlayerConfigEvent, PlayerEvent, PlayerSpawnEvent};
-use cerium::scoreboard::Objective;
+use cerium::scoreboard::objective::Objective;
 use cerium::text::{HoverEvent, NamedColor, TextComponent};
 use cerium::util::Viewable;
 use cerium::world::{DimensionType, World, block::Block};
 
 fn main() {
-    let server = Server::new();
+    let server = Server::new(AuthMode::Online);
     let world = World::new(DimensionType::OVERWORLD);
 
     for bz in 0..16 {

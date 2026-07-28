@@ -18,7 +18,7 @@ use crate::{
         EntityType, GameMode, Hand,
         entity::{Entity, EntityLike},
     },
-    event::{Cancellable, inventory::InventoryOpenEvent},
+    event::{Cancellable, inventory::InventoryOpenEvent, player::PlayerMoveEvent},
     inventory::{Inventory, PlayerInventory},
     item::ItemStack,
     network::client::Connection,
@@ -125,6 +125,15 @@ impl Player {
     // ===== Position & Movement ======
 
     pub fn refresh_position(&self, new_position: Position) {
+        let old_position = self.position();
+
+        let mut event = PlayerMoveEvent {
+            player: self.clone(),
+            new_position,
+            old_position,
+        };
+        self.server().events().fire(&mut event);
+
         self.0.update_position(new_position);
     }
 

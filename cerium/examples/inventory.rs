@@ -1,11 +1,12 @@
 use cerium::Server;
+use cerium::auth::AuthMode;
 use cerium::event::player::{PlayerConfigEvent, PlayerEvent, PlayerSpawnEvent};
 use cerium::inventory::{Inventory, InventoryType};
 use cerium::item::{ItemStack, Material};
 use cerium::world::{DimensionType, World, block::Block};
 
 fn main() {
-    let server = Server::new();
+    let server = Server::new(AuthMode::Online);
     let world = World::new(DimensionType::OVERWORLD);
 
     for bz in 0..16 {

@@ -1,3 +1,4 @@
+use cerium::auth::AuthMode;
 use cerium::entity::GameMode;
 use cerium::event::player::{PlayerConfigEvent, PlayerEvent, PlayerSpawnEvent};
 use cerium::util::Direction;
@@ -8,7 +9,7 @@ use cerium::world::{
 use cerium::{Server, p};
 
 fn main() {
-    let server = Server::new();
+    let server = Server::new(AuthMode::Online);
     let world = World::new(DimensionType::OVERWORLD);
 
     let mut states = BlockState::values();

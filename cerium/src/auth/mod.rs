@@ -1,6 +1,14 @@
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 
+#[derive(Debug, Clone, Default, PartialEq, Eq)]
+pub enum AuthMode {
+    #[default]
+    Online,
+    Offline,
+    Velocity(String),
+}
+
 #[derive(Debug, Clone, Deserialize, Serialize)]
 pub struct GameProfile {
     #[serde(alias = "id")]
