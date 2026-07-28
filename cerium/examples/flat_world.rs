@@ -4,8 +4,6 @@ use cerium::world::{DimensionType, World, block::Block};
 
 fn main() {
     let server = Server::new();
-    let _guard = server.enter();
-
     let world = World::new(DimensionType::OVERWORLD);
 
     for bz in 0..16 {

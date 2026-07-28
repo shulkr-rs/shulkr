@@ -1,12 +1,12 @@
 use crate::{entity::Player, event::Event};
 
+mod command;
 mod player_config;
 mod player_spawn;
-mod command;
 
+pub use command::CommandResultEvent;
 pub use player_config::PlayerConfigEvent;
 pub use player_spawn::PlayerSpawnEvent;
-pub use command::CommandResultEvent;
 
 pub trait PlayerEvent
 where

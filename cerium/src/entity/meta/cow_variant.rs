@@ -8,7 +8,6 @@ pub struct CowVariant {
     pub baby_asset_id: String,
 }
 
-
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct CowSoundVariant {
     ambient_sound: String,

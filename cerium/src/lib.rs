@@ -13,15 +13,14 @@ pub mod tickable;
 pub mod util;
 pub mod world;
 
+mod network;
 mod server;
-pub use server::{NoServerError, Server};
-
 mod server_ping;
+
+pub use server::Server;
 pub use server_ping::*;
 
-mod network;
-
-// Constants
+// Minecraft Constants
 
 /// The current protocol version.
 pub const PROTOCOL_VERSION: i32 = 776;

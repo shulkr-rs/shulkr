@@ -104,7 +104,13 @@ impl TicketStorage {
     fn lowest_ticket(tickets: &[Ticket], simulation: bool) -> Option<&Ticket> {
         tickets
             .iter()
-            .filter(|t| if simulation { t.ticket_type.does_simulate() } else { t.ticket_type.does_load() })
+            .filter(|t| {
+                if simulation {
+                    t.ticket_type.does_simulate()
+                } else {
+                    t.ticket_type.does_load()
+                }
+            })
             .min_by_key(|t| t.level)
     }
 
@@ -115,13 +121,16 @@ impl TicketStorage {
 
 #[cfg(test)]
 mod tests {
-    use super::*;
     use super::super::ticket::TicketType;
+    use super::*;
     use std::sync::{Arc, Mutex};
 
     const MAX_LEVEL: i32 = 34;
 
-    fn recording_listener() -> (impl FnMut((i32, i32), i32, bool) + Send, Arc<Mutex<Vec<((i32, i32), i32, bool)>>>) {
+    fn recording_listener() -> (
+        impl FnMut((i32, i32), i32, bool) + Send,
+        Arc<Mutex<Vec<((i32, i32), i32, bool)>>>,
+    ) {
         let log = Arc::new(Mutex::new(Vec::new()));
         let recorder = log.clone();
         let listener = move |pos, level, only_decreased| {
@@ -143,7 +152,10 @@ mod tests {
         assert_eq!(log.lock().unwrap().len(), 1);
 
         storage.add_ticket((0, 0), Ticket::new(TicketType::PLAYER_LOADING, 3));
-        assert_eq!(*log.lock().unwrap(), vec![((0, 0), 10, true), ((0, 0), 3, true)]);
+        assert_eq!(
+            *log.lock().unwrap(),
+            vec![((0, 0), 10, true), ((0, 0), 3, true)]
+        );
     }
 
     #[test]
@@ -162,7 +174,10 @@ mod tests {
         assert_eq!(*log.lock().unwrap(), vec![((0, 0), 10, false)]);
 
         storage.remove_ticket((0, 0), high);
-        assert_eq!(*log.lock().unwrap(), vec![((0, 0), 10, false), ((0, 0), MAX_LEVEL, false)]);
+        assert_eq!(
+            *log.lock().unwrap(),
+            vec![((0, 0), 10, false), ((0, 0), MAX_LEVEL, false)]
+        );
         assert!(storage.get_tickets((0, 0)).is_empty());
     }
 
@@ -182,7 +197,14 @@ mod tests {
 
         let ticket = Ticket::new(TicketType::PORTAL, 5);
         assert!(storage.add_ticket((0, 0), ticket));
-        assert!(!storage.add_ticket((0, 0), ticket), "same type+level should not be added twice");
-        assert_eq!(log.lock().unwrap().len(), 1, "re-adding an identical ticket should not re-notify");
+        assert!(
+            !storage.add_ticket((0, 0), ticket),
+            "same type+level should not be added twice"
+        );
+        assert_eq!(
+            log.lock().unwrap().len(),
+            1,
+            "re-adding an identical ticket should not re-notify"
+        );
     }
 }

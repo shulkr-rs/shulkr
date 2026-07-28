@@ -45,8 +45,8 @@ impl<K: Eq + Hash + Clone, V: Clone> Default for AsyncDedup<K, V> {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use std::sync::atomic::{AtomicUsize, Ordering};
     use std::sync::Arc;
+    use std::sync::atomic::{AtomicUsize, Ordering};
 
     #[tokio::test]
     async fn concurrent_requests_for_the_same_key_share_one_unit_of_work() {

@@ -26,7 +26,10 @@ impl World {
         dimension: RegistryKey<DimensionType>,
         generator: impl Fn(&Chunk) + Send + Sync + 'static,
     ) -> Self {
-        Self(Arc::new(inner::World::new(dimension, Some(Arc::new(generator)))))
+        Self(Arc::new(inner::World::new(
+            dimension,
+            Some(Arc::new(generator)),
+        )))
     }
 
     pub fn get_chunk(&self, chunk_x: i32, chunk_z: i32) -> Option<Chunk> {
@@ -69,7 +72,7 @@ impl World {
             if let Some(chunk) = receiver.borrow_and_update().clone() {
                 return chunk;
             }
-            
+
             if receiver.changed().await.is_err() {
                 return self.0.load_chunk(chunk_x, chunk_z);
             }
@@ -128,12 +131,12 @@ impl World {
 
 mod inner {
     use super::*;
+    use crate::world::chunk::AsyncDedup;
     use crate::{
         Server,
         protocol::packet::{BlockUpdatePacket, WorldEventPacket},
         world::block::Block,
     };
-    use crate::world::chunk::AsyncDedup;
     use parking_lot::RwLock;
     use std::collections::HashMap;
     use tokio::sync::{Semaphore, watch};
@@ -163,7 +166,10 @@ mod inner {
                 generator,
                 pending: AsyncDedup::new(),
                 load_semaphore: Arc::new(Semaphore::new(
-                    std::thread::available_parallelism().map(|n| n.get()).unwrap_or(4) * 4,
+                    std::thread::available_parallelism()
+                        .map(|n| n.get())
+                        .unwrap_or(4)
+                        * 4,
                 )),
             }
         }
@@ -182,7 +188,9 @@ mod inner {
 
         pub(super) fn get_chunk(&self, chunk_x: i32, chunk_z: i32) -> Option<Chunk> {
             let chunks = self.chunks.read();
-            chunks.get(&(chunk_x, chunk_z)).map(|(chunk, _)| chunk.clone())
+            chunks
+                .get(&(chunk_x, chunk_z))
+                .map(|(chunk, _)| chunk.clone())
         }
 
         pub(super) fn chunk_count(&self) -> usize {
@@ -216,7 +224,9 @@ mod inner {
 
         pub(super) fn remove_viewer(&self, chunk_x: i32, chunk_z: i32) {
             let mut chunks = self.chunks.write();
-            if let std::collections::hash_map::Entry::Occupied(mut entry) = chunks.entry((chunk_x, chunk_z)) {
+            if let std::collections::hash_map::Entry::Occupied(mut entry) =
+                chunks.entry((chunk_x, chunk_z))
+            {
                 let (_, refcount) = entry.get_mut();
                 *refcount = refcount.saturating_sub(1);
                 if *refcount == 0 {

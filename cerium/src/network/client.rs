@@ -18,7 +18,9 @@ use tokio::{
 };
 
 use crate::{
-    Server, auth::GameProfile, protocol::{encode::PacketWrite as _, packet::ServerPacket}
+    Server,
+    auth::GameProfile,
+    protocol::{encode::PacketWrite as _, packet::ServerPacket},
 };
 use crate::{
     auth::KeyStore,
@@ -80,7 +82,8 @@ impl Connection {
     }
 
     pub(crate) fn set_view_distance(&self, requested: i32) {
-        self.view_distance.store(requested.clamp(2, MAX_VIEW_DISTANCE), Ordering::Relaxed);
+        self.view_distance
+            .store(requested.clamp(2, MAX_VIEW_DISTANCE), Ordering::Relaxed);
     }
 
     pub async fn accept(addr: SocketAddr, stream: TcpStream) {
@@ -189,7 +192,10 @@ impl Connection {
 
         // Enqueue packet
         if let Err(_) = self.packet_tx.try_send(data) {
-            log::error!("Failed to enqueue packet, closing connection. ({})", std::any::type_name::<P>());
+            log::error!(
+                "Failed to enqueue packet, closing connection. ({})",
+                std::any::type_name::<P>()
+            );
             self.close();
         }
     }

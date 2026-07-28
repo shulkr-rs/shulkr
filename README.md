@@ -2,9 +2,6 @@
 
 Yet another high-performance Minecraft server library written in Rust.
 
-> [!CAUTION]
-> This repository is still in a very, very, very early stage of development. I'm a student so don't expect frequent updates.
-
 
 ## Goals
 
@@ -46,7 +43,6 @@ cargo r --example debug_world
 ```rust
 fn main() {
     let server = Server::new();
-
     let world = World::new(&DimensionType::OVERWORLD);
 
     for (ix, pos) in (0..27946).enumerate() {
@@ -82,7 +78,7 @@ fn main() {
     - [x] Registries
     - [ ] All Packets
 - World
-    - [ ] Blocks
+    - [x] Blocks
     - [ ] Entities
     - [ ] Block Interactions
     - [ ] Light API
@@ -98,12 +94,9 @@ fn main() {
     - [ ] Click Slot
     - [x] Create ItemStack
 - [x] Text components
-- [ ] Command System
-- [ ] Event System
+- [x] Command System
+- [x] Event System
 - [ ] Resource Pack Support
 - [ ] Advancements
 - [ ] Proxy Support
 - [ ] Scoreboards
-
-Of course, more features are planned for the future.
- 

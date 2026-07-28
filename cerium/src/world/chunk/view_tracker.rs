@@ -109,11 +109,22 @@ mod tests {
         tracker.add_player((0, 0));
         let changes = tracker.run_updates();
 
-        let visible: Vec<_> = changes.into_iter().filter(|&(_, visible)| visible).map(|(p, _)| p).collect();
+        let visible: Vec<_> = changes
+            .into_iter()
+            .filter(|&(_, visible)| visible)
+            .map(|(p, _)| p)
+            .collect();
         assert!(visible.contains(&(0, 0)));
         assert!(visible.contains(&(4, 0)));
-        assert!(!visible.contains(&(5, 0)), "chunk beyond view distance should not become visible");
-        assert_eq!(visible.len(), 9 * 9, "a 4-radius Chebyshev square is 9x9 chunks");
+        assert!(
+            !visible.contains(&(5, 0)),
+            "chunk beyond view distance should not become visible"
+        );
+        assert_eq!(
+            visible.len(),
+            9 * 9,
+            "a 4-radius Chebyshev square is 9x9 chunks"
+        );
     }
 
     #[test]
@@ -125,12 +136,29 @@ mod tests {
         tracker.move_player((0, 0), (20, 0));
         let changes = tracker.run_updates();
 
-        let hidden: Vec<_> = changes.iter().filter(|&&(_, visible)| !visible).map(|&(p, _)| p).collect();
-        let shown: Vec<_> = changes.iter().filter(|&&(_, visible)| visible).map(|&(p, _)| p).collect();
+        let hidden: Vec<_> = changes
+            .iter()
+            .filter(|&&(_, visible)| !visible)
+            .map(|&(p, _)| p)
+            .collect();
+        let shown: Vec<_> = changes
+            .iter()
+            .filter(|&&(_, visible)| visible)
+            .map(|&(p, _)| p)
+            .collect();
 
-        assert!(hidden.contains(&(0, 0)), "old position should be hidden after moving far away");
-        assert!(shown.contains(&(20, 0)), "new position should become visible");
-        assert!(!shown.contains(&(0, 0)), "old position should not also appear as newly shown");
+        assert!(
+            hidden.contains(&(0, 0)),
+            "old position should be hidden after moving far away"
+        );
+        assert!(
+            shown.contains(&(20, 0)),
+            "new position should become visible"
+        );
+        assert!(
+            !shown.contains(&(0, 0)),
+            "old position should not also appear as newly shown"
+        );
     }
 
     #[test]

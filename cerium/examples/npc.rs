@@ -9,7 +9,6 @@ use cerium::world::{DimensionType, World, block::Block};
 
 fn main() {
     let server = Server::new();
-    let _guard = server.enter();
     let world = World::new(DimensionType::OVERWORLD);
 
     for bz in 0..16 {
@@ -19,7 +18,7 @@ fn main() {
     }
 
     let entity = Entity::new(EntityType::Player);
-    entity.set_position((8, 71, 8, 0., 0.));
+    entity.set_position((8, 71, 8, 0 as f32, 0 as f32));
 
     world.spawn_entity(entity.clone());
 

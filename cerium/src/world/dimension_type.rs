@@ -4,10 +4,10 @@ use std::collections::HashMap;
 
 #[rustfmt::skip]
 impl DimensionType {
-    pub const OVERWORLD:        RegistryKey<DimensionType> = RegistryKey::of("minecraft:overworld");
-    pub const OVERWORLD_CAVES:  RegistryKey<DimensionType> = RegistryKey::of("minecraft:overworld_caves");
-    pub const THE_NETHER:       RegistryKey<DimensionType> = RegistryKey::of("minecraft:the_nether");
-    pub const THE_END:          RegistryKey<DimensionType> = RegistryKey::of("minecraft:the_end");
+    pub const OVERWORLD:        RegistryKey<DimensionType> = RegistryKey::const_new("minecraft:overworld");
+    pub const OVERWORLD_CAVES:  RegistryKey<DimensionType> = RegistryKey::const_new("minecraft:overworld_caves");
+    pub const THE_NETHER:       RegistryKey<DimensionType> = RegistryKey::const_new("minecraft:the_nether");
+    pub const THE_END:          RegistryKey<DimensionType> = RegistryKey::const_new("minecraft:the_end");
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]

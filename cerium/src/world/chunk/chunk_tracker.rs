@@ -1,6 +1,5 @@
 use super::graph::{DynamicGraph, GraphState};
 
-
 pub trait ChunkGraphSource {
     fn get_level(&self, pos: (i32, i32)) -> i32;
     fn set_level(&mut self, pos: (i32, i32), level: i32);
@@ -57,22 +56,37 @@ impl<S: ChunkGraphSource> DynamicGraph for ChunkGraph<S> {
         }
     }
 
-    fn compute_level_from_neighbor(&self, from: Self::Node, to: Self::Node, from_level: i32) -> i32 {
+    fn compute_level_from_neighbor(
+        &self,
+        from: Self::Node,
+        to: Self::Node,
+        from_level: i32,
+    ) -> i32 {
         match from {
             None => self.get_level_from_source_node(to),
             Some(_) => from_level + 1,
         }
     }
-    
-    fn get_computed_level(&self, node: Self::Node, known_parent: Self::Node, known_level_from_parent: i32) -> i32 {
+
+    fn get_computed_level(
+        &self,
+        node: Self::Node,
+        known_parent: Self::Node,
+        known_level_from_parent: i32,
+    ) -> i32 {
         let Some(pos) = node else {
             return known_level_from_parent;
         };
         let mut computed = known_level_from_parent;
         for neighbor_pos in neighbors(pos) {
-            let neighbor = if neighbor_pos == pos { None } else { Some(neighbor_pos) };
+            let neighbor = if neighbor_pos == pos {
+                None
+            } else {
+                Some(neighbor_pos)
+            };
             if neighbor != known_parent {
-                let cost = self.compute_level_from_neighbor(neighbor, node, self.get_level(neighbor));
+                let cost =
+                    self.compute_level_from_neighbor(neighbor, node, self.get_level(neighbor));
                 computed = computed.min(cost);
                 if computed == 0 {
                     return 0;
@@ -129,7 +143,11 @@ mod tests {
         }
 
         fn get_level_from_source(&self, pos: (i32, i32)) -> i32 {
-            if pos == self.source_pos { 0 } else { self.max_level }
+            if pos == self.source_pos {
+                0
+            } else {
+                self.max_level
+            }
         }
     }
 
@@ -219,9 +237,15 @@ mod tests {
         while graph.has_work() {
             graph.run_updates(4);
             calls += 1;
-            assert!(calls < 10_000, "did not converge in a reasonable number of bounded calls");
+            assert!(
+                calls < 10_000,
+                "did not converge in a reasonable number of bounded calls"
+            );
         }
-        assert!(calls > 1, "should have taken more than one call with a tiny budget");
+        assert!(
+            calls > 1,
+            "should have taken more than one call with a tiny budget"
+        );
 
         assert_eq!(graph.source.get_level((3, 3)), 3);
         assert_eq!(graph.source.get_level((10, 0)), 10);

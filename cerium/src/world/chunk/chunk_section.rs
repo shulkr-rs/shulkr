@@ -1,6 +1,5 @@
 use crate::world::palette::Palette;
 
-
 #[derive(Debug, Clone)]
 pub struct ChunkSection {
     pub block_states: Palette,

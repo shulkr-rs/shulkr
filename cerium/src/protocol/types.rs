@@ -131,12 +131,7 @@ pub fn read_lp_vec3<R: PacketRead>(r: &mut R) -> Result<(f64, f64, f64), DecodeE
     Ok((x, y, z))
 }
 
-pub fn write_lp_vec3<W: PacketWrite>(
-    w: &mut W,
-    x: f64,
-    y: f64,
-    z: f64,
-) -> Result<(), EncodeError> {
+pub fn write_lp_vec3<W: PacketWrite>(w: &mut W, x: f64, y: f64, z: f64) -> Result<(), EncodeError> {
     let max = x.abs().max(y.abs()).max(z.abs());
 
     // Zero vector: a single `0` byte, matching the decoder's early-out.

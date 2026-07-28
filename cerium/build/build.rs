@@ -86,6 +86,8 @@ pub fn write_file(content: &TokenStream, dst: &str) {
 pub fn generate(strct: &str, dst: &str, content: &str) {
     let entries: IndexMap<String, serde_json::Value> = serde_json::from_str(content).unwrap();
 
+    let strct = format_ident!("{}", strct);
+
     let keys: TokenStream = entries
         .keys()
         .map(|key| {
@@ -97,25 +99,15 @@ pub fn generate(strct: &str, dst: &str, content: &str) {
             );
 
             quote! {
-                key!(#ident, #key);
+                pub const #ident: RegistryKey<#strct> = RegistryKey::const_new(#key);
             }
         })
         .collect();
 
-    let strct = format_ident!("{}", strct);
-
     let out = quote! {
-        #![allow(unused)]
-
-        use std::sync::LazyLock;
         use crate::registry::{RegistryKey, #strct};
 
-        macro_rules! key {
-            ($ident:ident, $key:expr) => {
-                pub const $ident: LazyLock<RegistryKey<#strct>> = LazyLock::new(|| RegistryKey::of($key));
-            };
-        }
-
+        #[allow(unused)]
         impl #strct {
             #keys
         }

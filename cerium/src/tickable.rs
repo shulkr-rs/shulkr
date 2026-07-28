@@ -13,9 +13,9 @@ pub struct Ticker {
 }
 
 impl Ticker {
-    pub fn new(server: Server) -> Self {
+    pub fn new() -> Self {
         Self {
-            server,
+            server: Server::current(),
             interval: interval(Duration::from_millis(50)),
         }
     }

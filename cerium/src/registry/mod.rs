@@ -181,7 +181,10 @@ impl<T> RegistryHolder<T> {
     where
         T: Serialize + DeserializeOwned + Clone,
     {
-        let value = registry.get(&RegistryKey::of(self.key())).unwrap().clone();
+        let value = registry
+            .get(&RegistryKey::const_new(self.key()))
+            .unwrap()
+            .clone();
         self.set(value);
     }
 
@@ -212,16 +215,16 @@ pub struct RegistryKey<T> {
 }
 
 impl<T> RegistryKey<T> {
-    pub const fn of(key: &'static str) -> Self {
+    pub fn new(key: String) -> Self {
         Self {
-            key: Cow::Borrowed(key),
+            key: Cow::Owned(key),
             _phantom: PhantomData,
         }
     }
 
-    pub const fn new(key: String) -> Self {
+    pub const fn const_new(key: &'static str) -> Self {
         Self {
-            key: Cow::Owned(key),
+            key: Cow::Borrowed(key),
             _phantom: PhantomData,
         }
     }

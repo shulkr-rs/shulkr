@@ -9,7 +9,6 @@ impl Block {
     }
 
     pub fn default_state(&self) -> BlockState {
-       
         BlockState {
             block: *self,
             state_id: self.def().default_state,

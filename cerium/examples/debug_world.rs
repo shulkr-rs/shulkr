@@ -1,5 +1,3 @@
-use std::time::Instant;
-
 use cerium::entity::GameMode;
 use cerium::event::player::{PlayerConfigEvent, PlayerEvent, PlayerSpawnEvent};
 use cerium::util::Direction;
@@ -10,13 +8,8 @@ use cerium::world::{
 use cerium::{Server, p};
 
 fn main() {
-    let start = Instant::now();
-
     let server = Server::new();
-    let _guard = server.enter();
-
     let world = World::new(DimensionType::OVERWORLD);
-    println!("elapsed: {:?}", start.elapsed());
 
     let mut states = BlockState::values();
     states.sort_by_key(|s| s.id());

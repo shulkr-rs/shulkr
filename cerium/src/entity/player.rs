@@ -290,8 +290,9 @@ impl Player {
             *last_view = Some((center, view_distance));
         }
 
-        let desired: HashSet<(i32, i32)> =
-            Chunk::chunks_in_range(center, view_distance).into_iter().collect();
+        let desired: HashSet<(i32, i32)> = Chunk::chunks_in_range(center, view_distance)
+            .into_iter()
+            .collect();
 
         let (added, stale) = diff_tracked(&mut self.0.tracked_chunks.lock(), &desired);
 
@@ -354,7 +355,7 @@ impl Player {
                             _ => return,
                         }
                     }
-                    
+
                     while this.0.chunk_queue.lock().queue.len() > 256 {
                         tokio::time::sleep(Duration::from_millis(20)).await;
                     }
@@ -383,7 +384,11 @@ fn diff_tracked(
             added.push(pos);
         }
     }
-    let stale = tracked.keys().copied().filter(|pos| !desired.contains(pos)).collect();
+    let stale = tracked
+        .keys()
+        .copied()
+        .filter(|pos| !desired.contains(pos))
+        .collect();
     (added, stale)
 }
 
@@ -428,7 +433,8 @@ impl ChunkQueue {
 
     pub fn cancel(&mut self, cx: i32, cz: i32) -> bool {
         let before = self.queue.len();
-        self.queue.retain(|chunk| chunk.x() != cx || chunk.z() != cz);
+        self.queue
+            .retain(|chunk| chunk.x() != cx || chunk.z() != cz);
         self.queue.len() != before
     }
 
@@ -983,7 +989,7 @@ impl Inner {
         for viewer in self.viewers() {
             self.remove_viewer(viewer);
         }
-        
+
         let world = self.world();
         self.pending_loads.lock().clear();
         for (pos, state) in self.tracked_chunks.lock().drain() {

@@ -1,9 +1,7 @@
-mod item_stack;
-pub use item_stack::ItemStack;
-
-mod material;
-pub use material::Material;
-
 mod component;
-pub use component::*;
+mod item_stack;
+mod material;
 
+pub use component::*;
+pub use item_stack::ItemStack;
+pub use material::Material;

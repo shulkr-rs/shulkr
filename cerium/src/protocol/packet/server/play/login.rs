@@ -1,7 +1,10 @@
-use crate::{protocol::{
-    encode::{Encode, EncodeError, PacketWrite},
-    packet::{Packet, ServerPacket},
-}, util::{BlockPosition, Identifier}};
+use crate::{
+    protocol::{
+        encode::{Encode, EncodeError, PacketWrite},
+        packet::{Packet, ServerPacket},
+    },
+    util::{BlockPosition, Identifier},
+};
 
 #[derive(Debug, Clone)]
 pub struct LoginPacket {
