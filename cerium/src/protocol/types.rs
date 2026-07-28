@@ -99,11 +99,6 @@ impl Encode for Slot {
     }
 }
 
-/// `Vec3`'s low-precision codec (26.2): a shared integer `scale` (the
-/// magnitude) plus three 15-bit per-axis fractions in `[-1, 1]`, packed
-/// little-end-first as `u8 + u8 + u32` (+ optional `scale >> 2` varint).
-/// Used by the serverbound `Interact` packet's target position and the
-/// clientbound `SpawnEntity`/`SetEntityMotion` velocity fields.
 pub fn read_lp_vec3<R: PacketRead>(r: &mut R) -> Result<(f64, f64, f64), DecodeError> {
     fn unpack(value: u64) -> f64 {
         let v = std::cmp::min(value & 32767, 32766);
@@ -134,13 +129,10 @@ pub fn read_lp_vec3<R: PacketRead>(r: &mut R) -> Result<(f64, f64, f64), DecodeE
 pub fn write_lp_vec3<W: PacketWrite>(w: &mut W, x: f64, y: f64, z: f64) -> Result<(), EncodeError> {
     let max = x.abs().max(y.abs()).max(z.abs());
 
-    // Zero vector: a single `0` byte, matching the decoder's early-out.
     if max <= 0.0 {
         return w.write_u8(0);
     }
 
-    // Shared magnitude: smallest integer that keeps every axis fraction in
-    // `[-1, 1]`. At least 1 so a sub-block velocity stays representable.
     let scale = (max.ceil() as u64).max(1);
 
     let quant = |v: f64| -> u64 {
@@ -164,21 +156,6 @@ pub fn write_lp_vec3<W: PacketWrite>(w: &mut W, x: f64, y: f64, z: f64) -> Resul
     Ok(())
 }
 
-/// The `Slot` wire format used specifically by
-/// [`crate::protocol::packet::client::play::set_creative_mode_slot::SetCreativeModeSlotPacket`]
-/// (serverbound, i.e. client → server only).
-///
-/// Vanilla 26.2 `ServerboundSetCreativeModeSlotPacket.STREAM_CODEC` uses
-/// `ItemStack.OPTIONAL_UNTRUSTED_STREAM_CODEC`, which — unlike every other
-/// slot-carrying packet (`ItemStack.OPTIONAL_STREAM_CODEC`, backed by
-/// `DataComponentPatch.STREAM_CODEC`) — wraps *each individual component's
-/// value* in a `VarInt` byte-length prefix. This lets a malformed
-/// client-sent creative-slot item be partially skipped instead of
-/// desyncing the whole packet — but decoding it with the plain [`Slot`]
-/// codec silently misaligns every byte after the first component. Only this
-/// one packet needs the delimited form; every other use of [`Slot`]
-/// (container clicks, window contents, …) is correctly served by the plain
-/// impl above.
 pub mod slot_delimited {
     use super::*;
 

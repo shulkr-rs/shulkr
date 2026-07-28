@@ -16,8 +16,8 @@ use crate::{
 pub struct Command {
     pub(crate) name: String,
     pub(crate) aliases: Vec<String>,
-    args: Vec<Arg>,
-    subcommands: Vec<Command>,
+    pub(crate) args: Vec<Arg>,
+    pub(crate) subcommands: Vec<Command>,
 }
 
 impl Command {

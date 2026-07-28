@@ -7,7 +7,7 @@ use serde::{Deserialize, Serialize};
 
 use crate::entity::{EntityLike as _, MAX_VIEW_DISTANCE, Player};
 use crate::event::player::PlayerSpawnEvent;
-use crate::protocol::packet::{RegistryEntry, Tag, TagRegistry, UpdateTagsPacket};
+use crate::protocol::packet::{CommandsPacket, RegistryEntry, Tag, TagRegistry, UpdateTagsPacket};
 use crate::registry::{DynamicRegistry, RegistryKey};
 use crate::util::{Position, TeleportFlags, Viewable};
 use crate::world::{DimensionType, chunk::Chunk};
@@ -311,6 +311,10 @@ fn handle_acknowledge_finish_config(
             online_player.add_viewer(player.clone());
         }
     }
+
+    client.send_packet(&CommandsPacket::from_dispatcher(
+        &client.server().command_dispatcher(),
+    ));
 
     client.server().events().fire(&mut PlayerSpawnEvent {
         player: player.clone(),

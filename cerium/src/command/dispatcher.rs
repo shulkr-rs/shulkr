@@ -3,7 +3,7 @@ use parking_lot::RwLock;
 use crate::command::{Command, matches::CommandMatches};
 
 pub struct CommandDispatcher {
-    commands: RwLock<Vec<Command>>,
+    pub(crate) commands: RwLock<Vec<Command>>,
 }
 
 impl CommandDispatcher {

@@ -40,6 +40,7 @@ pub mod client {
     pub mod play {
         mod change_recipe_book_settings;
         mod chat_command;
+        mod chat_message;
         mod chunk_batch_received;
         mod click_container;
         mod client_tick_end;
@@ -68,6 +69,7 @@ pub mod client {
 
         pub use change_recipe_book_settings::ChangeRecipeBookSettingsPacket;
         pub use chat_command::ChatCommandPacket;
+        pub use chat_message::ChatMessagePacket;
         pub use chunk_batch_received::ChunkBatchReceivedPacket;
         pub use click_container::ClickContainerPacket;
         pub use client_tick_end::ClientTickEndPacket;
@@ -145,10 +147,12 @@ pub mod server {
     pub mod play {
         mod acknowledge_block_change;
         mod block_update;
+        mod chat_message;
         mod chunk_batch_finished;
         mod chunk_batch_start;
         mod chunk_data_and_update_light;
         mod close_container;
+        mod commands;
         mod disconnect;
         mod display_objective;
         mod entity_animation;
@@ -183,10 +187,12 @@ pub mod server {
 
         pub use acknowledge_block_change::AcknowledgeBlockChangePacket;
         pub use block_update::BlockUpdatePacket;
+        pub use chat_message::PlayerChatMessagePacket;
         pub use chunk_batch_finished::ChunkBatchFinishedPacket;
         pub use chunk_batch_start::ChunkBatchStartPacket;
         pub use chunk_data_and_update_light::*;
         pub use close_container::CloseContainerPacket;
+        pub use commands::CommandsPacket;
         pub use disconnect::DisconnectPacket;
         pub use display_objective::DisplayObjectivePacket;
         pub use entity_animation::EntityAnimationPacket;

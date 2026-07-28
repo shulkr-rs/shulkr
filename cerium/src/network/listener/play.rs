@@ -8,8 +8,8 @@ use crate::{
         decode::{Decode as _, DecodeError},
         packet::{
             AcknowledgeBlockChangePacket, ChangeRecipeBookSettingsPacket, ChatCommandPacket,
-            ChunkBatchReceivedPacket, ClickContainerPacket, ClientInfoPacket, ClientTickEndPacket,
-            ConfirmTeleportationPacket, EntityAnimationPacket, InteractPacket,
+            ChatMessagePacket, ChunkBatchReceivedPacket, ClickContainerPacket, ClientInfoPacket,
+            ClientTickEndPacket, ConfirmTeleportationPacket, EntityAnimationPacket, InteractPacket,
             PickItemFromBlockPacket, PlayerActionPacket, PlayerCommand, PlayerCommandPacket,
             PlayerDiggingState, PlayerInputFlags, PlayerInputPacket, PlayerLoadedPacket,
             PlayerMovementFlagsPacket, PlayerPositionAndRotationPacket, PlayerPositionPacket,
@@ -30,6 +30,7 @@ pub fn handle_packet(player: Player, id: i32, data: &mut Cursor<&[u8]>) -> Resul
     match id {
         0x00 => handle_confirm_teleportation(player, ConfirmTeleportationPacket::decode(data)?),
         0x07 => handle_chat_command(player, ChatCommandPacket::decode(data)?),
+        0x09 => handle_chat_message(player, ChatMessagePacket::decode(data)?),
         0x0A => handle_player_session(player, PlayerSessionPacket::decode(data)?),
         0x0B => handle_chunk_batch_received(player, ChunkBatchReceivedPacket::decode(data)?),
         0x0D => handle_client_tick_end(player, ClientTickEndPacket::decode(data)?),
@@ -77,6 +78,14 @@ fn handle_chat_command(player: Player, packet: ChatCommandPacket) {
         .fire(&mut CommandResultEvent::new(player.clone(), input, result));
 }
 
+fn handle_chat_message(player: Player, packet: ChatMessagePacket) {
+    for player in player.server().players().lock().iter() {
+        // Instead of sending a real PlayerChatMessagePacket we send a system chat message
+        // to avoid player reporting.
+        player.send_message(&format!("<{}> {}", player.name(), &packet.message));
+    }
+}
+
 fn handle_player_session(_player: Player, _packet: PlayerSessionPacket) {
     log::warn!("todo: handle_player_session");
 }
@@ -96,7 +105,7 @@ fn handle_chunk_batch_received(player: Player, packet: ChunkBatchReceivedPacket)
 }
 
 fn handle_client_tick_end(_player: Player, _packet: ClientTickEndPacket) {
-    // log::warn!("todo: handle_client_tick_end");
+    // ignored
 }
 
 fn handle_client_info(player: Player, packet: ClientInfoPacket) {
