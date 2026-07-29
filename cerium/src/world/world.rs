@@ -32,6 +32,13 @@ impl World {
         )))
     }
 
+    pub fn set_chunk(&mut self, chunk: Chunk) {
+        self.0
+            .chunks
+            .write()
+            .insert((chunk.x(), chunk.z()), (chunk, 0));
+    }
+
     pub fn get_chunk(&self, chunk_x: i32, chunk_z: i32) -> Option<Chunk> {
         self.0.get_chunk(chunk_x, chunk_z)
     }
@@ -143,7 +150,7 @@ mod inner {
 
     pub(super) struct World {
         dimension_type: DimensionType,
-        chunks: RwLock<HashMap<(i32, i32), (Chunk, usize)>>,
+        pub(super) chunks: RwLock<HashMap<(i32, i32), (Chunk, usize)>>,
         entities: RwLock<Vec<Entity>>,
         generator: Option<Arc<super::ChunkGenerator>>,
         pending: AsyncDedup<(i32, i32), Chunk>,

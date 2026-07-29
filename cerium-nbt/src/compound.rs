@@ -24,6 +24,21 @@ impl NbtCompound {
         }
     }
 
+    pub fn get(&self, name: &str) -> Option<&NbtTag> {
+        self.children
+            .iter()
+            .find(|(key, _)| key == &name)
+            .map(|t| &t.1)
+    }
+
+    pub fn remove(&mut self, name: &str) -> Option<NbtTag> {
+        let name = name.to_string();
+        if let Some(i) = self.children.iter().position(|(key, _)| key == &name) {
+            return Some(self.children.remove(i).1);
+        }
+        None
+    }
+
     pub fn deserialize_content<R: Buf>(reader: &mut R) -> Result<NbtCompound, Error> {
         let mut compound = NbtCompound::new();
 

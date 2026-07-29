@@ -1,0 +1,14 @@
+{
+  "lsp": {
+    "rust-analyzer": {
+      "initialization_options": {
+        "cargo": {
+          "features": ["polar", "anvil"]
+        },
+        "check": {
+          "features": ["polar", "anvil"]
+        }
+      }
+    }
+  }
+}

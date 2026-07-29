@@ -43,53 +43,69 @@ impl BlockState {
             .collect()
     }
 
-    pub fn get_property<P: Property>(&self) -> Option<P::Value> {
+    pub fn get_property(&self, name: &str) -> Option<&'static str> {
         let def = self.block.def();
         let relative = self.state_id - def.min_state_id;
 
         let mut stride = 1u16;
         for prop in def.properties.iter().rev() {
-            if prop.name() == P::NAME {
-                let index = (relative / stride) % prop.value_count();
-                return P::from_index(index as usize);
+            let count = prop.value_count();
+            if prop.name == name {
+                let index = (relative / stride) % count;
+                return Some(prop.values[index as usize]);
             }
-            stride *= prop.value_count();
+            stride *= count;
         }
         None
     }
 
-    pub fn set_property<P: Property>(&mut self, value: P::Value) {
+    pub fn set_property(&mut self, name: &str, value: &str) {
         let def = self.block.def();
         let relative = self.state_id - def.min_state_id;
 
         let mut stride = 1u16;
         for prop in def.properties.iter().rev() {
-            if prop.name() == P::NAME {
-                let old_index = (relative / stride) % prop.value_count();
-                let new_index = P::to_index(&value) as u16;
+            let count = prop.value_count();
+            if prop.name == name {
+                let old_index = (relative / stride) % count;
+                let new_index = prop
+                    .values
+                    .iter()
+                    .position(|v| *v == value)
+                    .expect("value not found") as u16;
                 self.state_id = self.state_id - old_index * stride + new_index * stride;
                 return;
             }
-            stride *= prop.value_count();
+            stride *= count;
         }
-        panic!("Property {} not found on block {}", P::NAME, def.id);
+        panic!("Property {} not found on block {}", name, def.id);
     }
 
-    pub fn with_property<P>(&self, value: P::Value) -> Self
-    where
-        P: Property,
-    {
-        let mut new = *self;
-        new.set_property::<P>(value);
-        new
+    pub fn with_property(&self, name: &str, value: &str) -> Option<BlockState> {
+        let def = self.block.def();
+        let mut stride = 1u16;
+        for prop in def.properties.iter().rev() {
+            let count = prop.value_count();
+            if prop.name == name {
+                let new_index = prop.values.iter().position(|v| *v == value)? as u16;
+                let relative = self.state_id - def.min_state_id;
+                let old_index = (relative / stride) % count;
+                return Some(BlockState {
+                    block: self.block,
+                    state_id: self.state_id - old_index * stride + new_index * stride,
+                });
+            }
+            stride *= count;
+        }
+        None
     }
 
-    pub fn has_property<P: Property>(&self) -> bool {
+    pub fn has_property(&self, name: &str) -> bool {
         self.block
             .def()
             .properties
             .iter()
-            .any(|p| p.name() == P::NAME)
+            .any(|p| p.name == name)
     }
 }
 

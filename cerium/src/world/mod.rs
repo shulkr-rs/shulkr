@@ -9,5 +9,6 @@ pub mod block;
 pub mod chunk;
 pub mod clock;
 pub mod heightmap;
+pub mod loader;
 pub mod palette;
 pub mod timeline;

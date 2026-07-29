@@ -228,7 +228,7 @@ impl<'de, R: Buf> de::Deserializer<'de> for &mut Deserializer<R> {
     where
         V: Visitor<'de>,
     {
-        let Some(tag) = self.tag_to_deserialize_stack else {
+        let Some(_tag) = self.tag_to_deserialize_stack else {
             return Err(Error::SerdeError("Ignoring nothing!".to_string()));
         };
 

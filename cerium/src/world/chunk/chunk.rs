@@ -26,6 +26,10 @@ impl Chunk {
         self.0.read().z()
     }
 
+    pub fn min_y(&self) -> i32 {
+        self.0.read().min_y
+    }
+
     pub fn sections(&self) -> Vec<ChunkSection> {
         self.0.read().sections().clone()
     }
@@ -102,6 +106,76 @@ impl Chunk {
                     callback(x, z);
                 }
             }
+        }
+    }
+
+    #[cfg(any(feature = "anvil", feature = "polar"))]
+    pub(crate) fn fill_block_state_section(&mut self, sect_y: u32, block: i32) {
+        use crate::world::palette::{Palette, PaletteFormat};
+        use std::collections::HashMap;
+
+        let dim = 16;
+        let volume = dim * dim * dim;
+
+        let mut count = HashMap::with_capacity(1);
+        count.insert(block as u16, volume as i32);
+
+        self.0.write().sections[sect_y as usize].block_states = Palette {
+            dim,
+            min_bpe: 4,
+            max_bpe: 8,
+            direct_bpe: 15,
+
+            bpe: 0,
+            format: PaletteFormat::SingleValued { value: block },
+            values: Vec::new(),
+
+            data: vec![block as u16; volume].into_boxed_slice(),
+            count,
+        };
+    }
+
+    #[cfg(any(feature = "anvil", feature = "polar"))]
+    pub(crate) fn fill_biome_section(&mut self, sect_y: u32, biome: i32) {
+        use crate::world::palette::{Palette, PaletteFormat};
+        use std::collections::HashMap;
+
+        let dim = 4;
+        let volume = dim * dim * dim;
+
+        let mut count = HashMap::with_capacity(1);
+        count.insert(biome as u16, volume as i32);
+
+        self.0.write().sections[sect_y as usize].biomes = Palette {
+            dim,
+            min_bpe: 1,
+            max_bpe: 3,
+            direct_bpe: 6,
+
+            bpe: 0,
+            format: PaletteFormat::SingleValued { value: biome },
+            values: Vec::new(),
+
+            data: vec![biome as u16; volume].into_boxed_slice(),
+            count,
+        };
+    }
+
+    pub fn set_block_entity_data(
+        &mut self,
+        x: usize,
+        _local_y: i32,
+        z: usize,
+        world_y: i32,
+        data: cerium_nbt::Nbt,
+    ) -> bool {
+        let key = pack_xz(x as i32, z as i32);
+        if let Some(block_entity) = self.0.write().block_entities.get_mut(&key) {
+            block_entity.y = world_y as i16;
+            block_entity.data = Some(data);
+            true
+        } else {
+            false
         }
     }
 }
@@ -190,7 +264,7 @@ impl Inner {
 
     fn set_block(&mut self, x: i32, y: i32, z: i32, state: &BlockState) {
         if let Some(info) = state.block_entity() {
-            let packed_xz = Self::pack_xz(x, z);
+            let packed_xz = pack_xz(x, z);
             let block_entity = BlockEntity {
                 packed_xz,
                 y: y as i16,
@@ -252,10 +326,10 @@ impl Inner {
     fn section_at_mut(&mut self, y: i32) -> Option<&mut ChunkSection> {
         self.sections.get_mut(((y - self.min_y) / 16) as usize)
     }
+}
 
-    fn pack_xz(world_x: i32, world_z: i32) -> u8 {
-        let block_x = world_x & 0xF;
-        let block_z = world_z & 0xF;
-        ((block_x << 4) | block_z) as u8
-    }
+fn pack_xz(world_x: i32, world_z: i32) -> u8 {
+    let block_x = world_x & 0xF;
+    let block_z = world_z & 0xF;
+    ((block_x << 4) | block_z) as u8
 }

@@ -2,7 +2,7 @@ use indexmap::IndexMap;
 use std::sync::OnceLock;
 
 pub mod property;
-use property::*;
+use property::Property;
 
 mod block;
 pub use block::*;
@@ -40,16 +40,29 @@ impl BlockRegistry {
             let id = block["id"].as_u64().unwrap() as u16;
             let default_state = block["defaultStateId"].as_u64().unwrap() as u16;
 
-            let properties: &'static [DynamicProperty] = {
-                let props: Vec<DynamicProperty> = block["properties"]
+            let properties: &'static [Property] = {
+                let props: Vec<Property> = block["properties"]
                     .as_object()
                     .map(|props| {
                         props
                             .iter()
                             .map(|(name, values)| {
-                                let name: &'static str = Box::leak(name.clone().into_boxed_str());
-                                let count = values.as_array().unwrap().len() as u16;
-                                DynamicProperty { name, count }
+                                let name: &'static str =
+                                    Box::leak(name.clone().into_boxed_str());
+                                let values: &'static [&'static str] = {
+                                    let vals: Vec<&'static str> = values
+                                        .as_array()
+                                        .unwrap()
+                                        .iter()
+                                        .map(|v| {
+                                            let s: &'static str =
+                                                &*Box::leak(v.as_str().unwrap().to_string().into_boxed_str());
+                                            s
+                                        })
+                                        .collect();
+                                    Box::leak(vals.into_boxed_slice())
+                                };
+                                Property { name, values }
                             })
                             .collect()
                     })
@@ -129,7 +142,7 @@ pub struct BlockDef {
     pub id: u16,
     pub default_state: u16,
     pub min_state_id: u16,
-    pub properties: &'static [DynamicProperty],
+    pub properties: &'static [Property],
     pub block_entity: Option<BlockEntityInfo>,
 }
 
@@ -169,13 +182,6 @@ impl BlockDef {
     }
 }
 
-#[derive(Debug, Clone, Copy, PartialEq)]
-pub enum BambooLeaves {
-    None,
-    Small,
-    Large,
-}
-
 #[cfg(test)]
 mod tests {
     use tokio::time::Instant;
@@ -190,18 +196,9 @@ mod tests {
 
         let state = Block::GrassBlock.default_state();
 
-        // false since default state is snowy=false
-        assert_eq!(state.get_property::<p![Snowy]>(), Some(false));
+        assert_eq!(state.get_property("snowy"), Some("false"));
 
-        let state = state.with_property::<p![Snowy]>(true);
-        assert_eq!(state.get_property::<p![Snowy]>(), Some(true));
-
-        let mut bamboo = Block::Bamboo.default_state();
-        println!("leaves: {:?}", bamboo.get_property::<p![BambooLeaves]>());
-        bamboo.set_property::<p![BambooLeaves]>(BambooLeaves::Large);
-        println!(
-            "leaves after: {:?}",
-            bamboo.get_property::<p![BambooLeaves]>()
-        );
+        let state = state.with_property("snowy", "true").unwrap();
+        assert_eq!(state.get_property("snowy"), Some("true"));
     }
 }

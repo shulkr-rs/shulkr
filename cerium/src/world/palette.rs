@@ -9,17 +9,17 @@ pub enum PaletteFormat {
 
 #[derive(Debug, Clone)]
 pub struct Palette {
-    dim: usize,
-    min_bpe: u8,
-    max_bpe: u8,
-    direct_bpe: u8,
+    pub dim: usize,
+    pub min_bpe: u8,
+    pub max_bpe: u8,
+    pub direct_bpe: u8,
 
     pub bpe: u8,
     pub format: PaletteFormat,
     pub values: Vec<i64>,
 
-    data: Box<[u16]>,
-    count: HashMap<u16, i32>,
+    pub data: Box<[u16]>,
+    pub count: HashMap<u16, i32>,
 }
 
 impl Palette {

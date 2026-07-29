@@ -1,12 +1,11 @@
 use cerium::auth::AuthMode;
 use cerium::entity::GameMode;
 use cerium::event::player::{PlayerConfigEvent, PlayerEvent, PlayerSpawnEvent};
-use cerium::util::Direction;
 use cerium::world::{
     DimensionType, World,
     block::{Block, BlockState},
 };
-use cerium::{Server, p};
+use cerium::Server;
 
 fn main() {
     let server = Server::new(AuthMode::Online);
@@ -22,8 +21,8 @@ fn main() {
     }
 
     let mut state = Block::Hopper.default_state();
-    state.set_property::<p![FacingHopper]>(Direction::West);
-    state.set_property::<p![Enabled]>(false);
+    state.set_property("facing", "west");
+    state.set_property("enabled", "false");
 
     world.set_block(0, 70, 0, state);
 
