@@ -4,7 +4,7 @@ use crate::{
     entity::{EntityAnimation, EntityLike as _, EntityType, GameMode, Hand, Player},
     event::player::{
         CommandResultEvent, PlayerInputEvent, PlayerPickBlockEvent, PlayerPickEntityEvent,
-        PlayerRequestGameModeEvent,
+        PlayerRequestGameModeEvent, PlayerStartSneakingEvent, PlayerStopSneakingEvent,
     },
     item::ItemStack,
     protocol::{
@@ -282,14 +282,27 @@ fn handle_player_command(player: Player, packet: PlayerCommandPacket) {
 fn handle_player_input(player: Player, packet: PlayerInputPacket) {
     let server = player.server();
 
+    let sneaking = packet.flags.contains(PlayerInputFlags::SNEAK);
+    let was_sneaking = player.is_sneaking();
+
     server.events().fire(&mut PlayerInputEvent {
         player: player.clone(),
         flags: packet.flags.clone(),
     });
 
-    player
-        .0
-        .set_sneaking(packet.flags.contains(PlayerInputFlags::SNEAK));
+    if sneaking != was_sneaking {
+        player.0.set_sneaking(sneaking);
+
+        if sneaking {
+            server.events().fire(&mut PlayerStartSneakingEvent {
+                player: player.clone(),
+            });
+        } else {
+            server.events().fire(&mut PlayerStopSneakingEvent {
+                player: player.clone(),
+            });
+        }
+    }
 }
 
 fn handle_player_loaded(_player: Player, _packet: PlayerLoadedPacket) {

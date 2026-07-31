@@ -47,16 +47,16 @@ impl BlockRegistry {
                         props
                             .iter()
                             .map(|(name, values)| {
-                                let name: &'static str =
-                                    Box::leak(name.clone().into_boxed_str());
+                                let name: &'static str = Box::leak(name.clone().into_boxed_str());
                                 let values: &'static [&'static str] = {
                                     let vals: Vec<&'static str> = values
                                         .as_array()
                                         .unwrap()
                                         .iter()
                                         .map(|v| {
-                                            let s: &'static str =
-                                                &*Box::leak(v.as_str().unwrap().to_string().into_boxed_str());
+                                            let s: &'static str = &*Box::leak(
+                                                v.as_str().unwrap().to_string().into_boxed_str(),
+                                            );
                                             s
                                         })
                                         .collect();

@@ -101,11 +101,7 @@ impl BlockState {
     }
 
     pub fn has_property(&self, name: &str) -> bool {
-        self.block
-            .def()
-            .properties
-            .iter()
-            .any(|p| p.name == name)
+        self.block.def().properties.iter().any(|p| p.name == name)
     }
 }
 

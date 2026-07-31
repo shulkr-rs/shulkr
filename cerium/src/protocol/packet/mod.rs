@@ -18,13 +18,13 @@ pub mod client {
     pub mod login {
         mod encryption_response;
         mod login_acknowledged;
-        mod login_start;
         mod login_plugin_response;
+        mod login_start;
 
         pub use encryption_response::EncryptionResponsePacket;
         pub use login_acknowledged::LoginAcknowledgePacket;
-        pub use login_start::LoginStartPacket;
         pub use login_plugin_response::LoginPluginResponsePacket;
+        pub use login_start::LoginStartPacket;
     }
 
     pub mod config {
@@ -51,6 +51,7 @@ pub mod client {
         mod interact;
         mod keep_alive;
         mod pick_block;
+        mod pick_entity;
         mod ping_request;
         mod player_abilities;
         mod player_action;
@@ -62,15 +63,14 @@ pub mod client {
         mod player_position_and_rotation;
         mod player_rotation;
         mod player_session;
+        mod request_game_mode;
         mod seen_advancements;
         mod set_creative_mode_slot;
         mod set_held_item;
         mod swing_arm;
         mod use_item;
         mod use_item_on;
-        mod request_game_mode;
-        mod pick_entity;
-        
+
         pub use change_recipe_book_settings::ChangeRecipeBookSettingsPacket;
         pub use chat_command::ChatCommandPacket;
         pub use chat_message::ChatMessagePacket;
@@ -82,6 +82,7 @@ pub mod client {
         pub use interact::InteractPacket;
         pub use keep_alive::KeepAlivePacket;
         pub use pick_block::PickItemFromBlockPacket;
+        pub use pick_entity::PickItemFromEntityPacket;
         pub use ping_request::PingRequestPacket;
         pub use player_abilities::PlayerAbilitiesPacket;
         pub use player_action::*;
@@ -93,14 +94,13 @@ pub mod client {
         pub use player_position_and_rotation::PlayerPositionAndRotationPacket;
         pub use player_rotation::PlayerRotationPacket;
         pub use player_session::PlayerSessionPacket;
+        pub use request_game_mode::PlayerRequestGameModePacket;
         pub use seen_advancements::SeenAdvancementsPacket;
         pub use set_creative_mode_slot::SetCreativeModeSlotPacket;
         pub use set_held_item::SetHeldItemPacket;
         pub use swing_arm::SwingArmPacket;
         pub use use_item::UseItemPacket;
         pub use use_item_on::UseItemOnPacket;
-        pub use request_game_mode::PlayerRequestGameModePacket;
-        pub use pick_entity::PickItemFromEntityPacket;
     }
 
     pub use config::*;

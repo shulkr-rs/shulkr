@@ -34,6 +34,24 @@ impl EntityMeta {
         self.holder.set(MetadataRef::SNEAKING, value);
     }
 
+    pub fn is_swimming(&self) -> bool {
+        self.holder.get(MetadataRef::SWIMMING).unwrap_or(false)
+    }
+
+    pub fn set_swimming(&mut self, value: bool) {
+        self.holder.set(MetadataRef::SWIMMING, value);
+    }
+
+    pub fn is_flying_with_elytra(&self) -> bool {
+        self.holder
+            .get(MetadataRef::FLYING_WITH_ELYTRA)
+            .unwrap_or(false)
+    }
+
+    pub fn set_flying_with_elytra(&mut self, value: bool) {
+        self.holder.set(MetadataRef::FLYING_WITH_ELYTRA, value);
+    }
+
     pub fn is_sprinting(&self) -> bool {
         self.holder.get(MetadataRef::SPRINTING).unwrap_or(false)
     }

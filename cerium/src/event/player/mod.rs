@@ -16,6 +16,7 @@ pub use gamemode::PlayerRequestGameModeEvent;
 pub use input::PlayerInputEvent;
 pub use mv::PlayerMoveEvent;
 pub use pick::{PlayerPickBlockEvent, PlayerPickEntityEvent};
+pub use sneak::{PlayerStartSneakingEvent, PlayerStopSneakingEvent};
 pub use spawn::PlayerSpawnEvent;
 
 use crate::{entity::Player, event::Event};

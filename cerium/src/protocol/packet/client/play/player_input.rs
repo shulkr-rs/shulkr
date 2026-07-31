@@ -16,7 +16,7 @@ impl ClientPacket for PlayerInputPacket {}
 impl Decode for PlayerInputPacket {
     fn decode<R: PacketRead>(r: &mut R) -> Result<Self, DecodeError> {
         Ok(Self {
-            flags: PlayerInputFlags::from_bits(r.read_u8()?).unwrap(),
+            flags: PlayerInputFlags::from_bits_truncate(r.read_u8()?),
         })
     }
 }

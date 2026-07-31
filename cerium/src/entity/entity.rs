@@ -55,6 +55,22 @@ impl Entity {
         self.0.set_sneaking(value)
     }
 
+    pub fn is_swimming(&self) -> bool {
+        self.0.is_swimming()
+    }
+
+    pub fn set_swimming(&self, value: bool) {
+        self.0.set_swimming(value)
+    }
+
+    pub fn is_flying_with_elytra(&self) -> bool {
+        self.0.is_flying_with_elytra()
+    }
+
+    pub fn set_flying_with_elytra(&self, value: bool) {
+        self.0.set_flying_with_elytra(value)
+    }
+
     pub fn is_sprinting(&self) -> bool {
         self.0.is_sprinting()
     }
@@ -185,16 +201,79 @@ impl Inner {
     }
 
     pub fn set_sneaking(&self, value: bool) {
-        {
-            let mut meta = self.meta.lock();
-            meta.set_sneaking(value);
-        }
-        self.refresh_meta();
-        self.set_pose(if value {
+        self.set_sneaking_with(value, false)
+    }
+
+    pub(crate) fn set_sneaking_with(&self, value: bool, flying: bool) {
+        self.update_flag_and_pose(flying, |meta| meta.set_sneaking(value));
+    }
+
+    pub fn is_swimming(&self) -> bool {
+        self.meta.lock().is_swimming()
+    }
+
+    pub fn set_swimming(&self, value: bool) {
+        self.set_swimming_with(value, false)
+    }
+
+    pub(crate) fn set_swimming_with(&self, value: bool, flying: bool) {
+        self.update_flag_and_pose(flying, |meta| meta.set_swimming(value));
+    }
+
+    pub fn is_flying_with_elytra(&self) -> bool {
+        self.meta.lock().is_flying_with_elytra()
+    }
+
+    pub fn set_flying_with_elytra(&self, value: bool) {
+        self.set_flying_with_elytra_with(value, false)
+    }
+
+    pub(crate) fn set_flying_with_elytra_with(&self, value: bool, flying: bool) {
+        self.update_flag_and_pose(flying, |meta| meta.set_flying_with_elytra(value));
+    }
+
+    pub(crate) fn resolve_pose(&self, flying: bool) -> EntityPose {
+        let meta = self.meta.lock();
+
+        if meta.is_flying_with_elytra() {
+            EntityPose::FallFlying
+        } else if meta.is_swimming() {
+            EntityPose::Swimming
+        } else if meta.is_sneaking() && !flying {
             EntityPose::Sneaking
         } else {
             EntityPose::Standing
-        });
+        }
+    }
+
+    pub(crate) fn refresh_pose(&self, flying: bool) -> bool {
+        let pose = self.resolve_pose(flying);
+        {
+            let mut meta = self.meta.lock();
+            if meta.get_pose() == pose {
+                return false;
+            }
+            meta.set_pose(pose);
+        }
+        self.refresh_meta();
+        true
+    }
+
+    fn update_flag_and_pose<F>(&self, flying: bool, f: F)
+    where
+        F: FnOnce(&mut EntityMeta),
+    {
+        {
+            let mut meta = self.meta.lock();
+            f(&mut meta);
+        }
+
+        let pose = self.resolve_pose(flying);
+        {
+            let mut meta = self.meta.lock();
+            meta.set_pose(pose);
+        }
+        self.refresh_meta();
     }
 
     fn refresh_meta(&self) {

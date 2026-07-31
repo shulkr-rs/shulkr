@@ -3,7 +3,6 @@ use crate::{
     event::{Event, player::PlayerEvent},
 };
 
-/// Not implemented yet.
 pub struct PlayerStartSneakingEvent {
     pub(crate) player: Player,
 }
@@ -16,7 +15,6 @@ impl PlayerEvent for PlayerStartSneakingEvent {
     }
 }
 
-/// Not implemented yet.
 pub struct PlayerStopSneakingEvent {
     pub(crate) player: Player,
 }

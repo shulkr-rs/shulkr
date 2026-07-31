@@ -231,6 +231,24 @@ impl Player {
         self.0.is_sneaking()
     }
 
+    /// Returns if the player is swimming.
+    pub fn is_swimming(&self) -> bool {
+        self.0.is_swimming()
+    }
+
+    pub fn set_swimming(&self, value: bool) {
+        self.0.set_swimming(value)
+    }
+
+    /// Returns if the player is gliding with an elytra.
+    pub fn is_flying_with_elytra(&self) -> bool {
+        self.0.is_flying_with_elytra()
+    }
+
+    pub fn set_flying_with_elytra(&self, value: bool) {
+        self.0.set_flying_with_elytra(value)
+    }
+
     // ===== Scoreboard =====
 
     /// Changes the tablist header for the player.
@@ -923,19 +941,11 @@ impl Inner {
     }
 
     fn update_flying(&self, value: bool) {
+        let changed = self.flying() != value;
         self.abilities.flying.store(value, Ordering::Release);
 
-        if self.flying() != value {
-            let pose = self.entity.pose();
-            match () {
-                _ if self.is_sneaking() && pose == EntityPose::Standing => {
-                    self.update_pose(EntityPose::Sneaking);
-                }
-                _ if pose == EntityPose::Sneaking => {
-                    self.update_pose(EntityPose::Standing);
-                }
-                _ => {}
-            }
+        if changed {
+            self.entity.0.refresh_pose(value);
         }
     }
 
@@ -990,7 +1000,39 @@ impl Inner {
     }
 
     pub fn set_sneaking(&self, value: bool) {
-        self.entity.set_sneaking(value);
+        if self.is_sneaking() == value {
+            return;
+        }
+
+        self.entity.0.set_sneaking_with(value, self.flying());
+        self.send_packet(&self.entity.0.metadata_packet());
+    }
+
+    fn is_swimming(&self) -> bool {
+        self.entity.is_swimming()
+    }
+
+    pub fn set_swimming(&self, value: bool) {
+        if self.is_swimming() == value {
+            return;
+        }
+
+        self.entity.0.set_swimming_with(value, self.flying());
+        self.send_packet(&self.entity.0.metadata_packet());
+    }
+
+    fn is_flying_with_elytra(&self) -> bool {
+        self.entity.is_flying_with_elytra()
+    }
+
+    pub fn set_flying_with_elytra(&self, value: bool) {
+        if self.is_flying_with_elytra() == value {
+            return;
+        }
+
+        self.entity
+            .0
+            .set_flying_with_elytra_with(value, self.flying());
         self.send_packet(&self.entity.0.metadata_packet());
     }
 

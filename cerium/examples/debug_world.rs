@@ -1,11 +1,8 @@
+use cerium::Server;
 use cerium::auth::AuthMode;
 use cerium::entity::GameMode;
 use cerium::event::player::{PlayerConfigEvent, PlayerEvent, PlayerSpawnEvent};
-use cerium::world::{
-    DimensionType, World,
-    block::{Block, BlockState},
-};
-use cerium::Server;
+use cerium::world::{DimensionType, World, block::BlockState};
 
 fn main() {
     let server = Server::new(AuthMode::Online);
@@ -19,12 +16,6 @@ fn main() {
         let bx = ((pos % 168) + 1) as i32;
         world.set_block((bz * 2) - 1, 70, (bx * 2) - 1, *block);
     }
-
-    let mut state = Block::Hopper.default_state();
-    state.set_property("facing", "west");
-    state.set_property("enabled", "false");
-
-    world.set_block(0, 70, 0, state);
 
     server
         .events()
