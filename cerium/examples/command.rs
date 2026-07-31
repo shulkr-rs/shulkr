@@ -14,9 +14,7 @@ fn main() {
         }
     }
 
-    server
-        .command_dispatcher()
-        .register(Command::new("whoami".to_string()));
+    server.command_dispatcher().register(Command::new("whoami"));
 
     server
         .events()

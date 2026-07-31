@@ -19,6 +19,14 @@ impl CommandDispatcher {
         commands.push(command);
     }
 
+    pub fn register_all(&self, commands: impl IntoIterator<Item = Command>) {
+        let mut cmds = self.commands.write();
+        for command in commands {
+            cmds.retain(|existing| existing.name != command.name);
+            cmds.push(command);
+        }
+    }
+
     pub fn unregister(&mut self, command: Command) {
         let mut commands = self.commands.write();
         commands.retain(|existing| existing.name != command.name);

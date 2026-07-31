@@ -21,9 +21,9 @@ pub struct Command {
 }
 
 impl Command {
-    pub fn new(name: String) -> Self {
+    pub fn new(name: impl Into<String>) -> Self {
         Self {
-            name,
+            name: name.into(),
             aliases: Vec::new(),
             args: Vec::new(),
             subcommands: Vec::new(),
