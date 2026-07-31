@@ -206,6 +206,18 @@ impl BlockPosition {
             z: self.z + z,
         }
     }
+
+    pub const fn from_long(value: i64) -> Self {
+        let x = value >> 38;
+        let y = value & 0xFFF;
+        let z = (value >> 12) & 0x3FFFFFF;
+
+        Self {
+            x: if x >= 0x2000000 { x - 0x4000000 } else { x },
+            y: if y >= 0x800 { y - 0x1000 } else { y },
+            z: if z >= 0x2000000 { z - 0x4000000 } else { z },
+        }
+    }
 }
 
 impl Into<BlockPosition> for Position {

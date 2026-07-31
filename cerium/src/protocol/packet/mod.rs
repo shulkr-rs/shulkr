@@ -50,7 +50,7 @@ pub mod client {
         mod confirm_teleportation;
         mod interact;
         mod keep_alive;
-        mod pick_item_from_block;
+        mod pick_block;
         mod ping_request;
         mod player_abilities;
         mod player_action;
@@ -68,7 +68,9 @@ pub mod client {
         mod swing_arm;
         mod use_item;
         mod use_item_on;
-
+        mod request_game_mode;
+        mod pick_entity;
+        
         pub use change_recipe_book_settings::ChangeRecipeBookSettingsPacket;
         pub use chat_command::ChatCommandPacket;
         pub use chat_message::ChatMessagePacket;
@@ -79,7 +81,7 @@ pub mod client {
         pub use confirm_teleportation::ConfirmTeleportationPacket;
         pub use interact::InteractPacket;
         pub use keep_alive::KeepAlivePacket;
-        pub use pick_item_from_block::PickItemFromBlockPacket;
+        pub use pick_block::PickItemFromBlockPacket;
         pub use ping_request::PingRequestPacket;
         pub use player_abilities::PlayerAbilitiesPacket;
         pub use player_action::*;
@@ -97,6 +99,8 @@ pub mod client {
         pub use swing_arm::SwingArmPacket;
         pub use use_item::UseItemPacket;
         pub use use_item_on::UseItemOnPacket;
+        pub use request_game_mode::PlayerRequestGameModePacket;
+        pub use pick_entity::PickItemFromEntityPacket;
     }
 
     pub use config::*;

@@ -9,7 +9,7 @@ use crate::{
     },
     text::TextComponent,
 };
-use crate::{event::ServerListPingEvent, network::client::Connection};
+use crate::{event::server_ping::ServerListPingEvent, network::client::Connection};
 
 use std::{io::Cursor, sync::Arc};
 

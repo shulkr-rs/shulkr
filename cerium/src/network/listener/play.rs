@@ -1,8 +1,11 @@
 use std::io::Cursor;
 
 use crate::{
-    entity::{EntityAnimation, EntityLike as _, GameMode, Hand, Player},
-    event::player::CommandResultEvent,
+    entity::{EntityAnimation, EntityLike as _, EntityType, GameMode, Hand, Player},
+    event::player::{
+        CommandResultEvent, PlayerInputEvent, PlayerPickBlockEvent, PlayerPickEntityEvent,
+        PlayerRequestGameModeEvent,
+    },
     item::ItemStack,
     protocol::{
         decode::{Decode as _, DecodeError},
@@ -10,10 +13,11 @@ use crate::{
             AcknowledgeBlockChangePacket, ChangeRecipeBookSettingsPacket, ChatCommandPacket,
             ChatMessagePacket, ChunkBatchReceivedPacket, ClickContainerPacket, ClientInfoPacket,
             ClientTickEndPacket, ConfirmTeleportationPacket, EntityAnimationPacket, InteractPacket,
-            PickItemFromBlockPacket, PlayerActionPacket, PlayerCommand, PlayerCommandPacket,
-            PlayerDiggingState, PlayerInputFlags, PlayerInputPacket, PlayerLoadedPacket,
-            PlayerMovementFlagsPacket, PlayerPositionAndRotationPacket, PlayerPositionPacket,
-            PlayerRotationPacket, PlayerSessionPacket, PluginMessagePacket, SeenAdvancementsPacket,
+            PickItemFromBlockPacket, PickItemFromEntityPacket, PlayerActionPacket, PlayerCommand,
+            PlayerCommandPacket, PlayerDiggingState, PlayerInputFlags, PlayerInputPacket,
+            PlayerLoadedPacket, PlayerMovementFlagsPacket, PlayerPositionAndRotationPacket,
+            PlayerPositionPacket, PlayerRequestGameModePacket, PlayerRotationPacket,
+            PlayerSessionPacket, PluginMessagePacket, SeenAdvancementsPacket,
             SetBlockDestroyStagePacket, SetCreativeModeSlotPacket, SwingArmPacket, UseItemOnPacket,
             UseItemPacket,
             client::play::{
@@ -22,13 +26,14 @@ use crate::{
             },
         },
     },
-    util::{Position, Viewable},
+    util::{BlockPosition, Position, Viewable},
 };
 
 #[rustfmt::skip]
 pub fn handle_packet(player: Player, id: i32, data: &mut Cursor<&[u8]>) -> Result<(), DecodeError> {
     match id {
         0x00 => handle_confirm_teleportation(player, ConfirmTeleportationPacket::decode(data)?),
+        0x05 => handle_request_game_mode(player, PlayerRequestGameModePacket::decode(data)?),
         0x07 => handle_chat_command(player, ChatCommandPacket::decode(data)?),
         0x09 => handle_chat_message(player, ChatMessagePacket::decode(data)?),
         0x0A => handle_player_session(player, PlayerSessionPacket::decode(data)?),
@@ -45,6 +50,7 @@ pub fn handle_packet(player: Player, id: i32, data: &mut Cursor<&[u8]>) -> Resul
         0x20 => handle_player_rotation(player, PlayerRotationPacket::decode(data)?),
         0x21 => handle_player_movement_flags(player, PlayerMovementFlagsPacket::decode(data)?),
         0x24 => handle_pick_item_from_block(player, PickItemFromBlockPacket::decode(data)?),
+        0x25 => handle_pick_item_from_entity(player, PickItemFromEntityPacket::decode(data)?),
         0x26 => handle_ping_request(player, PingRequestPacket::decode(data)?),
         0x28 => handle_player_abilities(player, PlayerAbilitiesPacket::decode(data)?),
         0x29 => handle_player_action(player, PlayerActionPacket::decode(data)?),
@@ -65,6 +71,15 @@ pub fn handle_packet(player: Player, id: i32, data: &mut Cursor<&[u8]>) -> Resul
 
 fn handle_confirm_teleportation(_player: Player, _packet: ConfirmTeleportationPacket) {
     log::warn!("todo: handle_confirm_teleportation");
+}
+
+fn handle_request_game_mode(player: Player, packet: PlayerRequestGameModePacket) {
+    let server = player.server();
+
+    server.events().fire(&mut PlayerRequestGameModeEvent {
+        player: player.clone(),
+        game_mode: packet.game_mode,
+    });
 }
 
 fn handle_chat_command(player: Player, packet: ChatCommandPacket) {
@@ -192,8 +207,23 @@ fn handle_player_movement_flags(_player: Player, _packet: PlayerMovementFlagsPac
     log::warn!("todo: handle_player_movement_flags");
 }
 
-fn handle_pick_item_from_block(_player: Player, _packet: PickItemFromBlockPacket) {
-    log::warn!("todo: handle_pick_item_from_block");
+fn handle_pick_item_from_block(player: Player, packet: PickItemFromBlockPacket) {
+    let server = player.server();
+    server.events().fire(&mut PlayerPickBlockEvent {
+        player: player.clone(),
+        position: BlockPosition::from_long(packet.position),
+        include_data: packet.include_data,
+    });
+}
+
+fn handle_pick_item_from_entity(player: Player, packet: PickItemFromEntityPacket) {
+    let server = player.server();
+    server.events().fire(&mut PlayerPickEntityEvent {
+        player: player.clone(),
+        // todo: bad, move to EntityType::from_id() when available
+        entity_type: unsafe { std::mem::transmute::<_, EntityType>(packet.entity_id) },
+        include_data: packet.include_data,
+    });
 }
 
 fn handle_ping_request(_player: Player, _packet: PingRequestPacket) {
@@ -250,6 +280,13 @@ fn handle_player_command(player: Player, packet: PlayerCommandPacket) {
 }
 
 fn handle_player_input(player: Player, packet: PlayerInputPacket) {
+    let server = player.server();
+
+    server.events().fire(&mut PlayerInputEvent {
+        player: player.clone(),
+        flags: packet.flags.clone(),
+    });
+
     player
         .0
         .set_sneaking(packet.flags.contains(PlayerInputFlags::SNEAK));

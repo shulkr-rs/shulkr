@@ -1,14 +1,24 @@
-use crate::{entity::Player, event::Event};
+#![allow(unused)]
 
 mod command;
+mod config;
+mod drop;
+mod gamemode;
+mod input;
 mod mv;
-mod player_config;
-mod player_spawn;
+mod pick;
+mod sneak;
+mod spawn;
 
 pub use command::CommandResultEvent;
+pub use config::PlayerConfigEvent;
+pub use gamemode::PlayerRequestGameModeEvent;
+pub use input::PlayerInputEvent;
 pub use mv::PlayerMoveEvent;
-pub use player_config::PlayerConfigEvent;
-pub use player_spawn::PlayerSpawnEvent;
+pub use pick::{PlayerPickBlockEvent, PlayerPickEntityEvent};
+pub use spawn::PlayerSpawnEvent;
+
+use crate::{entity::Player, event::Event};
 
 pub trait PlayerEvent
 where
