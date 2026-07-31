@@ -93,7 +93,7 @@ fn main() {
     - [x] Set Slot Content
     - [ ] Click Slot
     - [x] Create ItemStack
-- [x] Text components
+- [x] Text components (+ MiniMessage)
 - [x] Command System
 - [x] Event System
 - [ ] Resource Pack Support

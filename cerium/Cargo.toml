@@ -14,6 +14,7 @@ doctest = false
 [features]
 anvil = ["dep:bitfield-struct", "dep:flate2", "dep:byteorder"]
 polar = ["dep:zstd"]
+minimessage = []
 
 
 [dependencies]

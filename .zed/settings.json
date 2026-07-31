@@ -3,10 +3,10 @@
     "rust-analyzer": {
       "initialization_options": {
         "cargo": {
-          "features": ["polar", "anvil"]
+          "features": ["polar", "anvil", "minimessage"]
         },
         "check": {
-          "features": ["polar", "anvil"]
+          "features": ["polar", "anvil", "minimessage"]
         }
       }
     }
