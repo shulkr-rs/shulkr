@@ -1,9 +1,11 @@
+pub mod entity_status;
+pub mod meta;
+
 mod entity;
 mod entity_animation;
 mod entity_type;
 mod game_mode;
 mod hand;
-pub mod meta;
 mod player;
 
 pub use entity::{Entity, EntityLike};

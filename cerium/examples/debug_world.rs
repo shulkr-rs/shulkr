@@ -1,7 +1,9 @@
 use cerium::Server;
 use cerium::auth::AuthMode;
 use cerium::entity::GameMode;
-use cerium::event::player::{PlayerConfigEvent, PlayerEvent, PlayerSpawnEvent};
+use cerium::event::player::{
+    PlayerConfigEvent, PlayerEvent, PlayerRequestGameModeEvent, PlayerSpawnEvent,
+};
 use cerium::world::{DimensionType, World, block::BlockState};
 
 fn main() {
@@ -24,8 +26,15 @@ fn main() {
             event.set_position((0.5, 71., 0.5));
         })
         .subscribe(move |event: &mut PlayerSpawnEvent| {
-            event.get_player().set_game_mode(GameMode::Creative);
-            event.get_player().set_flying(true);
+            let player = event.get_player();
+            player.set_game_mode(GameMode::Creative);
+            player.set_flying(true);
+            player.set_permission_level(4);
+        })
+        .subscribe(|event: &mut PlayerRequestGameModeEvent| {
+            event
+                .get_player()
+                .set_game_mode(event.requested_game_mode());
         });
 
     server.bind("127.0.0.1:25565").unwrap();

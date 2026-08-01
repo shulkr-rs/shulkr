@@ -164,6 +164,7 @@ pub mod server {
         mod disconnect;
         mod display_objective;
         mod entity_animation;
+        mod entity_event;
         mod entity_position;
         mod entity_position_rotation;
         mod entity_rotation;
@@ -206,6 +207,7 @@ pub mod server {
         pub use disconnect::DisconnectPacket;
         pub use display_objective::DisplayObjectivePacket;
         pub use entity_animation::EntityAnimationPacket;
+        pub use entity_event::EntityEventPacket;
         pub use entity_position::EntityPositionPacket;
         pub use entity_position_rotation::EntityPositionRotationPacket;
         pub use entity_rotation::EntityRotationPacket;

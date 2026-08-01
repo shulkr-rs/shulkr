@@ -17,6 +17,7 @@ use crate::{
     entity::{
         EntityType, GameMode, Hand,
         entity::{Entity, EntityLike},
+        entity_status,
     },
     event::{Cancellable, inventory::InventoryOpenEvent, player::PlayerMoveEvent},
     inventory::{Inventory, PlayerInventory},
@@ -24,11 +25,11 @@ use crate::{
     network::client::Connection,
     protocol::packet::{
         ChunkBatchFinishedPacket, ChunkBatchStartPacket, ChunkDataAndUpdateLightPacket,
-        EntityPositionRotationPacket, EntityRotationPacket, GameEventPacket, Packet,
-        PlayerAbilities, PlayerAction, PlayerEntry, PlayerInfoFlags, PlayerInfoRemovePacket,
-        PlayerInfoUpdatePacket, RespawnPacket, ServerPacket, SetCenterChunkPacket,
-        SetHeadRotationPacket, SetTablistHeaderFooterPacket, SyncPlayerPositionPacket,
-        SystemChatMessagePacket, UnloadChunkPacket,
+        EntityEventPacket, EntityPositionRotationPacket, EntityRotationPacket, GameEventPacket,
+        Packet, PlayerAbilities, PlayerAction, PlayerEntry, PlayerInfoFlags,
+        PlayerInfoRemovePacket, PlayerInfoUpdatePacket, RespawnPacket, ServerPacket,
+        SetCenterChunkPacket, SetHeadRotationPacket, SetTablistHeaderFooterPacket,
+        SyncPlayerPositionPacket, SystemChatMessagePacket, UnloadChunkPacket,
         server::{PlayerAbilitiesPacket, SetHeldItemPacket, play::KeepAlivePacket},
     },
     text::TextComponent,
@@ -40,11 +41,11 @@ use crate::{
 pub const MAX_VIEW_DISTANCE: i32 = 32;
 
 #[derive(Clone, PartialEq)]
-pub struct Player(pub(crate) Arc<Inner>);
+pub struct Player(pub(crate) Arc<PlayerData>);
 
 impl Player {
     pub(crate) fn new(connection: Arc<Connection>, server: Server) -> Self {
-        Self(Arc::new(Inner::new(connection, server)))
+        Self(Arc::new(PlayerData::new(connection, server)))
     }
 
     pub fn addr(&self) -> SocketAddr {
@@ -90,8 +91,6 @@ impl Player {
         self.0.change_world(world)
     }
 
-    // ===== Inventory ======
-
     /// Returns the player's inventory.
     ///
     /// Note: this is not the open inventory. Use [`Player#get_open_inventory()`] instead.
@@ -101,12 +100,12 @@ impl Player {
 
     /// Opens an [`Inventory`] for a player.
     pub fn open_inventory(&self, inventory: Inventory) {
-        Inner::open_inventory(self.clone(), inventory);
+        PlayerData::open_inventory(self.clone(), inventory);
     }
 
     /// Closes the opened inventory if it is open.
     pub fn close_inventory(&self) {
-        Inner::close_inventory(self.clone());
+        PlayerData::close_inventory(self.clone());
     }
 
     /// Returns the open inventory.
@@ -125,8 +124,6 @@ impl Player {
     pub fn set_held_slot(&self, slot: u8) {
         self.0.set_held_slot(slot)
     }
-
-    // ===== Position & Movement ======
 
     pub fn refresh_position(&self, new_position: Position) {
         let old_position = self.position();
@@ -165,8 +162,6 @@ impl Player {
     pub fn refresh_on_ground(&self, value: bool) {
         self.0.refresh_on_ground(value)
     }
-
-    // ===== Abilities ======
 
     /// Returns if the player is invurnable.
     pub fn invurnable(&self) -> bool {
@@ -253,8 +248,6 @@ impl Player {
         self.0.set_flying_with_elytra(value)
     }
 
-    // ===== Scoreboard =====
-
     /// Changes the tablist header for the player.
     ///
     /// Note: This will clear the footer.
@@ -276,6 +269,19 @@ impl Player {
         footer: impl Into<TextComponent>,
     ) {
         self.0.set_header_and_footer(header.into(), footer.into())
+    }
+
+    pub fn set_permission_level(&self, permission_level: u8) {
+        self.0
+            .permission_level
+            .store(permission_level, Ordering::Relaxed);
+
+        let level = entity_status::player::PERMISSION_LEVEL_0 + permission_level;
+        self.0.update_status(level);
+    }
+
+    pub fn permission_level(&self) -> u8 {
+        self.0.permission_level.load(Ordering::Relaxed)
     }
 }
 
@@ -504,7 +510,7 @@ impl Abilities {
     }
 }
 
-pub(crate) struct Inner {
+pub(crate) struct PlayerData {
     connection: Arc<Connection>,
     game_profile: GameProfile,
     entity: Entity,
@@ -513,6 +519,7 @@ pub(crate) struct Inner {
     game_mode: Mutex<GameMode>,
     pub(crate) chunk_queue: Mutex<ChunkQueue>,
     teleport_id: AtomicI32,
+    permission_level: AtomicU8,
 
     last_view: Mutex<Option<((i32, i32), i32)>>,
     tracked_chunks: Mutex<HashMap<(i32, i32), TrackState>>,
@@ -531,7 +538,7 @@ pub(crate) struct Inner {
     server: Server,
 }
 
-impl Inner {
+impl PlayerData {
     fn new(connection: Arc<Connection>, server: Server) -> Self {
         let game_profile = connection.game_profile.lock().clone().unwrap();
         Self {
@@ -543,6 +550,7 @@ impl Inner {
             game_mode: Mutex::new(GameMode::Survival),
             chunk_queue: Mutex::new(ChunkQueue::new()),
             teleport_id: AtomicI32::default(),
+            permission_level: AtomicU8::default(),
             last_view: Mutex::new(None),
             tracked_chunks: Mutex::new(HashMap::new()),
             pending_loads: Mutex::new(HashSet::new()),
@@ -570,6 +578,15 @@ impl Inner {
 
     fn game_mode(&self) -> GameMode {
         *self.game_mode.lock()
+    }
+
+    fn update_status(&self, status: u8) {
+        let packet = EntityEventPacket {
+            entity_id: self.id(),
+            event: status,
+        };
+        self.broadcast_packet(&packet);
+        self.send_packet(&packet);
     }
 
     pub(crate) fn set_position(&self, position: Position) {
@@ -725,8 +742,6 @@ impl Inner {
         self.held_slot.store(slot, Ordering::Release);
     }
 
-    // ===== World ======
-
     fn untrack_chunk(&self, cx: i32, cz: i32) {
         let Some(state) = self.tracked_chunks.lock().remove(&(cx, cz)) else {
             return;
@@ -797,8 +812,6 @@ impl Inner {
     pub(crate) fn set_world(&self, world: World) {
         (*self.world.lock()) = Some(world)
     }
-
-    // ===== Position & Movement ======
 
     fn update_position(&self, new_position: Position) -> bool {
         let old_position = self.position();
@@ -897,8 +910,6 @@ impl Inner {
     fn next_teleport_id(&self) -> i32 {
         self.teleport_id.fetch_add(1, Ordering::Release)
     }
-
-    // ===== Abilities ======
 
     fn insta_break(&self) -> bool {
         self.abilities.insta_break.load(Ordering::Acquire)
@@ -1096,14 +1107,12 @@ impl Inner {
         });
     }
 
-    // ===== Scoreboard =====
-
     fn set_header_and_footer(&self, header: TextComponent, footer: TextComponent) {
         self.send_packet(&SetTablistHeaderFooterPacket { header, footer });
     }
 }
 
-impl Tickable for Inner {
+impl Tickable for PlayerData {
     fn tick(&self) {
         // Keep Alive
         {
@@ -1119,7 +1128,7 @@ impl Tickable for Inner {
     }
 }
 
-impl Viewable for Inner {
+impl Viewable for PlayerData {
     fn add_viewer(&self, player: Player) {
         player.send_packet(&self.add_to_list_packet());
 
@@ -1138,13 +1147,13 @@ impl Viewable for Inner {
     }
 }
 
-impl PartialEq for Inner {
+impl PartialEq for PlayerData {
     fn eq(&self, other: &Self) -> bool {
         self.uuid() == other.uuid()
     }
 }
 
-impl EntityLike for Inner {
+impl EntityLike for PlayerData {
     fn id(&self) -> i32 {
         self.entity.id()
     }
