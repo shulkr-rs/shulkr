@@ -6,6 +6,17 @@ pub enum GameMode {
     Spectator,
 }
 
+impl From<GameMode> for u8 {
+    fn from(value: GameMode) -> Self {
+        match value {
+            GameMode::Survival => 0,
+            GameMode::Creative => 1,
+            GameMode::Adventure => 2,
+            GameMode::Spectator => 3,
+        }
+    }
+}
+
 impl TryFrom<i32> for GameMode {
     type Error = ();
 

@@ -32,6 +32,10 @@ impl World {
         )))
     }
 
+    pub fn dimension(&self) -> RegistryKey<DimensionType> {
+        self.0.dimension()
+    }
+
     pub fn set_chunk(&mut self, chunk: Chunk) {
         self.0
             .chunks
@@ -149,6 +153,7 @@ mod inner {
     use tokio::sync::{Semaphore, watch};
 
     pub(super) struct World {
+        dimension: RegistryKey<DimensionType>,
         dimension_type: DimensionType,
         pub(super) chunks: RwLock<HashMap<(i32, i32), (Chunk, usize)>>,
         entities: RwLock<Vec<Entity>>,
@@ -163,10 +168,15 @@ mod inner {
             generator: Option<Arc<super::ChunkGenerator>>,
         ) -> Self {
             let server = Server::current();
-            let dimension = server.registries().dimension_type.get(&dimension).unwrap();
-            let dimension_type = dimension.clone();
+            let dimension_type = server
+                .registries()
+                .dimension_type
+                .get(&dimension)
+                .unwrap()
+                .clone();
 
             Self {
+                dimension,
                 dimension_type,
                 chunks: RwLock::new(HashMap::new()),
                 entities: RwLock::new(Vec::new()),
@@ -179,6 +189,10 @@ mod inner {
                         * 4,
                 )),
             }
+        }
+
+        pub(super) fn dimension(&self) -> RegistryKey<DimensionType> {
+            self.dimension.clone()
         }
 
         pub(super) fn take_or_create_pending(

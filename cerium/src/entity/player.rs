@@ -26,9 +26,9 @@ use crate::{
         ChunkBatchFinishedPacket, ChunkBatchStartPacket, ChunkDataAndUpdateLightPacket,
         EntityPositionRotationPacket, EntityRotationPacket, GameEventPacket, Packet,
         PlayerAbilities, PlayerAction, PlayerEntry, PlayerInfoFlags, PlayerInfoRemovePacket,
-        PlayerInfoUpdatePacket, ServerPacket, SetCenterChunkPacket, SetHeadRotationPacket,
-        SetTablistHeaderFooterPacket, SyncPlayerPositionPacket, SystemChatMessagePacket,
-        UnloadChunkPacket,
+        PlayerInfoUpdatePacket, RespawnPacket, ServerPacket, SetCenterChunkPacket,
+        SetHeadRotationPacket, SetTablistHeaderFooterPacket, SyncPlayerPositionPacket,
+        SystemChatMessagePacket, UnloadChunkPacket,
         server::{PlayerAbilitiesPacket, SetHeldItemPacket, play::KeepAlivePacket},
     },
     text::TextComponent,
@@ -84,6 +84,10 @@ impl Player {
 
     pub fn despawn(&self) {
         self.0.despawn()
+    }
+
+    pub fn change_world(&self, world: World) {
+        self.0.change_world(world)
     }
 
     // ===== Inventory ======
@@ -1048,6 +1052,48 @@ impl Inner {
                 world.remove_viewer(pos.0, pos.1);
             }
         }
+    }
+
+    fn change_world(&self, world: World) {
+        let tracked: Vec<(i32, i32)> = self.tracked_chunks.lock().keys().copied().collect();
+        for (cx, cz) in tracked {
+            self.untrack_chunk(cx, cz);
+        }
+        self.pending_loads.lock().clear();
+        self.chunk_queue.lock().queue.clear();
+        *self.last_view.lock() = None;
+
+        self.set_world(world.clone());
+
+        let dimension = world.dimension();
+        let dimension_type = self
+            .server
+            .registries()
+            .dimension_type
+            .get_id(&dimension)
+            .unwrap_or(0) as i32;
+
+        self.send_packet(&RespawnPacket {
+            dimension_type,
+            dimension_name: dimension.into(),
+            hashed_seed: 93522819,
+            game_mode: self.game_mode().into(),
+            previous_game_mode: -1,
+            is_debug: false,
+            is_flat: false,
+            death_location: None,
+            portal_cooldown: 4,
+            sea_level: 64,
+            data_to_keep: 0,
+        });
+
+        self.send_packet(&GameEventPacket::START_WAITING_FOR_CHUNKS);
+
+        let (cx, cz) = Chunk::to_chunk_pos(self.position());
+        self.send_packet(&SetCenterChunkPacket {
+            chunk_x: cx,
+            chunk_z: cz,
+        });
     }
 
     // ===== Scoreboard =====

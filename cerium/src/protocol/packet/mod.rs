@@ -176,6 +176,7 @@ pub mod server {
         mod player_info_update;
         mod remove_entities;
         mod reset_score;
+        mod respawn;
         mod set_block_destroy_stage;
         mod set_center_chunk;
         mod set_container_content;
@@ -217,6 +218,7 @@ pub mod server {
         pub use player_info_update::*;
         pub use remove_entities::RemoveEntitiesPacket;
         pub use reset_score::ResetScorePacket;
+        pub use respawn::*;
         pub use set_block_destroy_stage::SetBlockDestroyStagePacket;
         pub use set_center_chunk::SetCenterChunkPacket;
         pub use set_container_content::SetContainerContentPacket;
