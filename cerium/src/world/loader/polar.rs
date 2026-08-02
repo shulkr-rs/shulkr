@@ -241,7 +241,7 @@ fn read_section(
 
     if palette_len == 1 {
         if in_range {
-            chunk.fill_block_state_section(section, blocks[0].id() as i32);
+            chunk.fill_block_state_section(section, blocks[0].id());
         }
     } else {
         let data = read_long_array(body)?;
@@ -276,7 +276,7 @@ fn read_section(
 
     if palette_len == 1 {
         if in_range {
-            chunk.fill_biome_section(section, ids[0]);
+            chunk.fill_biome_section(section, ids[0] as u16);
         }
     } else {
         let data = read_long_array(body)?;

@@ -110,7 +110,7 @@ impl Chunk {
     }
 
     #[cfg(any(feature = "anvil", feature = "polar"))]
-    pub(crate) fn fill_block_state_section(&mut self, sect_y: u32, block: i32) {
+    pub(crate) fn fill_block_state_section(&mut self, sect_y: u32, block: u16) {
         use crate::world::palette::{Palette, PaletteFormat};
         use std::collections::HashMap;
 
@@ -136,7 +136,7 @@ impl Chunk {
     }
 
     #[cfg(any(feature = "anvil", feature = "polar"))]
-    pub(crate) fn fill_biome_section(&mut self, sect_y: u32, biome: i32) {
+    pub(crate) fn fill_biome_section(&mut self, sect_y: u32, biome: u16) {
         use crate::world::palette::{Palette, PaletteFormat};
         use std::collections::HashMap;
 

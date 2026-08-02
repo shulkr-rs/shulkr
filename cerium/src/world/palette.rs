@@ -2,8 +2,8 @@ use std::collections::{HashMap, hash_map::Entry};
 
 #[derive(Debug, Clone)]
 pub enum PaletteFormat {
-    SingleValued { value: i32 },
-    Indirect { values: Vec<i32> },
+    SingleValued { value: u16 },
+    Indirect { values: Vec<u16> },
     Direct,
 }
 
@@ -108,7 +108,7 @@ impl Palette {
             return (
                 0,
                 PaletteFormat::SingleValued {
-                    value: *self.count.keys().next().unwrap_or(&0) as i32,
+                    value: *self.count.keys().next().unwrap_or(&0),
                 },
                 vec![],
             );
@@ -148,7 +148,7 @@ impl Palette {
             return (
                 bpe,
                 PaletteFormat::Indirect {
-                    values: palette.iter().map(|v| *v as i32).collect(),
+                    values: palette.iter().copied().collect(),
                 },
                 values,
             );

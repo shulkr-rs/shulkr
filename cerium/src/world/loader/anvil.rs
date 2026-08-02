@@ -339,7 +339,7 @@ fn parse_block_states(chunk: &mut Chunk, sect_y: u32, tag: NbtTag) -> Option<()>
     }
 
     if blocks.len() == 1 {
-        chunk.fill_block_state_section(sect_y, blocks[0].id() as i32);
+        chunk.fill_block_state_section(sect_y, blocks[0].id());
         return Some(());
     }
 
@@ -406,7 +406,7 @@ fn parse_biomes(
     }
 
     if ids.len() == 1 {
-        chunk.fill_biome_section(sect_y, ids[0]);
+        chunk.fill_biome_section(sect_y, ids[0] as u16);
         return Some(());
     }
 
