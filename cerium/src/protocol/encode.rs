@@ -14,7 +14,7 @@ use crate::{
             EntityRotationPacket, FeatureFlagsPacket, FinishConfigPacket, GameEventPacket,
             LoginDisconnectPacket, LoginPacket, LoginPluginRequestPacket, LoginSuccessPacket,
             OpenScreenPacket, Packet, PlayerChatMessagePacket, PlayerInfoRemovePacket,
-            PlayerInfoUpdatePacket, PluginMessagePacket, PongResponsePacket, RegistryDataPacket,
+            PlayerInfoUpdatePacket, PongResponsePacket, RegistryDataPacket,
             RemoveEntitiesPacket, ResetScorePacket, RespawnPacket, ServerPacket,
             SetBlockDestroyStagePacket, SetCenterChunkPacket, SetCompressionPacket,
             SetContainerContentPacket, SetContainerSlotPacket, SetEntityMetadataPacket,
@@ -23,8 +23,7 @@ use crate::{
             UnloadChunkPacket, UpdateAdvancementsPacket, UpdateObjectivesPacket, UpdateScorePacket,
             UpdateTagsPacket, WorldEventPacket,
             server::{
-                CloseContainerPacket, KeepAlivePacket, KnownPacksPacket, PlayerAbilitiesPacket,
-                SetHeldItemPacket,
+                self, CloseContainerPacket, KeepAlivePacket, KnownPacksPacket, PlayerAbilitiesPacket, SetHeldItemPacket
             },
         },
     },
@@ -291,7 +290,7 @@ where
 {
     Some(match () {
         // _ if type_id == TypeId::of::<CookieRequestPacket>() => 0x00,
-        _ if type_id == TypeId::of::<PluginMessagePacket>() => 0x01,
+        _ if type_id == TypeId::of::<server::config::PluginMessagePacket>() => 0x01,
         _ if type_id == TypeId::of::<DisconnectPacket>() => 0x02,
         _ if type_id == TypeId::of::<FinishConfigPacket>() => 0x03,
         _ if type_id == TypeId::of::<KeepAlivePacket>() => 0x04,

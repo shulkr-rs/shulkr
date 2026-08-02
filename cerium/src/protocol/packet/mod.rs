@@ -63,6 +63,7 @@ pub mod client {
         mod player_position_and_rotation;
         mod player_rotation;
         mod player_session;
+        mod plugin_message;
         mod request_game_mode;
         mod seen_advancements;
         mod set_creative_mode_slot;
@@ -94,6 +95,7 @@ pub mod client {
         pub use player_position_and_rotation::PlayerPositionAndRotationPacket;
         pub use player_rotation::PlayerRotationPacket;
         pub use player_session::PlayerSessionPacket;
+        pub use plugin_message::PluginMessagePacket;
         pub use request_game_mode::PlayerRequestGameModePacket;
         pub use seen_advancements::SeenAdvancementsPacket;
         pub use set_creative_mode_slot::SetCreativeModeSlotPacket;
@@ -142,12 +144,14 @@ pub mod server {
         mod feature_flags;
         mod finish_config;
         mod known_packs;
+        mod plugin_message;
         mod registry_data;
         mod update_tags;
 
         pub use feature_flags::FeatureFlagsPacket;
         pub use finish_config::FinishConfigPacket;
         pub use known_packs::KnownPacksPacket;
+        pub use plugin_message::PluginMessagePacket;
         pub use registry_data::*;
         pub use update_tags::*;
     }

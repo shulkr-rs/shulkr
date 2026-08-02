@@ -18,8 +18,8 @@ use crate::{
         decode::{Decode as _, DecodeError},
         packet::{
             AcknowledgeFinishConfigPacket, ClientInfoPacket, FeatureFlagsPacket,
-            FinishConfigPacket, GameEventPacket, LoginPacket, PluginMessagePacket,
-            RegistryDataPacket, SetCenterChunkPacket, client, server,
+            FinishConfigPacket, GameEventPacket, LoginPacket, RegistryDataPacket,
+            SetCenterChunkPacket, client, server,
         },
     },
     util::Identifier,
@@ -30,7 +30,7 @@ pub fn handle_packet(client: Arc<Connection>, id: i32, data: &mut Cursor<&[u8]>)
     match id {
         0x00 => handle_client_info(client, ClientInfoPacket::decode(data)?),
         0x01 => handle_cookie_response(client),
-        0x02 => handle_plugin_message(client, PluginMessagePacket::decode(data)?),
+        0x02 => handle_plugin_message(client, client::config::PluginMessagePacket::decode(data)?),
         0x03 => handle_acknowledge_finish_config(client, AcknowledgeFinishConfigPacket::decode(data)?),
         0x04 => handle_keep_alive(client),
         0x05 => handle_pong(client),
@@ -130,13 +130,21 @@ fn block_tags(data: &str) -> TagRegistry {
         .collect();
 
     TagRegistry {
-        registry: Identifier::new("minecraft", "block"),
+        registry: Identifier::vanilla("block"),
         tags: packet_tags,
     }
 }
 
 fn handle_client_info(client: Arc<Connection>, packet: ClientInfoPacket) {
+    let server = client.server();
+    let registries = server.registries();
+
     client.set_view_distance(packet.view_distance as i32);
+
+    client.send_packet(&server::config::PluginMessagePacket {
+        identifier: Identifier::vanilla("brand"),
+        data: server.brand().into(),
+    });
 
     client.send_packet(&server::config::KnownPacksPacket {
         known_packs: Vec::new(),
@@ -145,8 +153,6 @@ fn handle_client_info(client: Arc<Connection>, packet: ClientInfoPacket) {
     client.send_packet(&FeatureFlagsPacket {
         feature_flags: vec![Identifier::vanilla("vanilla")],
     });
-
-    let registries = client.server().registries();
 
     client.send_packet(&RegistryDataPacket::from(&registries.cat_variant));
     client.send_packet(&RegistryDataPacket::from(&registries.cat_sound_variant));
@@ -217,7 +223,7 @@ fn handle_client_info(client: Arc<Connection>, packet: ClientInfoPacket) {
 
 fn handle_cookie_response(_client: Arc<Connection>) {}
 
-fn handle_plugin_message(_client: Arc<Connection>, _packet: PluginMessagePacket) {}
+fn handle_plugin_message(_client: Arc<Connection>, _packet: client::config::PluginMessagePacket) {}
 
 fn handle_acknowledge_finish_config(
     client: Arc<Connection>,

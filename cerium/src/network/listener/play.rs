@@ -17,12 +17,14 @@ use crate::{
             PlayerCommandPacket, PlayerDiggingState, PlayerInputFlags, PlayerInputPacket,
             PlayerLoadedPacket, PlayerMovementFlagsPacket, PlayerPositionAndRotationPacket,
             PlayerPositionPacket, PlayerRequestGameModePacket, PlayerRotationPacket,
-            PlayerSessionPacket, PluginMessagePacket, SeenAdvancementsPacket,
-            SetBlockDestroyStagePacket, SetCreativeModeSlotPacket, SwingArmPacket, UseItemOnPacket,
-            UseItemPacket,
-            client::play::{
-                CloseContainerPacket, KeepAlivePacket, PingRequestPacket, PlayerAbilitiesPacket,
-                SetHeldItemPacket,
+            PlayerSessionPacket, SeenAdvancementsPacket, SetBlockDestroyStagePacket,
+            SetCreativeModeSlotPacket, SwingArmPacket, UseItemOnPacket, UseItemPacket,
+            client::{
+                self,
+                play::{
+                    CloseContainerPacket, KeepAlivePacket, PingRequestPacket,
+                    PlayerAbilitiesPacket, SetHeldItemPacket,
+                },
             },
         },
     },
@@ -42,7 +44,7 @@ pub fn handle_packet(player: Player, id: i32, data: &mut Cursor<&[u8]>) -> Resul
         0x0E => handle_client_info(player, ClientInfoPacket::decode(data)?),
         0x12 => handle_click_container(player, ClickContainerPacket::decode(data)?),
         0x13 => handle_close_container(player, CloseContainerPacket::decode(data)?),
-        0x16 => handle_plugin_message(player, PluginMessagePacket::decode(data)?),
+        0x16 => handle_plugin_message(player, client::play::PluginMessagePacket::decode(data)?),
         0x1A => handle_interact(player, InteractPacket::decode(data)?),
         0x1C => handle_keep_alive(player, KeepAlivePacket::decode(data)?),
         0x1E => handle_player_position(player, PlayerPositionPacket::decode(data)?),
@@ -151,7 +153,7 @@ fn handle_close_container(player: Player, packet: CloseContainerPacket) {
     player.close_inventory();
 }
 
-fn handle_plugin_message(_player: Player, _packet: PluginMessagePacket) {
+fn handle_plugin_message(_player: Player, _packet: client::play::PluginMessagePacket) {
     log::warn!("todo: handle_plugin_message");
 }
 

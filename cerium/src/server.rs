@@ -67,6 +67,14 @@ impl Server {
         &self.events
     }
 
+    pub fn set_brand(&self, brand: impl Into<String>) {
+        *self.brand.lock() = brand.into();
+    }
+
+    pub fn brand(&self) -> String {
+        self.brand.lock().clone()
+    }
+
     /// Shutdown server
     pub fn shutdown(&self) {
         self.closed.store(true, Ordering::Relaxed);
@@ -116,6 +124,7 @@ mod imp {
         pub(super) events: Events,
         pub(super) players: Arc<Mutex<Vec<Player>>>,
         pub(super) command_dispatcher: Arc<CommandDispatcher>,
+        pub(super) brand: Mutex<String>,
     }
 
     impl Server {
@@ -135,6 +144,7 @@ mod imp {
                 events: Events::new(),
                 players: Arc::new(Mutex::new(Vec::new())),
                 command_dispatcher: Arc::new(CommandDispatcher::new()),
+                brand: Mutex::new("null".to_string()),
             }
         }
 
