@@ -143,7 +143,7 @@ fn handle_client_info(client: Arc<Connection>, packet: ClientInfoPacket) {
 
     client.send_packet(&server::config::PluginMessagePacket {
         identifier: Identifier::vanilla("brand"),
-        data: server.brand().into(),
+        data: server.brand().into_bytes().into_boxed_slice(),
     });
 
     client.send_packet(&server::config::KnownPacksPacket {

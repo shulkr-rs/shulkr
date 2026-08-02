@@ -9,14 +9,16 @@ use crate::{
 #[derive(Debug, Clone)]
 pub struct PluginMessagePacket {
     pub identifier: Identifier,
-    pub data: Vec<u8>,
+    pub data: Box<[u8]>,
 }
 
 impl Packet for PluginMessagePacket {}
 impl ServerPacket for PluginMessagePacket {}
 
 impl Encode for PluginMessagePacket {
-    fn encode<W: PacketWrite>(_w: &mut W, _this: &Self) -> Result<(), EncodeError> {
+    fn encode<W: PacketWrite>(w: &mut W, this: &Self) -> Result<(), EncodeError> {
+        w.write_identifier(&this.identifier)?;
+        w.write_boxed_slice(&this.data)?;
         Ok(())
     }
 }
