@@ -26,6 +26,10 @@ impl Rgb {
     pub fn b(&self) -> u8 {
         self.b
     }
+
+    pub fn to_hex(self) -> u32 {
+        ((self.r as u32) << 16) | ((self.g as u32) << 8) | (self.b as u32)
+    }
 }
 
 impl Serialize for Rgb {
