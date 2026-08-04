@@ -86,7 +86,7 @@ fn main() {
     - [ ] Batching
 - Entity
     - [ ] Entity API
-    - [ ] Entity Metadata
+    - [ ] Entity Metadata ([Issue](https://github.com/garfxld/cerium/issues/1#issue-5050587525))
 - Inventory/Item
     - [x] Open Inventory
     - [x] Close Inventory

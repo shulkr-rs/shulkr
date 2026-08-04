@@ -1,6 +1,10 @@
+use parking_lot::Mutex;
 use std::{any::Any, marker::PhantomData, sync::Arc};
+use uuid::Uuid;
 
 pub mod entity;
+
+pub mod refs;
 
 use crate::item::DataType2;
 use crate::item::VarInt;
@@ -10,69 +14,111 @@ use crate::protocol::decode::PacketRead;
 use crate::protocol::encode::EncodeError;
 use crate::protocol::encode::PacketWrite;
 use crate::text::TextComponent;
+use crate::util::BlockPosition;
 use crate::util::EntityPose;
 use crate::util::HashMap;
 
-mod cat_variant;
-mod chicken_variant;
-mod cow_variant;
-mod frog_variant;
 mod painting_variant;
-mod pig_variant;
-mod wolf_variant;
-mod zombie_nautilus;
+mod neutral {
+    mod fox;
+    mod llama;
+    mod wolf;
+    mod zombie_nautilus;
 
-pub use cat_variant::*;
-pub use chicken_variant::*;
-pub use cow_variant::*;
-pub use frog_variant::*;
+    pub use fox::*;
+    pub use llama::*;
+    pub use wolf::*;
+    pub use zombie_nautilus::*;
+}
+mod passive {
+    mod axolotl;
+    mod cat;
+    mod chicken;
+    mod cow;
+    mod frog;
+    mod horse;
+    mod mooshroom;
+    mod parrot;
+    mod pig;
+    mod rabbit;
+    mod tropical_fish;
+    mod villager;
+
+    pub use axolotl::*;
+    pub use cat::*;
+    pub use chicken::*;
+    pub use cow::*;
+    pub use frog::*;
+    pub use horse::*;
+    pub use mooshroom::*;
+    pub use parrot::*;
+    pub use pig::*;
+    pub use rabbit::*;
+    pub use tropical_fish::*;
+    pub use villager::*;
+}
+
+pub use neutral::*;
 pub use painting_variant::*;
-pub use pig_variant::*;
-pub use wolf_variant::*;
-pub use zombie_nautilus::*;
+pub use passive::*;
 
+pub trait MetaAccessor {
+    fn new(holder: MetadataHolder) -> Self;
+}
+
+#[derive(Clone)]
 pub struct MetadataHolder {
-    pub entries: HashMap<i32, AnyValue>, // i32, Ref((i32, dyn Any), default_value)
+    pub entries: Arc<Mutex<HashMap<i32, AnyValue>>>,
 }
 
 impl MetadataHolder {
-    pub fn get<T: Clone + 'static>(&self, r#ref: MetadataRef<T>) -> Option<T> {
+    pub fn new() -> Self {
+        Self {
+            entries: Arc::new(Mutex::new(HashMap::default())),
+        }
+    }
+
+    pub fn get<T: Clone + 'static>(&self, r#ref: MetadataRef<T>) -> T {
+        let entries = self.entries.lock();
         match &r#ref.kind {
             MetadataRefKind::Direct { id } => {
-                let Some(entry) = self.entries.get(id) else {
-                    return Some(r#ref.default_value());
+                let Some(entry) = entries.get(id) else {
+                    return r#ref.default_value();
                 };
-                entry.downcast_ref::<T>().cloned()
+                entry
+                    .downcast_ref::<T>()
+                    .unwrap_or(&r#ref.default_value())
+                    .clone()
             }
             MetadataRefKind::Bitmask { parent_id, mask } => {
-                let Some(entry) = self.entries.get(parent_id) else {
-                    return Some(r#ref.default_value());
+                let Some(entry) = entries.get(parent_id) else {
+                    return r#ref.default_value();
                 };
 
-                let flags = entry.downcast_ref::<u8>()?;
+                let flags = entry.downcast_ref::<u8>().unwrap_or(&0);
                 let result = (flags & mask) != 0;
-                // Safe transmute from bool to T (only valid when T is bool)
-                unsafe { Some(std::mem::transmute_copy(&result)) }
+                // SAFETY: It is safe to transmute from bool to T (only when T is of type bool)
+                unsafe { std::mem::transmute_copy(&result) }
             }
         }
     }
 
-    pub fn set<T: Send + Sync + 'static>(&mut self, r#ref: MetadataRef<T>, value: T) {
+    pub fn set<T: Send + Sync + 'static>(&self, r#ref: MetadataRef<T>, value: T) {
+        let mut entries = self.entries.lock();
         match &r#ref.kind {
             MetadataRefKind::Direct { id } => {
-                let Some(entry) = self.entries.get_mut(id) else {
+                let Some(entry) = entries.get_mut(id) else {
                     let type_id = r#ref.type_id().id;
                     let value = AnyValue::new(type_id, Arc::new(value));
-                    self.entries.insert(*id, value);
+                    entries.insert(*id, value);
                     return;
                 };
                 entry.set(Arc::new(value));
             }
             MetadataRefKind::Bitmask { parent_id, mask } => {
-                // For bool bitmask fields - assumes T is bool
                 let enabled = unsafe { *(&value as *const T as *const bool) };
 
-                let entry = self.entries.entry(*parent_id).or_insert_with(|| {
+                let entry = entries.entry(*parent_id).or_insert_with(|| {
                     AnyValue::new(0, Arc::new(0u8)) // BYTE type id = 0
                 });
 
@@ -158,35 +204,6 @@ impl AnyValue {
     pub fn set(&mut self, value: Arc<dyn Any + Send + Sync>) {
         self.value = value;
     }
-}
-
-#[rustfmt::skip]
-impl MetadataRef<()> {
-    pub const ENTITY_FLAGS: MetadataRef<u8>                 = MetadataRef::new(0, ValueType::BYTE, 0);
-
-    pub const ON_FIRE: MetadataRef<bool>                    = MetadataRef::bitmask(0, 0x01, false);
-    pub const SNEAKING: MetadataRef<bool>                   = MetadataRef::bitmask(0, 0x02, false);
-    pub const SPRINTING: MetadataRef<bool>                  = MetadataRef::bitmask(0, 0x08, false);
-    pub const SWIMMING: MetadataRef<bool>                   = MetadataRef::bitmask(0, 0x10, false);
-    pub const INVISIBLE: MetadataRef<bool>                  = MetadataRef::bitmask(0, 0x20, false);
-    pub const GLOWING_EFFECT: MetadataRef<bool>             = MetadataRef::bitmask(0, 0x40, false);
-    pub const FLYING_WITH_ELYTRA: MetadataRef<bool>         = MetadataRef::bitmask(0, 0x80, false);
-
-    pub const AIR_TICKS: MetadataRef<i32>                   = MetadataRef::new(1, ValueType::VAR_INT, 300);
-    pub const CUSTOM_NAME: MetadataRef<Option<TextComponent>> = MetadataRef::new(2, ValueType::OPTIONAL_TEXT_COMPONENT, None);
-    pub const CUSTOM_NAME_VISIBLE: MetadataRef<bool>        = MetadataRef::new(3, ValueType::BOOL, false);
-    pub const SILENT: MetadataRef<bool>                     = MetadataRef::new(4, ValueType::BOOL, false);
-    pub const NO_GRAVITY: MetadataRef<bool>                 = MetadataRef::new(5, ValueType::BOOL, false);
-    pub const POSE: MetadataRef<EntityPose>                 = MetadataRef::new(6, ValueType::POSE, EntityPose::Standing);
-    pub const TICKS_FROZEN_IN_POWDER_SNOW: MetadataRef<i32> = MetadataRef::new(7, ValueType::VAR_INT, 0);
-
-    pub const WEATHERING_COPPER_STATE: MetadataRef<WeatheringCopperState> = MetadataRef::new(
-        16,
-        ValueType::WEATHERING_COPPER_STATE,
-        WeatheringCopperState::Unaffected,
-    );
-    pub const COPPER_GOLEM_STATE: MetadataRef<CopperGolemState> =
-        MetadataRef::new(17, ValueType::COPPER_GOLEM_STATE, CopperGolemState::Idle);
 }
 
 #[derive(Debug, Clone, Copy)]
@@ -276,6 +293,9 @@ define_types! {
     const VAR_INT: ValueType<i32, VarInt> = ValueType::new(1);
 
     const OPTIONAL_TEXT_COMPONENT: ValueType<Option<TextComponent>> = ValueType::new(6);
+    const OPTIONAL_POSITION: ValueType<Option<BlockPosition>> = ValueType::new(7);
+    const OPTIONAL_LIVING_ENTITY: ValueType<Option<Uuid>> = ValueType::new(13);
+    const VILLAGER_DATA: ValueType<VillagerData> = ValueType::new(18);
     const POSE: ValueType<EntityPose> = ValueType::new(20);
 
     const COPPER_GOLEM_STATE: ValueType<CopperGolemState> = ValueType::new(32);
@@ -288,6 +308,26 @@ impl DataType2<u8> for u8 {
     }
     fn encode<W: PacketWrite>(w: &mut W, this: &u8) -> Result<(), EncodeError> {
         w.write_u8(*this)
+    }
+}
+
+impl DataType2<BlockPosition> for BlockPosition {
+    fn decode<R: PacketRead>(r: &mut R) -> Result<BlockPosition, DecodeError> {
+        r.read_position()
+    }
+
+    fn encode<W: PacketWrite>(w: &mut W, this: &BlockPosition) -> Result<(), EncodeError> {
+        w.write_position(this)
+    }
+}
+
+impl DataType2<Uuid> for Uuid {
+    fn decode<R: PacketRead>(r: &mut R) -> Result<Uuid, DecodeError> {
+        r.read_uuid()
+    }
+
+    fn encode<W: PacketWrite>(w: &mut W, this: &Uuid) -> Result<(), EncodeError> {
+        w.write_uuid(this)
     }
 }
 

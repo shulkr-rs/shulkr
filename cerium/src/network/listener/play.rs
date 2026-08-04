@@ -198,7 +198,7 @@ fn handle_movement(player: Player, new_position: Position, on_ground: bool) {
     }
 
     player.refresh_position(new_position);
-    player.refresh_on_ground(on_ground);
+    player.set_on_ground(on_ground);
 }
 
 fn handle_interact(_player: Player, _packet: InteractPacket) {

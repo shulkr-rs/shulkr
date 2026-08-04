@@ -159,8 +159,8 @@ impl Player {
         self.0.is_on_ground()
     }
 
-    pub fn refresh_on_ground(&self, value: bool) {
-        self.0.refresh_on_ground(value)
+    pub fn set_on_ground(&self, value: bool) {
+        self.0.set_on_ground(value)
     }
 
     /// Returns if the player is invurnable.
@@ -544,7 +544,7 @@ impl PlayerData {
         Self {
             connection,
             game_profile: game_profile.clone(),
-            entity: Entity::new_with_uuid(EntityType::Player, game_profile.uuid),
+            entity: Entity::with_uuid(EntityType::Player, game_profile.uuid),
             world: Mutex::new(None),
             last_keep_alive: Mutex::new(Instant::now()),
             game_mode: Mutex::new(GameMode::Survival),
@@ -903,8 +903,8 @@ impl PlayerData {
         self.entity.is_on_ground()
     }
 
-    fn refresh_on_ground(&self, value: bool) {
-        self.entity.refresh_on_ground(value);
+    fn set_on_ground(&self, value: bool) {
+        self.entity.set_on_ground(value);
     }
 
     fn next_teleport_id(&self) -> i32 {
@@ -960,13 +960,13 @@ impl PlayerData {
         self.abilities.flying.store(value, Ordering::Release);
 
         if changed {
-            self.entity.0.refresh_pose(value);
+            self.entity.refresh_pose(value);
         }
     }
 
     fn set_flying(&self, value: bool) {
         self.update_flying(value);
-        self.send_packet(&self.entity.0.metadata_packet());
+        self.send_packet(&self.entity.metadata_packet());
         self.refresh_abilities();
     }
 
@@ -998,7 +998,7 @@ impl PlayerData {
 
     fn set_pose(&self, pose: EntityPose) {
         self.update_pose(pose);
-        self.send_packet(&self.entity.0.metadata_packet());
+        self.send_packet(&self.entity.metadata_packet());
     }
 
     fn is_sprinting(&self) -> bool {
@@ -1007,7 +1007,7 @@ impl PlayerData {
 
     pub fn set_sprinting(&self, value: bool) {
         self.entity.set_sprinting(value);
-        self.send_packet(&self.entity.0.metadata_packet());
+        self.send_packet(&self.entity.metadata_packet());
     }
 
     fn is_sneaking(&self) -> bool {
@@ -1019,8 +1019,8 @@ impl PlayerData {
             return;
         }
 
-        self.entity.0.set_sneaking_with(value, self.flying());
-        self.send_packet(&self.entity.0.metadata_packet());
+        self.entity.set_sneaking_with(value, self.flying());
+        self.send_packet(&self.entity.metadata_packet());
     }
 
     fn is_swimming(&self) -> bool {
@@ -1032,8 +1032,8 @@ impl PlayerData {
             return;
         }
 
-        self.entity.0.set_swimming_with(value, self.flying());
-        self.send_packet(&self.entity.0.metadata_packet());
+        self.entity.set_swimming_with(value, self.flying());
+        self.send_packet(&self.entity.metadata_packet());
     }
 
     fn is_flying_with_elytra(&self) -> bool {
@@ -1046,9 +1046,8 @@ impl PlayerData {
         }
 
         self.entity
-            .0
             .set_flying_with_elytra_with(value, self.flying());
-        self.send_packet(&self.entity.0.metadata_packet());
+        self.send_packet(&self.entity.metadata_packet());
     }
 
     fn despawn(&self) {
