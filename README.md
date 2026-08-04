@@ -43,7 +43,7 @@ cargo r --example debug_world
 ```rust
 fn main() {
     let server = Server::new();
-    let world = World::new(&DimensionType::OVERWORLD);
+    let world = World::new(DimensionType::OVERWORLD);
 
     for (ix, pos) in (0..27946).enumerate() {
         let bz = (pos / 168) + 1;
