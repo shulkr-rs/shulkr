@@ -98,5 +98,5 @@ fn main() {
 - [x] Event System
 - [ ] Resource Pack Support
 - [ ] Advancements
-- [ ] Proxy Support
+- [ ] Proxy Support (WIP, only Velocity)
 - [ ] Scoreboards
