@@ -34,6 +34,7 @@ mod passive {
     mod axolotl;
     mod cat;
     mod chicken;
+    mod copper_golem;
     mod cow;
     mod frog;
     mod horse;
@@ -47,6 +48,7 @@ mod passive {
     pub use axolotl::*;
     pub use cat::*;
     pub use chicken::*;
+    pub use copper_golem::*;
     pub use cow::*;
     pub use frog::*;
     pub use horse::*;
@@ -349,74 +351,6 @@ where
             T::encode(w, this)?;
         }
         Ok(())
-    }
-}
-
-#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
-pub enum CopperGolemState {
-    Idle,
-    GettingItem,
-    GettingNoItem,
-    DroppingItem,
-    DroppingNoItem,
-}
-
-impl TryFrom<i32> for CopperGolemState {
-    type Error = ();
-
-    fn try_from(value: i32) -> Result<Self, Self::Error> {
-        let this = match value {
-            0 => CopperGolemState::Idle,
-            1 => CopperGolemState::GettingItem,
-            2 => CopperGolemState::GettingNoItem,
-            3 => CopperGolemState::DroppingItem,
-            4 => CopperGolemState::DroppingNoItem,
-            _ => return Err(()),
-        };
-        Ok(this)
-    }
-}
-
-impl DataType2<CopperGolemState> for CopperGolemState {
-    fn decode<R: PacketRead>(r: &mut R) -> Result<CopperGolemState, DecodeError> {
-        CopperGolemState::try_from(r.read_varint()?).map_err(|_| todo!())
-    }
-
-    fn encode<W: PacketWrite>(w: &mut W, this: &CopperGolemState) -> Result<(), EncodeError> {
-        w.write_varint(*this as i32)
-    }
-}
-
-#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
-pub enum WeatheringCopperState {
-    Unaffected,
-    Exposed,
-    Weathered,
-    Oxidized,
-}
-
-impl TryFrom<i32> for WeatheringCopperState {
-    type Error = ();
-
-    fn try_from(value: i32) -> Result<Self, Self::Error> {
-        let this = match value {
-            0 => Self::Unaffected,
-            1 => Self::Exposed,
-            2 => Self::Weathered,
-            3 => Self::Oxidized,
-            _ => return Err(()),
-        };
-        Ok(this)
-    }
-}
-
-impl DataType2<WeatheringCopperState> for WeatheringCopperState {
-    fn decode<R: PacketRead>(r: &mut R) -> Result<WeatheringCopperState, DecodeError> {
-        WeatheringCopperState::try_from(r.read_varint()?).map_err(|_| todo!())
-    }
-
-    fn encode<W: PacketWrite>(w: &mut W, this: &WeatheringCopperState) -> Result<(), EncodeError> {
-        w.write_varint(*this as i32)
     }
 }
 
