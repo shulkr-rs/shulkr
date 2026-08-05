@@ -22,11 +22,13 @@ mod painting_variant;
 mod neutral {
     mod fox;
     mod llama;
+    mod piglin;
     mod wolf;
     mod zombie_nautilus;
 
     pub use fox::*;
     pub use llama::*;
+    pub use piglin::*;
     pub use wolf::*;
     pub use zombie_nautilus::*;
 }
@@ -42,6 +44,7 @@ mod passive {
     mod parrot;
     mod pig;
     mod rabbit;
+    mod strider;
     mod tropical_fish;
     mod villager;
 
@@ -56,10 +59,25 @@ mod passive {
     pub use parrot::*;
     pub use pig::*;
     pub use rabbit::*;
+    pub use strider::*;
     pub use tropical_fish::*;
     pub use villager::*;
 }
+mod hostile {
+    mod blaze;
+    mod ghast;
+    mod hoglin;
+    mod wither;
+    mod zoglin;
 
+    pub use blaze::*;
+    pub use ghast::*;
+    pub use hoglin::*;
+    pub use wither::*;
+    pub use zoglin::*;
+}
+
+pub use hostile::*;
 pub use neutral::*;
 pub use painting_variant::*;
 pub use passive::*;

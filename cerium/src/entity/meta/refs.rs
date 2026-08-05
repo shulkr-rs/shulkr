@@ -151,3 +151,61 @@ pub mod copper_golem {
     pub const WEATHERING_COPPER_STATE: MetadataRef<WeatheringCopperState> = MetadataRef::new(16, ValueType::WEATHERING_COPPER_STATE, WeatheringCopperState::Unaffected);
     pub const COPPER_GOLEM_STATE: MetadataRef<CopperGolemState> = MetadataRef::new(17, ValueType::COPPER_GOLEM_STATE, CopperGolemState::Idle);
 }
+
+#[rustfmt::skip]
+pub mod piglin {
+    use super::*;
+
+    pub const IS_BABY: MetadataRef<bool> = MetadataRef::new(17, ValueType::BOOL, false);
+    pub const IS_CHARGING_CROSSBOW: MetadataRef<bool> = MetadataRef::new(18, ValueType::BOOL, false);
+    pub const IS_DANCING: MetadataRef<bool> = MetadataRef::new(19, ValueType::BOOL, false);
+}
+
+#[rustfmt::skip]
+pub mod strider {
+    use super::*;
+
+    pub const TIME_TO_BOOST: MetadataRef<i32> = MetadataRef::new(18, ValueType::VAR_INT, 0);
+    pub const IS_SHAKING: MetadataRef<bool> = MetadataRef::new(19, ValueType::BOOL, false);
+}
+
+#[rustfmt::skip]
+pub mod blaze {
+    use super::*;
+
+    pub const BLAZE_FLAGS: MetadataRef<u8>        = MetadataRef::new(16, ValueType::BYTE, 0);
+
+    pub const IS_ON_FIRE: MetadataRef<bool>     = MetadataRef::bitmask(16, 0x01, false);
+}
+
+#[rustfmt::skip]
+pub mod ghast {
+    use super::*;
+
+    pub const IS_ATTACKING: MetadataRef<bool> = MetadataRef::new(16, ValueType::BOOL, false);
+}
+
+#[rustfmt::skip]
+pub mod wither {
+    use super::*;
+
+    pub const CENTER_TARGET: MetadataRef<i32> = MetadataRef::new(16, ValueType::VAR_INT, 0);
+    pub const LEFT_TARGET: MetadataRef<i32> = MetadataRef::new(17, ValueType::VAR_INT, 0);
+    pub const RIGHT_TARGET: MetadataRef<i32> = MetadataRef::new(18, ValueType::VAR_INT, 0);
+    pub const INVULNERABLE_TIME: MetadataRef<i32> = MetadataRef::new(19, ValueType::VAR_INT, 0);
+}
+
+#[rustfmt::skip]
+pub mod hoglin {
+    use super::*;
+
+    pub const IS_IMMUNE_TO_ZOMBIFICATION: MetadataRef<bool> = MetadataRef::new(18, ValueType::BOOL, false);
+}
+
+
+#[rustfmt::skip]
+pub mod zoglin {
+    use super::*;
+
+    pub const IS_BABY: MetadataRef<bool> = MetadataRef::new(16, ValueType::BOOL, false);
+}
