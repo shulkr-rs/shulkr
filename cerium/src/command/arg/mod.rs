@@ -10,6 +10,14 @@ pub struct Arg {
 }
 
 impl Arg {
+    pub fn new(name: impl Into<String>, kind: ArgKind) -> Self {
+        Self {
+            name: name.into(),
+            required: true,
+            kind,
+        }
+    }
+
     pub fn required(mut self, required: bool) -> Self {
         self.required = required;
         self
