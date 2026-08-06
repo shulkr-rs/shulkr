@@ -8,7 +8,7 @@ use uuid::Uuid;
 use crate::{
     entity::{
         EntityType, Player,
-        meta::{MetaAccessor, MetadataHolder, entity::EntityMeta},
+        meta::{EntityMeta, MetaAccessor, MetadataHolder},
     },
     protocol::packet::{RemoveEntitiesPacket, SetEntityMetadataPacket, SpawnEntityPacket},
     util::{EntityPose, Position, Viewable, Viewers},

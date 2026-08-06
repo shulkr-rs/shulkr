@@ -2,8 +2,6 @@ use parking_lot::Mutex;
 use std::{any::Any, marker::PhantomData, sync::Arc};
 use uuid::Uuid;
 
-pub mod entity;
-
 pub mod refs;
 
 use crate::item::DataType2;
@@ -18,7 +16,12 @@ use crate::util::BlockPosition;
 use crate::util::EntityPose;
 use crate::util::HashMap;
 
+mod entity;
+mod living_entity;
+mod mob;
 mod painting_variant;
+mod raider;
+mod spellcaster_illager;
 mod neutral {
     mod fox;
     mod llama;
@@ -67,20 +70,31 @@ mod hostile {
     mod blaze;
     mod ghast;
     mod hoglin;
+    mod pillager;
+    mod vex;
+    mod witch;
     mod wither;
     mod zoglin;
 
     pub use blaze::*;
     pub use ghast::*;
     pub use hoglin::*;
+    pub use pillager::*;
+    pub use vex::*;
+    pub use witch::*;
     pub use wither::*;
     pub use zoglin::*;
 }
 
+pub use entity::*;
 pub use hostile::*;
+pub use living_entity::*;
+pub use mob::*;
 pub use neutral::*;
 pub use painting_variant::*;
 pub use passive::*;
+pub use raider::*;
+pub use spellcaster_illager::*;
 
 pub trait MetaAccessor {
     fn new(holder: MetadataHolder) -> Self;

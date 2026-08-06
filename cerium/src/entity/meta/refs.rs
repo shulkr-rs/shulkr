@@ -27,6 +27,7 @@ pub mod entity {
 
 #[rustfmt::skip]
 pub mod living_entity {
+    use crate::util::BlockPosition;
     use super::*;
 
     pub const LIVING_ENTITY_FLAGS: MetadataRef<u8> = MetadataRef::new(8, ValueType::BYTE, 0);
@@ -40,7 +41,7 @@ pub mod living_entity {
     pub const IS_POTION_EFFECT_AMBIENT: MetadataRef<bool> = MetadataRef::new(11, ValueType::BOOL, false);
     pub const NUMBER_OF_ARROWS: MetadataRef<i32>          = MetadataRef::new(12, ValueType::VAR_INT, 0);
     pub const NUMBER_OF_BEE_STINGERS: MetadataRef<i32>    = MetadataRef::new(13, ValueType::VAR_INT, 0);
-    pub const LOCATION_OF_BED: MetadataRef<i32>           = MetadataRef::new(12, ValueType::VAR_INT, 0);
+    pub const LOCATION_OF_BED: MetadataRef<Option<BlockPosition>> = MetadataRef::new(12, ValueType::OPTIONAL_POSITION, None);
 }
 
 #[rustfmt::skip]
@@ -202,10 +203,46 @@ pub mod hoglin {
     pub const IS_IMMUNE_TO_ZOMBIFICATION: MetadataRef<bool> = MetadataRef::new(18, ValueType::BOOL, false);
 }
 
-
 #[rustfmt::skip]
 pub mod zoglin {
     use super::*;
 
     pub const IS_BABY: MetadataRef<bool> = MetadataRef::new(16, ValueType::BOOL, false);
+}
+
+#[rustfmt::skip]
+pub mod raider {
+    use super::*;
+
+    pub const IS_CELEBRATING: MetadataRef<bool> = MetadataRef::new(16, ValueType::BOOL, false);
+}
+
+#[rustfmt::skip]
+pub mod pillager {
+    use super::*;
+
+    pub const IS_CHARGING: MetadataRef<bool> = MetadataRef::new(17, ValueType::BOOL, false);
+}
+
+#[rustfmt::skip]
+pub mod witch {
+    use super::*;
+
+    pub const IS_DRINKING_POTION: MetadataRef<bool> = MetadataRef::new(17, ValueType::BOOL, false);
+}
+
+#[rustfmt::skip]
+pub mod spellcaster_illager {
+    use super::*;
+
+    pub const SPELL: MetadataRef<u8> = MetadataRef::new(17, ValueType::BYTE, 0);
+}
+
+#[rustfmt::skip]
+pub mod vex {
+    use super::*;
+
+    pub const VEX_FLAGS: MetadataRef<u8>        = MetadataRef::new(16, ValueType::BYTE, 0);
+
+    pub const IS_ATTACKING: MetadataRef<bool>     = MetadataRef::bitmask(16, 0x01, false);
 }
