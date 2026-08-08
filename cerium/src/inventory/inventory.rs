@@ -7,22 +7,31 @@ use std::sync::{
 
 use crate::{
     entity::Player,
-    inventory::{InventoryType, Slot},
-    item::{ItemStack, Material},
+    inventory::InventoryType,
+    item::ItemStack,
     protocol::packet::{
         OpenScreenPacket, SetContainerContentPacket, SetContainerSlotPacket,
         server::CloseContainerPacket,
     },
     text::TextComponent,
-    util::{HashMap, Viewable, Viewers},
+    util::{Viewable, Viewers},
 };
 
 #[derive(Clone)]
-pub struct Inventory(Arc<Inner>);
+pub struct Inventory(Arc<imp::Inventory>);
+
+impl PartialEq for Inventory {
+    fn eq(&self, other: &Self) -> bool {
+        Arc::ptr_eq(&self.0, &other.0)
+    }
+}
+
+impl Eq for Inventory {}
 
 impl Inventory {
     pub fn new(ty: InventoryType, title: impl Into<TextComponent>) -> Self {
-        Self(Arc::new(Inner::new(ty, title)))
+        let inventory = imp::Inventory::new(ty, title);
+        Self(Arc::new(inventory))
     }
 
     /// Returns the id of the inventory.
@@ -75,136 +84,138 @@ impl Viewable for Inventory {
     }
 }
 
-struct Inner {
-    id: i32,
-    ty: InventoryType,
-    title: TextComponent,
-    content: Mutex<HashMap<i32, ItemStack>>,
-    viewers: Viewers,
-}
+mod imp {
+    use super::*;
 
-impl Inner {
-    fn new(ty: InventoryType, title: impl Into<TextComponent>) -> Self {
-        let size = ty.size();
-        let mut content = HashMap::with_capacity_and_hasher(size as usize, Default::default());
-        for ix in 0..size {
-            content.insert(ix, ItemStack::EMPTY);
-        }
-
-        Self {
-            id: Self::generate_id(),
-            ty,
-            title: title.into(),
-            content: Mutex::new(content),
-            viewers: Viewers::new(),
-        }
+    pub struct Inventory {
+        id: i32,
+        ty: InventoryType,
+        title: TextComponent,
+        content: Mutex<Vec<ItemStack>>,
+        viewers: Viewers,
+        state: AtomicI32,
     }
 
-    fn generate_id() -> i32 {
-        static CURRENT_ID: AtomicI32 = AtomicI32::new(1);
-        CURRENT_ID
-            .fetch_update(Ordering::Relaxed, Ordering::Relaxed, |i| {
-                Some(if i + 1 >= 128 { 1 } else { i + 1 })
-            })
-            .unwrap()
-    }
+    impl Inventory {
+        pub fn new(ty: InventoryType, title: impl Into<TextComponent>) -> Self {
+            let size = ty.size();
+            let content = vec![ItemStack::EMPTY; size as usize];
 
-    fn id(&self) -> i32 {
-        self.id
-    }
-
-    fn r#type(&self) -> InventoryType {
-        self.ty
-    }
-
-    fn title(&self) -> &TextComponent {
-        &self.title
-    }
-
-    fn add_item_stack(&self, stack: ItemStack) {
-        let mut content = self.content.lock();
-        for (ix, stck) in content.values().enumerate() {
-            if stck.material() == Material::Air {
-                content.insert(ix as i32, stack.clone());
-
-                self.broadcast_packet(&SetContainerSlotPacket {
-                    window_id: self.id(),
-                    state_id: 0,
-                    slot: ix as i16,
-                    slot_data: stack.into(),
-                });
-                break;
+            Self {
+                id: Self::generate_id(),
+                ty,
+                title: title.into(),
+                content: Mutex::new(content),
+                viewers: Viewers::new(),
+                state: AtomicI32::new(0),
             }
         }
+
+        fn next_state(&self) -> i32 {
+            self.state.fetch_add(1, Ordering::Relaxed) + 1
+        }
+
+        fn generate_id() -> i32 {
+            static CURRENT_ID: AtomicI32 = AtomicI32::new(1);
+            CURRENT_ID
+                .fetch_update(Ordering::Relaxed, Ordering::Relaxed, |i| {
+                    Some(if i + 1 >= 128 { 1 } else { i + 1 })
+                })
+                .unwrap()
+        }
+
+        pub fn id(&self) -> i32 {
+            self.id
+        }
+
+        pub fn r#type(&self) -> InventoryType {
+            self.ty
+        }
+
+        pub fn title(&self) -> &TextComponent {
+            &self.title
+        }
+
+        pub fn add_item_stack(&self, stack: ItemStack) {
+            let mut content = self.content.lock();
+            let Some(ix) = content.iter().position(|s| s.is_empty()) else {
+                return;
+            };
+            content[ix] = stack.clone();
+
+            self.broadcast_packet(&SetContainerSlotPacket {
+                window_id: self.id(),
+                state_id: self.next_state(),
+                slot: ix as i16,
+                slot_data: stack.into(),
+            });
+        }
+
+        pub fn set_item_stack(&self, slot: i32, stack: ItemStack) {
+            let mut content = self.content.lock();
+            let Some(current) = content.get_mut(slot as usize) else {
+                return;
+            };
+            *current = stack.clone();
+            drop(content);
+
+            self.broadcast_packet(&SetContainerSlotPacket {
+                window_id: self.id(),
+                state_id: self.next_state(),
+                slot: slot as i16,
+                slot_data: stack.into(),
+            });
+        }
+
+        pub fn get_item_stack(&self, slot: i32) -> ItemStack {
+            self.content
+                .lock()
+                .get(slot as usize)
+                .cloned()
+                .unwrap_or(ItemStack::EMPTY)
+        }
+
+        pub fn refresh_contents(&self, player: Player) {
+            let content = self.content.lock().clone();
+            player.send_packet(&SetContainerContentPacket {
+                window_id: self.id(),
+                state_id: self.state.load(Ordering::Relaxed),
+                slot_data: content.into_iter().map(|s| s.into()).collect(),
+                carried_item: ItemStack::EMPTY.into(),
+            });
+        }
     }
 
-    fn set_item_stack(&self, slot: i32, stack: ItemStack) {
-        self.content.lock().insert(slot, stack.clone());
+    impl Viewable for Inventory {
+        fn add_viewer(&self, player: Player) {
+            self.viewers.add_viewer(player.clone());
 
-        self.broadcast_packet(&SetContainerSlotPacket {
-            window_id: self.id(),
-            state_id: 0,
-            slot: slot as i16,
-            slot_data: stack.into(),
-        });
-    }
+            player.send_packet(&OpenScreenPacket {
+                window_id: self.id(),
+                window_type: self.r#type().id(),
+                window_title: self.title().clone(),
+            });
+            self.refresh_contents(player);
+        }
 
-    /// Returns the [`ItemStack`] in the current slot.
-    fn get_item_stack(&self, slot: i32) -> ItemStack {
-        self.content
-            .lock()
-            .get(&slot)
-            .cloned()
-            .unwrap_or(ItemStack::EMPTY)
-    }
+        fn remove_viewer(&self, player: Player) {
+            self.viewers.remove_viewer(player.clone());
 
-    fn refresh_contents(&self, player: Player) {
-        let content = self.content.lock().clone();
-        println!(
-            "{:?}",
-            content
-                .clone()
-                .into_iter()
-                .map(|(_, s)| s.into())
-                .collect::<Vec<Slot>>()
-        );
-        player.send_packet(&SetContainerContentPacket {
-            window_id: self.id(),
-            state_id: 0,
-            slot_data: content.into_iter().map(|(_, s)| s.into()).collect(),
-            carried_item: ItemStack::EMPTY.into(),
-        });
-    }
-}
+            player.send_packet(&CloseContainerPacket {
+                window_id: self.id(),
+            });
+        }
 
-impl Viewable for Inner {
-    fn add_viewer(&self, player: Player) {
-        self.viewers.add_viewer(player.clone());
-
-        player.send_packet(&OpenScreenPacket {
-            window_id: self.id(),
-            window_type: self.r#type().id(),
-            window_title: self.title().clone(),
-        });
-        self.refresh_contents(player);
-    }
-
-    fn remove_viewer(&self, player: Player) {
-        self.viewers.remove_viewer(player.clone());
-
-        player.send_packet(&CloseContainerPacket {
-            window_id: self.id(),
-        });
-    }
-
-    fn viewers(&self) -> &Viewers {
-        &self.viewers
+        fn viewers(&self) -> &Viewers {
+            &self.viewers
+        }
     }
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::item::Material;
 
     #[test]
     #[rustfmt::skip]
@@ -221,7 +232,7 @@ mod tests {
     #[test]
     #[rustfmt::skip]
     fn test_add_item_stack() {
-        let inventory = Inner::new(InventoryType::Generic9x6, "");
+        let inventory = Inventory::new(InventoryType::Generic9x6, "");
         inventory.add_item_stack(ItemStack::EMPTY);
         inventory.add_item_stack(ItemStack::new(Material::GraniteStairs, 1));
         inventory.add_item_stack(ItemStack::new(Material::RedCandle, 1));

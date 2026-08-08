@@ -2,10 +2,15 @@ use std::io::Cursor;
 
 use crate::{
     entity::{EntityAnimation, EntityLike as _, EntityType, GameMode, Hand, Player},
-    event::player::{
-        CommandResultEvent, PlayerInputEvent, PlayerPickBlockEvent, PlayerPickEntityEvent,
-        PlayerRequestGameModeEvent, PlayerStartSneakingEvent, PlayerStopSneakingEvent,
+    event::{
+        Cancellable,
+        inventory::CreativeInventoryActionEvent,
+        player::{
+            CommandResultEvent, PlayerInputEvent, PlayerPickBlockEvent, PlayerPickEntityEvent,
+            PlayerRequestGameModeEvent, PlayerStartSneakingEvent, PlayerStopSneakingEvent,
+        },
     },
+    inventory::OFFHAND_SLOT,
     item::ItemStack,
     protocol::{
         decode::{Decode as _, DecodeError},
@@ -18,7 +23,8 @@ use crate::{
             PlayerLoadedPacket, PlayerMovementFlagsPacket, PlayerPositionAndRotationPacket,
             PlayerPositionPacket, PlayerRequestGameModePacket, PlayerRotationPacket,
             PlayerSessionPacket, SeenAdvancementsPacket, SetBlockDestroyStagePacket,
-            SetCreativeModeSlotPacket, SwingArmPacket, UseItemOnPacket, UseItemPacket,
+            SetContainerSlotPacket, SetCreativeModeSlotPacket, SwingArmPacket, UseItemOnPacket,
+            UseItemPacket,
             client::{
                 self,
                 play::{
@@ -30,6 +36,10 @@ use crate::{
     },
     util::{BlockPosition, Position, Viewable},
 };
+
+mod inventory;
+
+use inventory::*;
 
 #[rustfmt::skip]
 pub fn handle_packet(player: Player, id: i32, data: &mut Cursor<&[u8]>) -> Result<(), DecodeError> {
@@ -127,30 +137,6 @@ fn handle_client_tick_end(_player: Player, _packet: ClientTickEndPacket) {
 
 fn handle_client_info(player: Player, packet: ClientInfoPacket) {
     player.set_view_distance(packet.view_distance as i32);
-}
-
-fn handle_click_container(player: Player, packet: ClickContainerPacket) {
-    log::warn!("todo: handle_click_container");
-    if packet.slot == -1 {
-        return;
-    }
-
-    if packet.window_id == 0 {
-        // todo
-
-        return;
-    }
-
-    let Some(_inventory) = player.get_open_inventory() else {
-        return;
-    };
-
-    // todo
-}
-
-fn handle_close_container(player: Player, packet: CloseContainerPacket) {
-    let _ = packet;
-    player.close_inventory();
 }
 
 fn handle_plugin_message(_player: Player, _packet: client::play::PluginMessagePacket) {
@@ -322,11 +308,52 @@ fn handle_set_held_item(player: Player, packet: SetHeldItemPacket) {
 }
 
 fn handle_set_creative_mode_slot(player: Player, packet: SetCreativeModeSlotPacket) {
-    let inventory = player.inventory();
+    if player.game_mode() != GameMode::Creative {
+        return;
+    }
 
     let item_stack = ItemStack::from(packet.clicked_item);
+    let previous_item = player.inventory().get_item_stack(packet.slot as i32);
 
-    inventory.set_item_stack(packet.slot as i32, item_stack);
+    let mut event = CreativeInventoryActionEvent {
+        player: player.clone(),
+        slot: packet.slot,
+        clicked_item: item_stack,
+        cancelled: false,
+    };
+    player.server().events().fire(&mut event);
+
+    if event.is_cancelled() {
+        if let Some(previous_item) = previous_item {
+            player.send_packet(&SetContainerSlotPacket {
+                window_id: 0,
+                state_id: player.inventory().next_state(),
+                slot: packet.slot,
+                slot_data: previous_item.into(),
+            });
+        }
+        return;
+    }
+
+    let item_stack = event.clicked_item;
+
+    if packet.slot == -1 {
+        return;
+    }
+
+    if !(1..=OFFHAND_SLOT).contains(&(packet.slot as i32)) {
+        return;
+    }
+
+    let inventory = player.inventory();
+    inventory.set_item_stack(packet.slot as i32, item_stack.clone());
+
+    player.send_packet(&SetContainerSlotPacket {
+        window_id: 0,
+        state_id: player.inventory().next_state(),
+        slot: packet.slot,
+        slot_data: item_stack.into(),
+    });
 }
 
 fn handle_swing_arm(player: Player, packet: SwingArmPacket) {

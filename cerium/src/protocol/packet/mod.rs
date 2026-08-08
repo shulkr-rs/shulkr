@@ -186,6 +186,7 @@ pub mod server {
         mod set_center_chunk;
         mod set_container_content;
         mod set_container_slot;
+        mod set_cursor_item;
         mod set_entity_metadata;
         mod set_head_rotation;
         mod set_held_item;
@@ -229,6 +230,7 @@ pub mod server {
         pub use set_center_chunk::SetCenterChunkPacket;
         pub use set_container_content::SetContainerContentPacket;
         pub use set_container_slot::SetContainerSlotPacket;
+        pub use set_cursor_item::SetCursorItemPacket;
         pub use set_entity_metadata::SetEntityMetadataPacket;
         pub use set_head_rotation::SetHeadRotationPacket;
         pub use set_held_item::SetHeldItemPacket;

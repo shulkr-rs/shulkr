@@ -88,6 +88,24 @@ impl ItemStack {
     pub fn amount(&self) -> i32 {
         self.amount
     }
+
+    /// Returns true if this stack is empty (`Material::Air`).
+    pub fn is_empty(&self) -> bool {
+        self.material == Material::Air || self.amount <= 0
+    }
+
+    /// Returns the maximum amount this stack can hold, taking a custom
+    /// `MAX_STACK_SIZE` component into account.
+    pub fn max_stack_size(&self) -> i32 {
+        self.get(DataComponent::MAX_STACK_SIZE)
+            .copied()
+            .unwrap_or_else(|| self.material.max_stack_size())
+    }
+
+    /// Returns true if two stacks can be merged into one, e.g. same item.
+    pub fn can_stack_with(&self, other: &ItemStack) -> bool {
+        !self.is_empty() && self.material == other.material
+    }
 }
 
 impl From<Material> for ItemStack {

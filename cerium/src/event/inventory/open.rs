@@ -19,8 +19,8 @@ impl PlayerEvent for InventoryOpenEvent {
 }
 
 impl InventoryEvent for InventoryOpenEvent {
-    fn get_inventory(&self) -> &Inventory {
-        &self.inventory
+    fn get_inventory(&self) -> Option<&Inventory> {
+        Some(&self.inventory)
     }
 }
 

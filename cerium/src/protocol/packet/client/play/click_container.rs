@@ -40,8 +40,22 @@ pub struct ChangedSlot {
 
 #[derive(Debug, Clone)]
 pub struct HashedSlot {
-    pub has_item: bool,
+    pub present: bool,
     pub item_id: Option<i32>,
+    pub count: i32,
+    pub components: HashedComponents,
+}
+
+#[derive(Debug, Clone, Default)]
+pub struct HashedComponents {
+    pub added: Vec<HashedComponent>,
+    pub removed: Vec<i32>,
+}
+
+#[derive(Debug, Clone)]
+pub struct HashedComponent {
+    pub component_id: i32,
+    pub hash: i32,
 }
 
 impl Decode for ChangedSlot {
@@ -57,9 +71,42 @@ impl Decode for ChangedSlot {
 impl Decode for HashedSlot {
     #[rustfmt::skip]
     fn decode<R: PacketRead>(r: &mut R) -> Result<Self, DecodeError> {
+        let present = r.read_bool()?;
+        if !present {
+            return Ok(Self {
+                present,
+                item_id: None,
+                count: 0,
+                components: HashedComponents::default(),
+            });
+        }
+
         Ok(Self {
-            has_item: r.read_bool()?,
-            item_id:  r.read_option(|r| r.read_varint())?,
+            present,
+            item_id:    Some(r.read_varint()?),
+            count:      r.read_varint()?,
+            components: HashedComponents::decode(r)?,
         })
+    }
+}
+
+impl Decode for HashedComponents {
+    fn decode<R: PacketRead>(r: &mut R) -> Result<Self, DecodeError> {
+        let added_len = r.read_varint()? as usize;
+        let mut added = Vec::with_capacity(added_len);
+        for _ in 0..added_len {
+            added.push(HashedComponent {
+                component_id: r.read_varint()?,
+                hash: r.read_i32()?,
+            });
+        }
+
+        let removed_len = r.read_varint()? as usize;
+        let mut removed = Vec::with_capacity(removed_len);
+        for _ in 0..removed_len {
+            removed.push(r.read_varint()?);
+        }
+
+        Ok(Self { added, removed })
     }
 }

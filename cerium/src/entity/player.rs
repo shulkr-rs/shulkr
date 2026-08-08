@@ -20,7 +20,10 @@ use crate::{
         entity_status,
     },
     event::{Cancellable, inventory::InventoryOpenEvent, player::PlayerMoveEvent},
-    inventory::{Inventory, PlayerInventory},
+    inventory::{
+        ARMOR_START, DragState, EquipmentSlot, HOTBAR_START, Inventory, OFFHAND_SLOT,
+        PlayerInventory,
+    },
     item::ItemStack,
     network::client::Connection,
     protocol::packet::{
@@ -98,6 +101,24 @@ impl Player {
         self.0.inventory()
     }
 
+    /// Returns the item currently carried on the cursor.
+    pub fn carried_item(&self) -> ItemStack {
+        self.inventory().carried_item()
+    }
+
+    /// Sets the item carried on the cursor.
+    pub fn set_carried_item(&self, stack: ItemStack) {
+        self.inventory().set_carried_item(stack)
+    }
+
+    pub(crate) fn drag_state(&self) -> Option<DragState> {
+        self.inventory().drag_state()
+    }
+
+    pub(crate) fn set_drag_state(&self, state: Option<DragState>) {
+        self.inventory().set_drag_state(state)
+    }
+
     /// Opens an [`Inventory`] for a player.
     pub fn open_inventory(&self, inventory: Inventory) {
         PlayerData::open_inventory(self.clone(), inventory);
@@ -123,6 +144,11 @@ impl Player {
 
     pub fn set_held_slot(&self, slot: u8) {
         self.0.set_held_slot(slot)
+    }
+
+    /// Returns the currently selected hotbar slot (0-8).
+    pub fn held_slot(&self) -> u8 {
+        self.0.held_slot.load(Ordering::Acquire)
     }
 
     pub fn refresh_position(&self, new_position: Position) {
@@ -702,7 +728,7 @@ impl PlayerData {
     }
 
     fn close_inventory(this: Player) {
-        let inventory = this.0.open_inventory.lock().clone();
+        let inventory = this.0.open_inventory.lock().take();
         if let Some(inventory) = inventory {
             inventory.remove_viewer(this);
         }
@@ -722,15 +748,15 @@ impl PlayerData {
 
     fn get_equipment(&self, slot: EquipmentSlot) -> Option<ItemStack> {
         let slot_id = match slot {
-            EquipmentSlot::MainHand => self.held_slot.load(Ordering::Acquire) + 36,
-            EquipmentSlot::OffHand => 45,
-            EquipmentSlot::Boots => 44,
-            EquipmentSlot::Leggings => 43,
-            EquipmentSlot::Chestplate => 42,
-            EquipmentSlot::Helmet => 41,
+            EquipmentSlot::MainHand => HOTBAR_START + self.held_slot.load(Ordering::Acquire) as i32,
+            EquipmentSlot::OffHand => OFFHAND_SLOT,
+            EquipmentSlot::Helmet => ARMOR_START,
+            EquipmentSlot::Chestplate => ARMOR_START + 1,
+            EquipmentSlot::Leggings => ARMOR_START + 2,
+            EquipmentSlot::Boots => ARMOR_START + 3,
         };
 
-        self.inventory.get_item_stack(slot_id as i32)
+        self.inventory.get_item_stack(slot_id)
     }
 
     fn set_held_slot(&self, slot: u8) {
@@ -1174,25 +1200,3 @@ impl EntityLike for PlayerData {
     }
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
-pub enum EquipmentSlot {
-    MainHand,
-    OffHand,
-    Boots,
-    Leggings,
-    Chestplate,
-    Helmet,
-}
-
-impl EquipmentSlot {
-    pub fn slot_id(&self) -> i32 {
-        match self {
-            Self::MainHand => 0,
-            Self::OffHand => 0,
-            Self::Boots => 0,
-            Self::Leggings => 0,
-            Self::Chestplate => 0,
-            Self::Helmet => 0,
-        }
-    }
-}
