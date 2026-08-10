@@ -22,6 +22,7 @@ mod mob;
 mod painting_variant;
 mod raider;
 mod spellcaster_illager;
+mod interaction;
 mod neutral {
     mod fox;
     mod llama;
@@ -95,6 +96,7 @@ pub use painting_variant::*;
 pub use passive::*;
 pub use raider::*;
 pub use spellcaster_illager::*;
+pub use interaction::*;
 
 pub trait MetaAccessor {
     fn new(holder: MetadataHolder) -> Self;

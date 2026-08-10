@@ -246,3 +246,12 @@ pub mod vex {
 
     pub const IS_ATTACKING: MetadataRef<bool>     = MetadataRef::bitmask(16, 0x01, false);
 }
+
+#[rustfmt::skip]
+pub mod interaction {
+    use super::*;
+
+    pub const WIDTH: MetadataRef<f32> = MetadataRef::new(8, ValueType::FLOAT, 0.0);
+    pub const HEIGHT: MetadataRef<f32> = MetadataRef::new(9, ValueType::FLOAT, 0.0);
+    pub const RESPONSIVE: MetadataRef<bool> = MetadataRef::new(10, ValueType::BOOL, false);
+}
