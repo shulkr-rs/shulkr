@@ -98,7 +98,7 @@ pub fn derive_static_object(input: TokenStream) -> TokenStream {
     let expanded = quote! {
         impl #enum_name {
             /// Matches the enum variant to its corresponding static object
-            pub const fn get(&self) -> &'static #name {
+            pub const fn data(&self) -> &'static #name {
                 match self {
                     #(#arms)*
                 }

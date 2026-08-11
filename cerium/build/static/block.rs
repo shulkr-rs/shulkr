@@ -1,3 +1,4 @@
+use convert_case::{Case, Casing as _};
 use proc_macro2::{Span, TokenStream};
 use quote::{format_ident, quote};
 use serde_json::Value;
@@ -37,11 +38,28 @@ fn generate_init(ident: Ident, value: Value) -> TokenStream {
         .expect("minStateId must be a number");
     let min_state_id = LitInt::new(&min_state_id.to_string(), Span::call_site());
 
+    let block_entity = value
+        .get("blockEntity")
+        .and_then(Value::as_str)
+        .map_or_else(
+            || quote! { None },
+            |v| {
+                let block = format_ident!(
+                    "{}",
+                    v.split_once(":")
+                        .map_or(v, |v| v.1)
+                        .to_case(Case::UpperCamel)
+                );
+                quote! { Some(BlockEntityType::#block) }
+            },
+        );
+
     quote! {
         #ident::new(
             #default_state_id,
             #min_state_id,
-            &[ #( &Properties::#props ),* ]
+            &[ #( &Properties::#props ),* ],
+            #block_entity
         )
     }
 }

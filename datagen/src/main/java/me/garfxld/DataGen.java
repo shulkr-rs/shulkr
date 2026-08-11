@@ -12,8 +12,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
 
-//TIP To <b>Run</b> code, press <shortcut actionId="Run"/> or
-// click the <icon src="AllIcons.Actions.Execute"/> icon in the gutter.
 public class DataGen {
 
     public static final Gson GSON = new GsonBuilder().create();
@@ -22,23 +20,26 @@ public class DataGen {
         SharedConstants.tryDetectVersion();
         Bootstrap.bootStrap();
 
-        Object result = new BlockGenerator().generate();
+        write(Path.of("generated/block.json"), new BlockGenerator().generate());
+        write(Path.of("generated/block_entity_type.json"), new BlockEntityTypeGenerator().generate());
+    }
 
-        var path = Path.of("generated/blocks.json");
+    static void write(Path path, Object data) throws IOException {
         if (!Files.exists(path)) {
             Files.createDirectories(path.getParent());
         }
 
         try (BufferedWriter writer = Files.newBufferedWriter(path, StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING)) {
             try {
-                if (result instanceof JsonElement) {
-                    GSON.toJson(result, writer);
+                if (data instanceof JsonElement) {
+                    GSON.toJson(data, writer);
                 } else {
-                    writer.write(result.toString());
+                    writer.write(data.toString());
                 }
             } catch (Exception e) {
                 throw new RuntimeException(e);
             }
         }
     }
+
 }

@@ -1,4 +1,4 @@
-use crate::item::trim_material::TrimMaterial;
+use crate::{item::trim_material::TrimMaterial, world::block::BlockEntityType};
 
 use super::*;
 
@@ -61,9 +61,14 @@ macro_rules! registry {
 
 impl Registries {
     pub const BLOCK: &LazyLock<Registry<Block>> = registry!(
-        crate::world::block::register_all,
+        crate::world::block::block::register_all,
         Block,
         RegistryKeys::BLOCK
+    );
+    pub const BLOCK_ENTITY_TYPE: &LazyLock<Registry<BlockEntityType>> = registry!(
+        crate::world::block::block_entity::register_all,
+        BlockEntityType,
+        RegistryKeys::BLOCK_ENTITY_TYPE
     );
     pub const MATERIAL: &LazyLock<Registry<Material>> = registry!(
         crate::item::material::register_all,

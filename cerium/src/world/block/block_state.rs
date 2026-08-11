@@ -15,8 +15,8 @@ pub struct BlockState {
 }
 
 impl BlockState {
-    pub fn block_entity(&self) -> Option<&BlockEntityInfo> {
-        None
+    pub fn block_entity(&self) -> Option<&BlockEntityType> {
+        self.block.data().block_entity.as_ref()
     }
 
     /// Returns the id of the [BlockState].
@@ -36,9 +36,9 @@ impl BlockState {
     where
         P: Property,
     {
-        let relative = self.state_id - self.block.get().min_state_id;
+        let relative = self.state_id - self.block.data().min_state_id;
         let mut stride = 1u16;
-        for prop in self.block.get().properties.iter().rev() {
+        for prop in self.block.data().properties.iter().rev() {
             let count = prop.len() as u16;
             if prop.name() == property.name() {
                 let index = (relative / stride) % count;
@@ -87,9 +87,9 @@ impl BlockState {
     }
 
     fn set_index(&self, name: &str, index: usize) -> Option<u16> {
-        let relative = self.state_id - self.block.get().min_state_id;
+        let relative = self.state_id - self.block.data().min_state_id;
         let mut stride = 1u16;
-        for prop in self.block.get().properties.iter().rev() {
+        for prop in self.block.data().properties.iter().rev() {
             let count = prop.len() as u16;
             if prop.name() == name {
                 let old_index = (relative / stride) % count;
@@ -116,8 +116,8 @@ impl BlockState {
         Block::all()
             .iter()
             .flat_map(|block| {
-                let min_state_id = block.get().min_state_id;
-                (min_state_id..min_state_id + block.get().state_count()).map(move |state_id| {
+                let min_state_id = block.data().min_state_id;
+                (min_state_id..min_state_id + block.data().state_count()).map(move |state_id| {
                     BlockState {
                         block: *block,
                         state_id,
@@ -142,7 +142,7 @@ impl BlockStateTable {
     pub fn build(blocks: &Registry<Block>) -> Self {
         let mut state_to_block = Vec::new();
         for (index, block) in blocks.values().iter().enumerate() {
-            let state_count = block.get().state_count();
+            let state_count = block.data().state_count();
             for _ in 0..state_count {
                 state_to_block.push(index as u16);
             }

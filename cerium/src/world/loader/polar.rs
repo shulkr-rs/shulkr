@@ -366,7 +366,7 @@ fn parse_block(entry: &str) -> Result<BlockState, PolarError> {
 fn apply_property(state: BlockState, name: &str, value: &str) -> Option<BlockState> {
     let prop = state
         .as_block()
-        .get()
+        .data()
         .properties
         .iter()
         .find(|p| p.name() == name)?;

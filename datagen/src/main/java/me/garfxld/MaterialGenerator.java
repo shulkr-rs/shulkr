@@ -16,7 +16,6 @@ public class MaterialGenerator implements DataGenerator {
         builder.append("    ");
         builder.append("}");
 
-        Block.byItem()
         for (Item item : registry) {
 
         }

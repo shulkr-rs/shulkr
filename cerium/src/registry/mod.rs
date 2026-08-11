@@ -9,7 +9,13 @@ use crate::{
     },
     item::Material,
     util::{HashMap, Key},
-    world::{DimensionType, biome::Biome, block::Block, clock::WorldClock, timeline::Timeline},
+    world::{
+        DimensionType,
+        biome::Biome,
+        block::{Block, BlockEntityType},
+        clock::WorldClock,
+        timeline::Timeline,
+    },
 };
 use indexmap::IndexMap;
 use serde::{Serialize, de::DeserializeOwned};
@@ -43,6 +49,7 @@ type RegisteredKey<T> = RegistryKey<Registry<T>>;
 impl RegistryKeys {
     pub const ROOT: Key = Key::const_vanilla("root");
     pub const BLOCK:       RegisteredKey<Block>      = RegistryKey::const_vanilla("block");
+    pub const BLOCK_ENTITY_TYPE: RegisteredKey<BlockEntityType> = RegistryKey::const_vanilla("block_entity_type");
     pub const MATERIAL:    RegisteredKey<Material>   = RegistryKey::const_vanilla("material");
     pub const ENTITY_TYPE: RegisteredKey<EntityType> = RegistryKey::const_vanilla("entity_type");
 }

@@ -1,5 +1,5 @@
-mod block;
-mod block_entity;
+pub(crate) mod block;
+pub(crate) mod block_entity;
 mod block_state;
 mod property;
 

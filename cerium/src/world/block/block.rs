@@ -2,6 +2,7 @@ use super::BlockState;
 use super::property::{Properties, Property};
 use crate::registry::{Id, Registries};
 use crate::util::Key;
+use crate::world::block::BlockEntityType;
 
 include!("../../registry/generated/blocks.rs");
 
@@ -10,6 +11,7 @@ pub struct BlockData {
     pub default_state: Id,
     pub min_state_id: Id,
     pub properties: &'static [&'static dyn Property],
+    pub block_entity: Option<BlockEntityType>,
 }
 
 impl BlockData {
@@ -17,11 +19,13 @@ impl BlockData {
         default_state: Id,
         min_state_id: Id,
         properties: &'static [&'static dyn Property],
+        block_entity: Option<BlockEntityType>,
     ) -> Self {
         Self {
             default_state,
             min_state_id,
             properties,
+            block_entity,
         }
     }
 
@@ -35,11 +39,15 @@ impl BlockData {
 }
 
 impl Block {
-    pub fn default_state(&self) -> BlockState {
+    pub const fn default_state(&self) -> BlockState {
         BlockState {
             block: *self,
-            state_id: self.get().default_state,
+            state_id: self.data().default_state,
         }
+    }
+
+    pub fn block_entity(&self) -> Option<&BlockEntityType> {
+        self.data().block_entity.as_ref()
     }
 
     pub fn from_id(id: Id) -> Option<&'static Block> {

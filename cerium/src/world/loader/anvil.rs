@@ -382,7 +382,7 @@ fn parse_block(entry: NbtTag) -> Option<BlockState> {
 fn apply_property(state: BlockState, name: &str, value: &str) -> Option<BlockState> {
     let prop = state
         .as_block()
-        .get()
+        .data()
         .properties
         .iter()
         .find(|p| p.name() == name)?;

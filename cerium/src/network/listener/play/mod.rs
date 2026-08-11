@@ -375,7 +375,7 @@ fn handle_use_item_on(player: Player, packet: UseItemOnPacket) {
         return;
     };
 
-    let Some(block) = placed_block.material().get().block else {
+    let Some(block) = placed_block.material().data().block else {
         return;
     };
 

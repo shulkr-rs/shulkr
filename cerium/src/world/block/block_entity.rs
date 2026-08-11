@@ -1,11 +1,8 @@
 use cerium_nbt::Nbt;
-use serde::{Deserialize, Serialize};
 
-#[derive(Debug, Clone, Serialize, Deserialize)]
-pub struct BlockEntityInfo {
-    pub namespace: String,
-    pub id: i32,
-}
+include!("../../registry/generated/block_entity_types.rs");
+
+pub struct BlockEntityTypeData;
 
 #[derive(Debug, Clone)]
 pub struct BlockEntity {
