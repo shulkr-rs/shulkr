@@ -2,11 +2,11 @@ use crate::protocol::{
     decode::{Decode, DecodeError, PacketRead},
     packet::{ClientPacket, Packet},
 };
-use crate::util::Identifier;
+use crate::util::Key;
 
 #[derive(Debug, Clone)]
 pub struct PluginMessagePacket {
-    pub identifier: Identifier,
+    pub identifier: Key,
     pub data: Vec<u8>,
 }
 

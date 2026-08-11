@@ -7,7 +7,7 @@ use crate::{
         color::{Rgb, Rgba},
         style::{ClickEvent, HoverEvent, TextStyle},
     },
-    util::Identifier,
+    util::Key,
 };
 
 /// A wrapper around a [TextComponent](https://minecraft.wiki/w/Java_Edition_protocol/Packets#Type:Text_Component).
@@ -187,7 +187,7 @@ impl TextComponent {
     }
 
     /// The resource location of the font for this component in the resource pack within `assets/<namespace>/font`. Defaults to `minecraft:default`.
-    pub fn font(mut self, font: impl Into<Identifier>) -> Self {
+    pub fn font(mut self, font: impl Into<Key>) -> Self {
         self.style_mut().set_font(font.into().to_string());
         self
     }

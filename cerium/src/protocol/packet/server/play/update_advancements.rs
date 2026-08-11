@@ -5,14 +5,14 @@ use crate::{
         encode::{Encode, EncodeError, PacketWrite},
         packet::{Packet, ServerPacket},
     },
-    util::Identifier,
+    util::Key,
 };
 
 #[derive(Debug, Clone)]
 pub struct UpdateAdvancementsPacket {
     pub reset: bool,
     pub advancements: AdvancementTree,
-    pub to_remove: Vec<Identifier>,
+    pub to_remove: Vec<Key>,
     pub progress: Vec<()>,
     pub show_advancements: bool,
 }

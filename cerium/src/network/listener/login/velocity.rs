@@ -5,12 +5,12 @@ use crate::{
         decode::PacketRead as _,
         packet::{LoginPluginRequestPacket, LoginPluginResponsePacket},
     },
-    util::Identifier,
+    util::Key,
 };
 
 const VELOCITY_FORWARDING_VERSION: i32 = 1;
 const VELOCITY_PLAYER_INFO_ID: i32 = 1;
-const VELOCITY_CHANNEL: Identifier = Identifier::const_new("velocity", "player_info");
+const VELOCITY_CHANNEL: Key = Key::const_new("velocity", "player_info");
 
 pub(super) fn login_velocity(conn: &Connection) {
     conn.send_packet(&LoginPluginRequestPacket {

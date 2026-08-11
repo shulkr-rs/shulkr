@@ -3,12 +3,12 @@ use crate::{
         encode::{Encode, EncodeError, PacketWrite},
         packet::{Packet, ServerPacket},
     },
-    util::Identifier,
+    util::Key,
 };
 
 #[derive(Debug, Clone)]
 pub struct FeatureFlagsPacket {
-    pub feature_flags: Vec<Identifier>,
+    pub feature_flags: Vec<Key>,
 }
 
 impl Packet for FeatureFlagsPacket {}

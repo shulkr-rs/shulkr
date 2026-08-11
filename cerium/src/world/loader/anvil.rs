@@ -13,7 +13,7 @@ use flate2::bufread::{GzDecoder, ZlibDecoder};
 use thiserror::Error;
 
 use crate::{
-    registry::{DynamicRegistry, RegistryKey},
+    registry::{Registry, RegistryKey},
     world::{
         biome::Biome,
         block::{Block, BlockState},
@@ -30,7 +30,7 @@ pub struct AnvilLoader {
     min_section: i32,
     regions: HashMap<(i32, i32), Region>,
     decompress_buf: Vec<u8>,
-    biomes: DynamicRegistry<Biome>,
+    biomes: Registry<Biome>,
 }
 
 impl AnvilLoader {
@@ -42,7 +42,7 @@ impl AnvilLoader {
             decompress_buf: Vec::new(),
             biomes: crate::registry::load(
                 "minecraft:worldgen/biome".into(),
-                include_str!("../../../data/worldgen/biome.json"),
+                include_str!("../../../build_assets/worldgen/biome.json"),
             ),
         }
     }
@@ -250,7 +250,7 @@ fn parse_chunk(
     cx: i32,
     cz: i32,
     mut nbt: NbtCompound,
-    biomes: &DynamicRegistry<Biome>,
+    biomes: &Registry<Biome>,
     min_section: i32,
 ) -> Option<Chunk> {
     let mut chunk = Chunk::new(cx, cz, min_section * 16);
@@ -339,7 +339,7 @@ fn parse_block_states(chunk: &mut Chunk, sect_y: u32, tag: NbtTag) -> Option<()>
     }
 
     if blocks.len() == 1 {
-        chunk.fill_block_state_section(sect_y, blocks[0].id());
+        chunk.fill_block_state_section(sect_y, blocks[0].state_id());
         return Some(());
     }
 
@@ -373,17 +373,28 @@ fn parse_block(entry: NbtTag) -> Option<BlockState> {
             let NbtTag::String(value) = value else {
                 return None;
             };
-            state = state.with_property(&key, &value)?;
+            state = apply_property(state, &key, &value)?;
         }
     }
     Some(state)
+}
+
+fn apply_property(state: BlockState, name: &str, value: &str) -> Option<BlockState> {
+    let prop = state
+        .as_block()
+        .get()
+        .properties
+        .iter()
+        .find(|p| p.name() == name)?;
+    let index = (0..prop.len()).find(|&i| prop.value_name_from_index(i) == value)?;
+    state.with_index(*prop, index)
 }
 
 fn parse_biomes(
     chunk: &mut Chunk,
     sect_y: u32,
     tag: NbtTag,
-    biomes: &DynamicRegistry<Biome>,
+    biomes: &Registry<Biome>,
 ) -> Option<()> {
     let NbtTag::Compound(mut comp) = tag else {
         return None;

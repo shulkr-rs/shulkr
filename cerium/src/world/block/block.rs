@@ -1,27 +1,68 @@
-use super::*;
+use super::BlockState;
+use super::property::{Properties, Property};
+use crate::registry::{Id, Registries};
+use crate::util::Key;
 
 include!("../../registry/generated/blocks.rs");
 
-impl Block {
-    pub(crate) fn def(&self) -> &'static BlockDef {
-        // SAFETY: REGISTRY is always initialized before any Block is used
-        unsafe { REGISTRY.get().unwrap_unchecked() }.def_by_index(*self as u16)
-    }
+#[derive(Clone)]
+pub struct BlockData {
+    pub default_state: Id,
+    pub min_state_id: Id,
+    pub properties: &'static [&'static dyn Property],
+}
 
-    pub fn default_state(&self) -> BlockState {
-        BlockState {
-            block: *self,
-            state_id: self.def().default_state,
+impl BlockData {
+    pub const fn new(
+        default_state: Id,
+        min_state_id: Id,
+        properties: &'static [&'static dyn Property],
+    ) -> Self {
+        Self {
+            default_state,
+            min_state_id,
+            properties,
         }
     }
 
-    pub fn from_id(id: u16) -> Option<Block> {
-        let index = *REGISTRY.get()?.by_id.get(id as usize)?;
-        Block::try_from(index).ok()
+    pub fn state_count(&self) -> Id {
+        self.properties
+            .iter()
+            .map(|p| p.len() as Id)
+            .product::<Id>()
+            .max(1)
+    }
+}
+
+impl Block {
+    pub fn default_state(&self) -> BlockState {
+        BlockState {
+            block: *self,
+            state_id: self.get().default_state,
+        }
     }
 
-    pub fn from_key(key: impl Into<String>) -> Option<Block> {
-        let index = *REGISTRY.get()?.by_key.get(&key.into())?;
-        Block::try_from(index).ok()
+    pub fn from_id(id: Id) -> Option<&'static Block> {
+        Registries::BLOCK.by_id(id)
+    }
+
+    pub fn from_key(key: impl Into<Key>) -> Option<&'static Block> {
+        Registries::BLOCK.by_key(&key.into())
+    }
+}
+
+impl TryFrom<Id> for Block {
+    type Error = ();
+
+    #[inline]
+    fn try_from(value: Id) -> Result<Self, Self::Error> {
+        Self::all().get(value as usize).copied().ok_or(())
+    }
+}
+
+impl From<Block> for Id {
+    #[inline]
+    fn from(block: Block) -> Self {
+        block as Id
     }
 }

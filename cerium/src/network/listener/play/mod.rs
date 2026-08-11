@@ -34,6 +34,7 @@ use crate::{
             },
         },
     },
+    registry::Id,
     util::{BlockPosition, Position, Viewable},
 };
 
@@ -208,8 +209,7 @@ fn handle_pick_item_from_entity(player: Player, packet: PickItemFromEntityPacket
     let server = player.server();
     server.events().fire(&mut PlayerPickEntityEvent {
         player: player.clone(),
-        // todo: bad, move to EntityType::from_id() when available
-        entity_type: unsafe { std::mem::transmute::<_, EntityType>(packet.entity_id) },
+        entity_type: EntityType::from_id(packet.entity_id as Id).expect("Invalid EntityType"),
         include_data: packet.include_data,
     });
 }
@@ -375,7 +375,7 @@ fn handle_use_item_on(player: Player, packet: UseItemOnPacket) {
         return;
     };
 
-    let Some(block) = placed_block.material().block() else {
+    let Some(block) = placed_block.material().get().block else {
         return;
     };
 

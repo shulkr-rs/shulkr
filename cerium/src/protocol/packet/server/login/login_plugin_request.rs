@@ -3,13 +3,13 @@ use crate::{
         encode::{Encode, EncodeError, PacketWrite},
         packet::{Packet, ServerPacket},
     },
-    util::Identifier,
+    util::Key,
 };
 
 #[derive(Debug, Clone)]
 pub struct LoginPluginRequestPacket {
     pub message_id: i32,
-    pub channel: Identifier,
+    pub channel: Key,
     pub data: Box<[u8]>,
 }
 

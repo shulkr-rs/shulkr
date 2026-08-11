@@ -12,7 +12,7 @@ use cerium_nbt::{Nbt, NbtCompound};
 use thiserror::Error;
 
 use crate::{
-    registry::{DynamicRegistry, RegistryKey},
+    registry::{Registry, RegistryKey},
     world::{
         biome::Biome,
         block::{Block, BlockState},
@@ -90,7 +90,7 @@ impl PolarLoader {
 
         let biomes = crate::registry::load(
             "minecraft:worldgen/biome".into(),
-            include_str!("../../../data/worldgen/biome.json"),
+            include_str!("../../../build_assets/worldgen/biome.json"),
         );
 
         let min_section = read_i8(&mut body)?;
@@ -183,7 +183,7 @@ fn read_chunk(
     version: u16,
     min_section: i8,
     section_count: usize,
-    biomes: &DynamicRegistry<Biome>,
+    biomes: &Registry<Biome>,
 ) -> Result<(Chunk, Vec<u8>), PolarError> {
     let cx = read_varint(body)?;
     let cz = read_varint(body)?;
@@ -220,7 +220,7 @@ fn read_section(
     version: u16,
     section: u32,
     chunk: &mut Chunk,
-    biomes: &DynamicRegistry<Biome>,
+    biomes: &Registry<Biome>,
 ) -> Result<(), PolarError> {
     if read_bool(body)? {
         // Empty section: nothing else encoded, leave it as air.
@@ -241,7 +241,7 @@ fn read_section(
 
     if palette_len == 1 {
         if in_range {
-            chunk.fill_block_state_section(section, blocks[0].id());
+            chunk.fill_block_state_section(section, blocks[0].state_id());
         }
     } else {
         let data = read_long_array(body)?;
@@ -268,8 +268,9 @@ fn read_section(
     let mut ids = Vec::with_capacity(palette_len);
     for _ in 0..palette_len {
         let name = read_string(body)?;
+        let lookup = name.strip_prefix("minecraft:").unwrap_or(&name);
         let id = biomes
-            .get_id(&RegistryKey::new(name))
+            .get_id(&RegistryKey::new(lookup.to_owned()))
             .ok_or(PolarError::Malformed)? as i32;
         ids.push(id);
     }
@@ -355,13 +356,22 @@ fn parse_block(entry: &str) -> Result<BlockState, PolarError> {
     if let Some(props) = props.filter(|p| !p.is_empty()) {
         for pair in props.split(',') {
             let (key, value) = pair.split_once('=').ok_or(PolarError::Malformed)?;
-            state = state
-                .with_property(key.trim(), value.trim())
-                .ok_or(PolarError::Malformed)?;
+            state = apply_property(state, key.trim(), value.trim()).ok_or(PolarError::Malformed)?;
         }
     }
 
     Ok(state)
+}
+
+fn apply_property(state: BlockState, name: &str, value: &str) -> Option<BlockState> {
+    let prop = state
+        .as_block()
+        .get()
+        .properties
+        .iter()
+        .find(|p| p.name() == name)?;
+    let index = (0..prop.len()).find(|&i| prop.value_name_from_index(i) == value)?;
+    state.with_index(*prop, index)
 }
 
 fn unpack(
@@ -592,8 +602,8 @@ mod tests {
 
         let chunk = loader.load_chunk(0, 0).expect("chunk present");
         let stone = Block::from_key("minecraft:stone").unwrap().default_state();
-        assert_eq!(chunk.get_block(0, 0, 0), stone.id());
-        assert_eq!(chunk.get_block(15, 15, 15), stone.id());
+        assert_eq!(chunk.get_block(0, 0, 0), stone.state_id());
+        assert_eq!(chunk.get_block(15, 15, 15), stone.state_id());
         assert_eq!(seen.borrow().as_slice(), &[b"chunk-meta".to_vec()]);
 
         assert!(loader.load_chunk(0, 0).is_none());

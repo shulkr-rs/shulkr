@@ -1,6 +1,24 @@
+use crate::{
+    registry::{Id, Registries},
+    util::Key,
+    world::block::Block,
+};
+
 include!("../registry/generated/materials.rs");
 
+pub struct MaterialData {
+    pub block: Option<Block>,
+}
+
 impl Material {
+    pub fn from_id(id: Id) -> Option<Material> {
+        Self::try_from(id).ok()
+    }
+
+    pub fn from_key(key: Key) -> Option<Material> {
+        Registries::MATERIAL.by_key(&key).copied()
+    }
+
     /// Returns the vanilla default max stack size for this material.
     ///
     /// Most items stack to 64; tools, armor, buckets, boats, minecarts, etc.
@@ -73,5 +91,14 @@ impl Material {
                 }
             }
         }
+    }
+}
+
+impl TryFrom<Id> for Material {
+    type Error = ();
+
+    #[inline]
+    fn try_from(value: Id) -> Result<Self, Self::Error> {
+        Self::all().get(value as usize).copied().ok_or(())
     }
 }

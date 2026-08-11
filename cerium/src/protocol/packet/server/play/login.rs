@@ -3,14 +3,14 @@ use crate::{
         encode::{Encode, EncodeError, PacketWrite},
         packet::{Packet, ServerPacket},
     },
-    util::{BlockPosition, Identifier},
+    util::{BlockPosition, Key},
 };
 
 #[derive(Debug, Clone)]
 pub struct LoginPacket {
     pub entity_id: i32,
     pub is_hardcore: bool,
-    pub dimension_names: Vec<Identifier>,
+    pub dimension_names: Vec<Key>,
     pub max_players: i32,
     pub view_distance: i32,
     pub simulation_distance: i32,
@@ -18,7 +18,7 @@ pub struct LoginPacket {
     pub enable_respawn_screen: bool,
     pub do_limited_crafting: bool,
     pub dimension_type: i32,
-    pub dimension_name: Identifier,
+    pub dimension_name: Key,
     pub hashed_seed: i64,
     pub game_mode: u8,
     pub previous_game_mode: i8,

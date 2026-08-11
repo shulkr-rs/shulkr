@@ -3,7 +3,7 @@ use crate::protocol::{
     encode::{Encode, EncodeError, PacketWrite},
     packet::{Packet, ServerPacket},
 };
-use crate::util::Identifier;
+use crate::util::Key;
 
 pub const KEEP_ATTRIBUTE_MODIFIERS: u8 = 1;
 pub const KEEP_ENTITY_DATA: u8 = 2;
@@ -12,7 +12,7 @@ pub const KEEP_ALL_DATA: u8 = 3;
 #[derive(Debug, Clone)]
 pub struct RespawnPacket {
     pub dimension_type: i32,
-    pub dimension_name: Identifier,
+    pub dimension_name: Key,
     pub hashed_seed: i64,
     pub game_mode: u8,
     pub previous_game_mode: i8,

@@ -3,7 +3,7 @@ use crate::{
         encode::{Encode, EncodeError, PacketWrite},
         packet::{Packet, ServerPacket},
     },
-    util::Identifier,
+    util::Key,
 };
 
 #[derive(Debug, Clone)]
@@ -23,7 +23,7 @@ impl Encode for UpdateTagsPacket {
 
 #[derive(Debug, Clone)]
 pub struct TagRegistry {
-    pub registry: Identifier,
+    pub registry: Key,
     pub tags: Vec<Tag>,
 }
 
@@ -41,6 +41,6 @@ impl Encode for TagRegistry {
 
 #[derive(Debug, Clone)]
 pub struct Tag {
-    pub tag_name: Identifier,
+    pub tag_name: Key,
     pub entries: Vec<i32>,
 }

@@ -4,12 +4,12 @@ use crate::{
         decode::{DecodeError, PacketRead},
         encode::{EncodeError, PacketWrite},
     },
-    util::Identifier,
+    util::Key,
 };
 
 pub struct Cooldown {
     pub seconds: f32,
-    pub group: Option<Identifier>,
+    pub group: Option<Key>,
 }
 
 impl DataType for Cooldown {

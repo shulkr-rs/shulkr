@@ -5,6 +5,7 @@ use crate::{
         decode::{DecodeError, PacketRead},
         encode::{EncodeError, PacketWrite},
     },
+    registry::Id,
 };
 
 pub struct PotDecorations {
@@ -22,10 +23,10 @@ impl DataType for PotDecorations {
         }
 
         Ok(Self {
-            back: Material::from_id(r.read_varint()?).unwrap_or(Material::Brick),
-            left: Material::from_id(r.read_varint()?).unwrap_or(Material::Brick),
-            right: Material::from_id(r.read_varint()?).unwrap_or(Material::Brick),
-            front: Material::from_id(r.read_varint()?).unwrap_or(Material::Brick),
+            back: Material::from_id(r.read_varint()? as Id).unwrap_or(Material::Brick),
+            left: Material::from_id(r.read_varint()? as Id).unwrap_or(Material::Brick),
+            right: Material::from_id(r.read_varint()? as Id).unwrap_or(Material::Brick),
+            front: Material::from_id(r.read_varint()? as Id).unwrap_or(Material::Brick),
         })
     }
 

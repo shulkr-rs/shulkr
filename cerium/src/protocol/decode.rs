@@ -5,7 +5,7 @@ use uuid::Uuid;
 
 use crate::{
     text::TextComponent,
-    util::{BlockPosition, Identifier},
+    util::{BlockPosition, Key},
 };
 use cerium_nbt::Nbt;
 
@@ -65,7 +65,7 @@ pub trait PacketRead {
 
     fn read_uuid(&mut self) -> Result<Uuid>;
 
-    fn read_identifier(&mut self) -> Result<Identifier>;
+    fn read_identifier(&mut self) -> Result<Key>;
 
     fn read_nbt(&mut self) -> Result<Nbt>;
 
@@ -145,11 +145,11 @@ impl<R: Buf> PacketRead for R {
         Ok(Uuid::from_u128(self.read_u128()?))
     }
 
-    fn read_identifier(&mut self) -> Result<Identifier> {
+    fn read_identifier(&mut self) -> Result<Key> {
         let identifier = self.read_string()?;
 
         match identifier.split_once(":") {
-            Some((namespace, path)) => Ok(Identifier::new(namespace.to_string(), path.to_string())),
+            Some((namespace, path)) => Ok(Key::new(namespace.to_string(), path.to_string())),
             None => Err(DecodeError::Decode("Identifier read")),
         }
     }

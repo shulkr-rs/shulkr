@@ -3,12 +3,12 @@ use crate::{
         encode::{Encode, EncodeError, PacketWrite},
         packet::{Packet, ServerPacket},
     },
-    util::Identifier,
+    util::Key,
 };
 
 #[derive(Debug, Clone)]
 pub struct PluginMessagePacket {
-    pub identifier: Identifier,
+    pub identifier: Key,
     pub data: Box<[u8]>,
 }
 

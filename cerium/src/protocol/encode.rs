@@ -29,7 +29,7 @@ use crate::{
         },
     },
     text::TextComponent,
-    util::{BlockPosition, Identifier},
+    util::{BlockPosition, Key},
 };
 use cerium_nbt::{Nbt, NbtTag};
 
@@ -81,7 +81,7 @@ pub trait PacketWrite {
 
     fn write_string(&mut self, value: &String) -> Result<()>;
 
-    fn write_identifier(&mut self, value: &Identifier) -> Result<()>;
+    fn write_identifier(&mut self, value: &Key) -> Result<()>;
 
     fn write_uuid(&mut self, value: &Uuid) -> Result<()>;
 
@@ -167,7 +167,7 @@ impl<B: BufMut> PacketWrite for B {
         Ok(())
     }
 
-    fn write_identifier(&mut self, value: &Identifier) -> Result<()> {
+    fn write_identifier(&mut self, value: &Key) -> Result<()> {
         self.write_string(&value.to_string())
     }
 

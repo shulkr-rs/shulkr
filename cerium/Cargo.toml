@@ -19,6 +19,7 @@ minimessage = []
 
 [dependencies]
 cerium-nbt = { workspace = true }
+cerium-macros = { workspace = true }
 
 anyhow = { workspace = true }
 async-compression = { workspace = true }

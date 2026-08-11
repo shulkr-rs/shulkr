@@ -136,5 +136,5 @@ impl Into<ChunkDataAndUpdateLightPacket> for &Chunk {
 
 fn is_fluid(state_id: u16) -> bool {
     BlockState::from_id(state_id)
-        .is_some_and(|state| matches!(state.block(), Block::Water | Block::Lava))
+        .is_some_and(|state| matches!(state.as_block(), Block::Water | Block::Lava))
 }

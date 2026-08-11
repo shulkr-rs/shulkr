@@ -8,7 +8,7 @@ use serde::{Deserialize, Serialize};
 use crate::entity::{EntityLike as _, MAX_VIEW_DISTANCE, Player};
 use crate::event::player::PlayerSpawnEvent;
 use crate::protocol::packet::{CommandsPacket, RegistryEntry, Tag, TagRegistry, UpdateTagsPacket};
-use crate::registry::{DynamicRegistry, RegistryKey};
+use crate::registry::{Registries, Registry, RegistryKey};
 use crate::util::{Position, TeleportFlags, Viewable};
 use crate::world::{DimensionType, chunk::Chunk};
 use crate::{event::player::PlayerConfigEvent, network::client::Connection};
@@ -22,7 +22,7 @@ use crate::{
             SetCenterChunkPacket, client, server,
         },
     },
-    util::Identifier,
+    util::Key,
 };
 
 #[rustfmt::skip]
@@ -86,7 +86,7 @@ fn load_tags(_registry: &str, data: &str) -> HashMap<String, Vec<String>> {
     result
 }
 
-fn tags<T>(registry: &'static str, reg: &DynamicRegistry<T>, data: &str) -> TagRegistry
+fn tags<T>(registry: &'static str, reg: &Registry<T>, data: &str) -> TagRegistry
 where
     T: Serialize + DeserializeOwned,
 {
@@ -95,7 +95,7 @@ where
     let packet_tags: Vec<Tag> = resolved_tags
         .into_iter()
         .map(|(name, values)| Tag {
-            tag_name: Identifier::of(name),
+            tag_name: Key::of(name),
             entries: values
                 .into_iter()
                 .map(|v| reg.get_id(&RegistryKey::new(v)).map(|v| v as i32))
@@ -105,7 +105,7 @@ where
         .collect();
 
     TagRegistry {
-        registry: Identifier::new("minecraft", registry),
+        registry: Key::new("minecraft", registry),
         tags: packet_tags,
     }
 }
@@ -116,13 +116,12 @@ fn block_tags(data: &str) -> TagRegistry {
     let packet_tags: Vec<Tag> = resolved_tags
         .into_iter()
         .map(|(name, values)| Tag {
-            tag_name: Identifier::of(name),
+            tag_name: Key::of(name),
             entries: values
                 .into_iter()
                 .filter_map(|v| {
-                    crate::world::block::REGISTRY
-                        .get()?
-                        .get_id(&v)
+                    Registries::BLOCK
+                        .get_id(&RegistryKey::of(v))
                         .map(|id| id as i32)
                 })
                 .collect(),
@@ -130,7 +129,7 @@ fn block_tags(data: &str) -> TagRegistry {
         .collect();
 
     TagRegistry {
-        registry: Identifier::vanilla("block"),
+        registry: Key::vanilla("block"),
         tags: packet_tags,
     }
 }
@@ -142,7 +141,7 @@ fn handle_client_info(client: Arc<Connection>, packet: ClientInfoPacket) {
     client.set_view_distance(packet.view_distance as i32);
 
     client.send_packet(&server::config::PluginMessagePacket {
-        identifier: Identifier::vanilla("brand"),
+        identifier: Key::vanilla("brand"),
         data: server.brand().into_bytes().into_boxed_slice(),
     });
 
@@ -151,7 +150,7 @@ fn handle_client_info(client: Arc<Connection>, packet: ClientInfoPacket) {
     });
 
     client.send_packet(&FeatureFlagsPacket {
-        feature_flags: vec![Identifier::vanilla("vanilla")],
+        feature_flags: vec![Key::vanilla("vanilla")],
     });
 
     client.send_packet(&RegistryDataPacket::from(&registries.cat_variant));
@@ -173,14 +172,14 @@ fn handle_client_info(client: Arc<Connection>, packet: ClientInfoPacket) {
 
     client.send_packet(&RegistryDataPacket::from(&registries.biome));
     client.send_packet(&RegistryDataPacket {
-        registry_id: Identifier::vanilla("world_clock"),
+        registry_id: Key::vanilla("world_clock"),
         entries: vec![
             RegistryEntry {
-                entry_id: Identifier::new("minecraft", "overworld"),
+                entry_id: Key::new("minecraft", "overworld"),
                 data: Some(NbtCompound::new().into()),
             },
             RegistryEntry {
-                entry_id: Identifier::new("minecraft", "the_end"),
+                entry_id: Key::new("minecraft", "the_end"),
                 data: Some(NbtCompound::new().into()),
             },
         ],
@@ -197,24 +196,24 @@ fn handle_client_info(client: Arc<Connection>, packet: ClientInfoPacket) {
             tags(
                 "timeline",
                 &registries.timeline,
-                include_str!("../../../data/tags/timeline.json"),
+                include_str!("../../../build_assets/tags/timeline.json"),
             ),
             tags(
                 "damage_type",
                 &registries.damage_type,
-                include_str!("../../../data/tags/damage_type.json"),
+                include_str!("../../../build_assets/tags/damage_type.json"),
             ),
             tags(
                 "banner_pattern",
                 &registries.banner_pattern,
-                include_str!("../../../data/tags/banner_pattern.json"),
+                include_str!("../../../build_assets/tags/banner_pattern.json"),
             ),
             tags(
                 "instrument",
                 &registries.instrument,
-                include_str!("../../../data/tags/instrument.json"),
+                include_str!("../../../build_assets/tags/instrument.json"),
             ),
-            block_tags(include_str!("../../../data/tags/block.json")),
+            block_tags(include_str!("../../../build_assets/tags/block.json")),
         ],
     });
 

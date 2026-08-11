@@ -1,12 +1,12 @@
 use std::borrow::Cow;
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
-pub struct Identifier {
+pub struct Key {
     namespace: Cow<'static, str>,
     path: Cow<'static, str>,
 }
 
-impl Identifier {
+impl Key {
     pub fn new<A, B>(namespace: A, path: B) -> Self
     where
         A: Into<Cow<'static, str>>,
@@ -32,6 +32,10 @@ impl Identifier {
         Self::new("minecraft", path)
     }
 
+    pub const fn const_vanilla(path: &'static str) -> Self {
+        Self::const_new("minecraft", path)
+    }
+
     pub fn of<S>(key: S) -> Self
     where
         S: Into<Cow<'static, str>>,
@@ -53,13 +57,13 @@ impl Identifier {
     }
 }
 
-impl std::fmt::Display for Identifier {
+impl std::fmt::Display for Key {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         write!(f, "{}:{}", self.namespace, self.path)
     }
 }
 
-impl<S> From<S> for Identifier
+impl<S> From<S> for Key
 where
     S: Into<String>,
 {

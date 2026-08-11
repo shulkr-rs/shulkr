@@ -1,4 +1,4 @@
-use crate::util::Identifier;
+use crate::util::Key;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum StringBehaviour {
@@ -37,15 +37,15 @@ pub enum ArgKind {
     /// `minecraft:time`.
     Time { min: i32 },
     /// `minecraft:resource`
-    Resource { registry: Identifier },
+    Resource { registry: Key },
     /// `minecraft:resource_key`.
-    ResourceKey { registry: Identifier },
+    ResourceKey { registry: Key },
     /// `minecraft:resource_or_tag`.
-    ResourceOrTag { registry: Identifier },
+    ResourceOrTag { registry: Key },
     /// `minecraft:resource_or_tag_key`.
-    ResourceOrTagKey { registry: Identifier },
+    ResourceOrTagKey { registry: Key },
     /// `minecraft:resource_selector`.
-    ResourceSelector { registry: Identifier },
+    ResourceSelector { registry: Key },
 }
 
 impl ArgKind {

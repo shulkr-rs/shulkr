@@ -1,0 +1,8 @@
+metadata.format.version = "1.1"
+
+[versions]
+minecraft = "26.2"
+loom = "1.16-SNAPSHOT"
+
+[plugins]
+loom = { id = "net.fabricmc.fabric-loom", version.ref = "loom" }

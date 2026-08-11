@@ -5,6 +5,7 @@ use rustc_hash::FxBuildHasher;
 use crate::{
     inventory::Slot,
     item::{ComponentMap, DataComponent, Material},
+    registry::Id,
     util::HashMap,
 };
 
@@ -118,7 +119,7 @@ impl From<Slot> for ItemStack {
     fn from(value: Slot) -> Self {
         if let Some(item_id) = value.item_id {
             Self {
-                material: Material::from_id(item_id).unwrap(),
+                material: Material::from_id(item_id as Id).unwrap(),
                 amount: value.item_count,
                 components: value.to_add,
             }

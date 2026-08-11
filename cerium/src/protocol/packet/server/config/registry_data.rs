@@ -6,14 +6,14 @@ use crate::{
         encode::{Encode, EncodeError, PacketWrite},
         packet::{Packet, ServerPacket},
     },
-    registry::DynamicRegistry,
-    util::Identifier,
+    registry::Registry,
+    util::Key,
 };
 use cerium_nbt::{Nbt, to_nbt_compound};
 
 #[derive(Debug, Clone)]
 pub struct RegistryDataPacket {
-    pub registry_id: Identifier,
+    pub registry_id: Key,
     pub entries: Vec<RegistryEntry>,
 }
 
@@ -30,7 +30,7 @@ impl Encode for RegistryDataPacket {
 
 #[derive(Debug, Clone)]
 pub struct RegistryEntry {
-    pub entry_id: Identifier,
+    pub entry_id: Key,
     pub data: Option<Nbt>,
 }
 
@@ -42,20 +42,20 @@ impl Encode for RegistryEntry {
     }
 }
 
-impl<T> From<&DynamicRegistry<T>> for RegistryDataPacket
+impl<T> From<&Registry<T>> for RegistryDataPacket
 where
     T: Serialize + DeserializeOwned + Clone,
 {
-    fn from(value: &DynamicRegistry<T>) -> Self {
-        let registry_id = value.registry_id().clone();
-        let entries = value.entries();
+    fn from(value: &Registry<T>) -> Self {
+        let registry_id = value.key().to_key();
+        let entries = value.values();
         RegistryDataPacket {
             registry_id,
             entries: entries
                 .into_iter()
-                .map(|(key, value)| RegistryEntry {
-                    entry_id: key.to_key(),
-                    data: Some(to_nbt_compound(value).unwrap().into()),
+                .map(|v| RegistryEntry {
+                    entry_id: value.get_key(v).unwrap().clone(),
+                    data: Some(to_nbt_compound(v).unwrap().into()),
                 })
                 .collect(),
         }

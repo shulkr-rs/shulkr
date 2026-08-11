@@ -1,17 +1,17 @@
 #![allow(unused)]
 
-use crate::{item::ItemStack, text::TextComponent, util::Identifier};
+use crate::{item::ItemStack, text::TextComponent, util::Key};
 
 #[derive(Debug, Clone)]
 pub struct Advancement {
-    id: Identifier,
-    parent: Option<Identifier>,
+    id: Key,
+    parent: Option<Key>,
 
     title: TextComponent,
     description: TextComponent,
     icon: ItemStack,
     frame: AdvancementFrame,
-    background: Option<Identifier>,
+    background: Option<Key>,
     toast: bool,
     hidden: bool,
     x: f32,
@@ -22,11 +22,11 @@ pub struct Advancement {
 }
 
 impl Advancement {
-    pub fn builder(id: impl Into<Identifier>) -> AdvancementBuilder {
+    pub fn builder(id: impl Into<Key>) -> AdvancementBuilder {
         AdvancementBuilder::new(id.into())
     }
 
-    pub fn new(id: impl Into<Identifier>, parent: Option<&Advancement>) -> Self {
+    pub fn new(id: impl Into<Key>, parent: Option<&Advancement>) -> Self {
         let mut builder = Self::builder(id);
         if let Some(parent) = parent {
             builder = builder.with_parent(parent);
@@ -34,11 +34,11 @@ impl Advancement {
         builder.build()
     }
 
-    pub fn key(&self) -> &Identifier {
+    pub fn key(&self) -> &Key {
         &self.id
     }
 
-    pub fn parent(&self) -> Option<&Identifier> {
+    pub fn parent(&self) -> Option<&Key> {
         self.parent.as_ref()
     }
 
@@ -78,7 +78,7 @@ impl Advancement {
         self.hidden = value;
     }
 
-    pub(crate) fn background(&self) -> Option<&Identifier> {
+    pub(crate) fn background(&self) -> Option<&Key> {
         self.background.as_ref()
     }
 
@@ -110,13 +110,13 @@ impl Advancement {
 }
 
 pub struct AdvancementBuilder {
-    id: Identifier,
-    parent: Option<Identifier>,
+    id: Key,
+    parent: Option<Key>,
     title: TextComponent,
     description: TextComponent,
     icon: ItemStack,
     frame: AdvancementFrame,
-    background: Option<Identifier>,
+    background: Option<Key>,
     toast: bool,
     hidden: bool,
     x: f32,
@@ -125,7 +125,7 @@ pub struct AdvancementBuilder {
 }
 
 impl AdvancementBuilder {
-    pub fn new(id: Identifier) -> Self {
+    pub fn new(id: Key) -> Self {
         Self {
             id,
             parent: None,
@@ -215,12 +215,12 @@ pub enum AdvancementFrame {
 
 #[derive(Debug, Clone)]
 pub struct AdvancementTree {
-    background: Identifier,
+    background: Key,
     children: Vec<Advancement>,
 }
 
 impl AdvancementTree {
-    pub fn new(background: Identifier) -> Self {
+    pub fn new(background: Key) -> Self {
         Self {
             background,
             children: vec![],
@@ -236,12 +236,12 @@ impl AdvancementTree {
 mod tests {
     use crate::{
         advancement::{Advancement, AdvancementTree},
-        util::Identifier,
+        util::Key,
     };
 
     #[test]
     fn test_advanements() {
-        let tree = AdvancementTree::new(Identifier::new("a", "b"));
+        let tree = AdvancementTree::new(Key::new("a", "b"));
 
         let root = Advancement::builder("id")
             .hidden(true)

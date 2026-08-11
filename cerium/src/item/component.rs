@@ -14,7 +14,7 @@ use crate::{
     },
     item::ItemStack,
     text::TextComponent,
-    util::{DyeColor, Identifier},
+    util::{DyeColor, Key},
 };
 use cerium_nbt::Nbt;
 
@@ -120,7 +120,7 @@ impl<T> DataComponent<T> {
 }
 
 impl DataComponent<()> {
-    pub fn from_key(key: Identifier) -> Option<&'static AnyDataComponent> {
+    pub fn from_key(key: Key) -> Option<&'static AnyDataComponent> {
         BY_KEY.get(&key.to_string())
     }
 
@@ -221,7 +221,7 @@ define_components! {
     const CONSUMABLE: DataComponent<Consumable>                         = DataComponent::new(21, "minecraft:consumable");
     const USE_REMAINDER: DataComponent<ItemStack>                       = DataComponent::new(22, "minecraft:use_remainder");
     const USE_COOLDOWN: DataComponent<Cooldown>                         = DataComponent::new(23, "minecraft:use_cooldown");
-    const DAMAGE_RESISTANT: DataComponent<Identifier>                   = DataComponent::new(24, "minecraft:damage_resistant");
+    const DAMAGE_RESISTANT: DataComponent<Key>                   = DataComponent::new(24, "minecraft:damage_resistant");
     const TOOL: DataComponent<Tool>                                     = DataComponent::new(25, "minecraft:tool");
     const WEAPON: DataComponent<Weapon>                                 = DataComponent::new(26, "minecraft:weapon");
     const ENCHANTABLE: DataComponent<i32, VarInt>                       = DataComponent::new(27, "minecraft:enchantable");
@@ -253,13 +253,13 @@ define_components! {
     // const PROVIDES_TRIM_MATERIAL: DataComponent<ProvidesTrimMaterial>   = DataComponent::new(53, "minecraft:provides_trim_material");
     const OMINOUS_BOTTLE_AMPLIFIER: DataComponent<i32, VarInt>          = DataComponent::new(54, "minecraft:ominous_bottle_amplifier");
     // const JUKEBOX_PLAYABLE: DataComponent<Song?>                     = DataComponent::new(55, "minecraft:jukebox_playable");
-    const PROVIDES_BANNER_PATTERNS: DataComponent<Identifier>           = DataComponent::new(56, "minecraft:provides_banner_patterns");
+    const PROVIDES_BANNER_PATTERNS: DataComponent<Key>           = DataComponent::new(56, "minecraft:provides_banner_patterns");
     const RECIPES: DataComponent<Nbt>                                   = DataComponent::new(57, "minecraft:recipes");
     const LODESTONE_TRACKER: DataComponent<LodestoneTracker>            = DataComponent::new(58, "minecraft:lodestone_tracker");
     const FIREWORK_EXPLOSION: DataComponent<FireworkExplosion>          = DataComponent::new(59, "minecraft:firework_explosion");
     const FIREWORKS: DataComponent<Fireworks>                           = DataComponent::new(60, "minecraft:fireworks");
     // const PROFILE: DataComponent<ResolvableProfile>                     = DataComponent::new(61, "minecraft:profile");
-    const NOTE_BLOCK_SOUND: DataComponent<Identifier>                   = DataComponent::new(62, "minecraft:note_block_sound");
+    const NOTE_BLOCK_SOUND: DataComponent<Key>                   = DataComponent::new(62, "minecraft:note_block_sound");
     // const BANNER_PATTERNS: DataComponent<BannerPatterns>                = DataComponent::new(63, "minecraft:banner_patterns");
     const BASE_COLOR: DataComponent<DyeColor>                           = DataComponent::new(64, "minecraft:base_color");
     const POT_DECORATIONS: DataComponent<PotDecorations>                = DataComponent::new(65, "minecraft:pot_decorations");
@@ -375,7 +375,7 @@ impl DataType for Nbt {
     }
 }
 
-impl DataType for Identifier {
+impl DataType for Key {
     fn decode<R: PacketRead>(r: &mut R) -> Result<Self, DecodeError> {
         r.read_identifier()
     }

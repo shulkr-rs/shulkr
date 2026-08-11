@@ -1,107 +1,130 @@
+use std::sync::OnceLock;
+
+use crate::{
+    registry::{Id, Registries, Registry},
+    util::Key,
+    world::block::property::Property,
+};
+
 use super::*;
 
 #[derive(Clone, Copy)]
 pub struct BlockState {
-    pub(super) block: Block,
-    pub(super) state_id: u16,
+    pub block: Block,
+    pub state_id: u16,
 }
 
 impl BlockState {
     pub fn block_entity(&self) -> Option<&BlockEntityInfo> {
-        self.block().def().block_entity.as_ref()
+        None
     }
 
-    pub fn id(&self) -> u16 {
+    /// Returns the id of the [BlockState].
+    pub fn state_id(&self) -> u16 {
         self.state_id
     }
 
-    pub fn block(&self) -> Block {
+    /// Returns this [BlockState] back into a [`Block`].
+    pub fn as_block(&self) -> Block {
         self.block
     }
 
+    /// Returns the value of a specific [Property].
+    ///
+    /// If the Block does not have this value [None] is returned.
+    pub fn get<P>(&self, property: P) -> Option<P::Value>
+    where
+        P: Property,
+    {
+        let relative = self.state_id - self.block.get().min_state_id;
+        let mut stride = 1u16;
+        for prop in self.block.get().properties.iter().rev() {
+            let count = prop.len() as u16;
+            if prop.name() == property.name() {
+                let index = (relative / stride) % count;
+                return Some(property.by_index(index as usize));
+            }
+            stride *= count;
+        }
+        None
+    }
+
+    /// Sets the value of a specific [Property].
+    ///
+    /// Panics if the block does not have this property.
+    pub fn set<P>(&mut self, property: P, value: P::Value)
+    where
+        P: Property,
+    {
+        let Some(state_id) = self.set_index(property.name(), property.index_of(&value)) else {
+            panic!(
+                "Property {} not found on block {}",
+                property.name(),
+                self.block as u16
+            );
+        };
+        self.state_id = state_id;
+    }
+
+    pub fn with<P>(&self, property: P, value: P::Value) -> Option<BlockState>
+    where
+        P: Property,
+    {
+        self.set_index(property.name(), property.index_of(&value))
+            .map(|state_id| BlockState {
+                block: self.block,
+                state_id,
+            })
+    }
+
+    #[cfg(any(feature = "anvil", feature = "polar"))]
+    pub(crate) fn with_index(&self, property: &dyn Property, index: usize) -> Option<BlockState> {
+        self.set_index(property.name(), index)
+            .map(|state_id| BlockState {
+                block: self.block,
+                state_id,
+            })
+    }
+
+    fn set_index(&self, name: &str, index: usize) -> Option<u16> {
+        let relative = self.state_id - self.block.get().min_state_id;
+        let mut stride = 1u16;
+        for prop in self.block.get().properties.iter().rev() {
+            let count = prop.len() as u16;
+            if prop.name() == name {
+                let old_index = (relative / stride) % count;
+                return Some(self.state_id - old_index * stride + index as u16 * stride);
+            }
+            stride *= count;
+        }
+        None
+    }
+
+    /// Returns a [BlockState] based on the given `state_id`. If no corrosponding BlockState is found [None] is returned.
     pub fn from_id(state_id: u16) -> Option<BlockState> {
-        let registry = REGISTRY.get()?;
-        let def = registry.def_by_state(state_id)?;
-        let block = Block::try_from(registry.by_id.get(def.id as usize).copied()?).ok()?;
+        let block_index = block_state_table().block_by_state(state_id)?;
+        let block = *Registries::BLOCK.by_id(block_index as Id)?;
         Some(BlockState { block, state_id })
     }
 
-    pub fn from_key(key: impl Into<String>) -> Option<BlockState> {
+    /// Returns a [BlockState] based on the given `key`. If no corrosponding BlockState is found [None] is returned.
+    pub fn from_key(key: impl Into<Key>) -> Option<BlockState> {
         Block::from_key(key).map(|b| b.default_state())
     }
 
-    pub fn values() -> Vec<BlockState> {
-        let registry = REGISTRY.get().unwrap();
-        registry
-            .defs
+    pub fn all() -> Vec<BlockState> {
+        Block::all()
             .iter()
-            .flat_map(|def| {
-                let block = Block::try_from(*registry.by_id.get(def.id as usize).unwrap()).unwrap();
-                (def.min_state_id..def.min_state_id + def.state_count())
-                    .map(move |state_id| BlockState { block, state_id })
+            .flat_map(|block| {
+                let min_state_id = block.get().min_state_id;
+                (min_state_id..min_state_id + block.get().state_count()).map(move |state_id| {
+                    BlockState {
+                        block: *block,
+                        state_id,
+                    }
+                })
             })
             .collect()
-    }
-
-    pub fn get_property(&self, name: &str) -> Option<&'static str> {
-        let def = self.block.def();
-        let relative = self.state_id - def.min_state_id;
-
-        let mut stride = 1u16;
-        for prop in def.properties.iter().rev() {
-            let count = prop.value_count();
-            if prop.name == name {
-                let index = (relative / stride) % count;
-                return Some(prop.values[index as usize]);
-            }
-            stride *= count;
-        }
-        None
-    }
-
-    pub fn set_property(&mut self, name: &str, value: &str) {
-        let def = self.block.def();
-        let relative = self.state_id - def.min_state_id;
-
-        let mut stride = 1u16;
-        for prop in def.properties.iter().rev() {
-            let count = prop.value_count();
-            if prop.name == name {
-                let old_index = (relative / stride) % count;
-                let new_index = prop
-                    .values
-                    .iter()
-                    .position(|v| *v == value)
-                    .expect("value not found") as u16;
-                self.state_id = self.state_id - old_index * stride + new_index * stride;
-                return;
-            }
-            stride *= count;
-        }
-        panic!("Property {} not found on block {}", name, def.id);
-    }
-
-    pub fn with_property(&self, name: &str, value: &str) -> Option<BlockState> {
-        let def = self.block.def();
-        let mut stride = 1u16;
-        for prop in def.properties.iter().rev() {
-            let count = prop.value_count();
-            if prop.name == name {
-                let new_index = prop.values.iter().position(|v| *v == value)? as u16;
-                let relative = self.state_id - def.min_state_id;
-                let old_index = (relative / stride) % count;
-                return Some(BlockState {
-                    block: self.block,
-                    state_id: self.state_id - old_index * stride + new_index * stride,
-                });
-            }
-            stride *= count;
-        }
-        None
-    }
-
-    pub fn has_property(&self, name: &str) -> bool {
-        self.block.def().properties.iter().any(|p| p.name == name)
     }
 }
 
@@ -109,4 +132,31 @@ impl From<Block> for BlockState {
     fn from(block: Block) -> Self {
         block.default_state()
     }
+}
+
+pub struct BlockStateTable {
+    state_to_block: Vec<u16>,
+}
+
+impl BlockStateTable {
+    pub fn build(blocks: &Registry<Block>) -> Self {
+        let mut state_to_block = Vec::new();
+        for (index, block) in blocks.values().iter().enumerate() {
+            let state_count = block.get().state_count();
+            for _ in 0..state_count {
+                state_to_block.push(index as u16);
+            }
+        }
+        Self { state_to_block }
+    }
+
+    pub fn block_by_state(&self, state_id: u16) -> Option<u16> {
+        self.state_to_block.get(state_id as usize).copied()
+    }
+}
+
+static BLOCK_STATE_TABLE: OnceLock<BlockStateTable> = OnceLock::new();
+
+pub fn block_state_table() -> &'static BlockStateTable {
+    BLOCK_STATE_TABLE.get_or_init(|| BlockStateTable::build(Registries::BLOCK))
 }

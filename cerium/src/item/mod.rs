@@ -1,6 +1,7 @@
 mod component;
 mod item_stack;
-mod material;
+pub(crate) mod material;
+pub mod trim_material;
 
 pub use component::*;
 pub use item_stack::ItemStack;

@@ -1,16 +1,18 @@
+mod axis;
 mod direction;
 mod dye_color;
 mod hash_map;
-mod identifier;
+mod key;
 mod pose;
 mod position;
 mod viewable;
 mod world_pos;
 
+pub use axis::*;
 pub use direction::*;
 pub use dye_color::*;
 pub use hash_map::*;
-pub use identifier::*;
+pub use key::*;
 pub use pose::*;
 pub use position::*;
 pub use viewable::*;

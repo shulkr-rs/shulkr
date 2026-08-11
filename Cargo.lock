@@ -215,6 +215,7 @@ dependencies = [
  "bitflags",
  "byteorder",
  "bytes",
+ "cerium-macros",
  "cerium-nbt",
  "cfb8",
  "convert_case",
@@ -246,6 +247,16 @@ dependencies = [
  "ureq",
  "uuid",
  "zstd",
+]
+
+[[package]]
+name = "cerium-macros"
+version = "0.1.0"
+dependencies = [
+ "convert_case",
+ "proc-macro2",
+ "quote",
+ "syn",
 ]
 
 [[package]]

@@ -1,0 +1,9 @@
+rootProject.name = "datagen"
+
+pluginManagement {
+    repositories {
+        gradlePluginPortal()
+        mavenCentral()
+        maven(url = "https://maven.fabricmc.net/")
+    }
+}

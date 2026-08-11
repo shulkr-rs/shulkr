@@ -10,8 +10,8 @@ fn main() {
     let server = Server::new(AuthMode::Online);
     let world = World::new(DimensionType::OVERWORLD);
 
-    let mut states = BlockState::values();
-    states.sort_by_key(|s| s.id());
+    let mut states = BlockState::all();
+    states.sort_by_key(|s| s.state_id());
 
     for (pos, block) in states.iter().enumerate() {
         let bz = ((pos / 168) + 1) as i32;

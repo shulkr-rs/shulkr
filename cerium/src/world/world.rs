@@ -15,18 +15,18 @@ pub type ChunkGenerator = dyn Fn(&Chunk) + Send + Sync;
 
 /// A Minecraft world.
 #[derive(Clone)]
-pub struct World(Arc<inner::World>);
+pub struct World(Arc<imp::World>);
 
 impl World {
     pub fn new(dimension: RegistryKey<DimensionType>) -> Self {
-        Self(Arc::new(inner::World::new(dimension, None)))
+        Self(Arc::new(imp::World::new(dimension, None)))
     }
 
     pub fn with_generator(
         dimension: RegistryKey<DimensionType>,
         generator: impl Fn(&Chunk) + Send + Sync + 'static,
     ) -> Self {
-        Self(Arc::new(inner::World::new(
+        Self(Arc::new(imp::World::new(
             dimension,
             Some(Arc::new(generator)),
         )))
@@ -140,7 +140,7 @@ impl World {
     }
 }
 
-mod inner {
+mod imp {
     use super::*;
     use crate::world::chunk::AsyncDedup;
     use crate::{
@@ -171,7 +171,7 @@ mod inner {
             let dimension_type = server
                 .registries()
                 .dimension_type
-                .get(&dimension)
+                .by_key(&dimension.to_key())
                 .unwrap()
                 .clone();
 
@@ -338,7 +338,7 @@ mod inner {
             for p in player.server().players().lock().clone() {
                 p.send_packet(&BlockUpdatePacket {
                     position,
-                    block_id: block.id(),
+                    block_id: block.state_id(),
                 });
                 if p == player {
                     continue;
@@ -346,7 +346,7 @@ mod inner {
                 p.send_packet(&WorldEventPacket {
                     event: 2001,
                     position,
-                    data: block.id() as i32,
+                    data: block.state_id() as i32,
                     disable_relative_volume: false,
                 });
             }
@@ -360,6 +360,7 @@ mod inner {
             state: impl Into<BlockState>,
         ) {
             let state = state.into();
+            let block_id = state.state_id();
 
             let new_position = match face {
                 BlockFace::Bottom => position.add(0, -1, 0),
@@ -381,7 +382,7 @@ mod inner {
             for player in player.server().players().lock().clone() {
                 player.send_packet(&BlockUpdatePacket {
                     position: new_position,
-                    block_id: state.id(),
+                    block_id,
                 });
             }
         }

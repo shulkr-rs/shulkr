@@ -3,11 +3,12 @@ use uuid::Uuid;
 
 use crate::{
     item::ItemStack,
+    registry::Registries,
     text::{
         TextComponent,
         color::{Rgb, Rgba},
     },
-    util::Identifier,
+    util::Key,
 };
 
 // ===== Style ======
@@ -256,7 +257,10 @@ impl HoverEvent {
     pub fn show_item(stack: ItemStack, show_amount: bool, show_components: bool) -> Self {
         Self {
             ty: HoverEventType::ShowItem {
-                id: stack.material().key().to_string(),
+                id: Registries::MATERIAL
+                    .get_key(&stack.material())
+                    .expect(&format!("{:?} has no key", stack.material()))
+                    .to_string(),
                 count: show_amount.then_some(stack.amount()),
                 components: show_components.then_some(()),
             },
@@ -264,7 +268,7 @@ impl HoverEvent {
     }
 
     /// Shows an entity's name, type, and UUID.
-    pub fn show_entity(name: Option<impl Into<TextComponent>>, id: Identifier, uuid: Uuid) -> Self {
+    pub fn show_entity(name: Option<impl Into<TextComponent>>, id: Key, uuid: Uuid) -> Self {
         Self {
             ty: HoverEventType::ShowEntity {
                 name: Box::new(name.map(Into::into)),

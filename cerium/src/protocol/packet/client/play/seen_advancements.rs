@@ -3,13 +3,13 @@ use crate::{
         decode::{Decode, DecodeError, PacketRead},
         packet::{ClientPacket, Packet},
     },
-    util::Identifier,
+    util::Key,
 };
 
 #[derive(Debug, Clone)]
 pub struct SeenAdvancementsPacket {
     pub action: i32,
-    pub tab_id: Option<Identifier>,
+    pub tab_id: Option<Key>,
 }
 
 impl Packet for SeenAdvancementsPacket {}

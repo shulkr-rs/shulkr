@@ -4,11 +4,11 @@ use crate::{
         decode::{DecodeError, PacketRead},
         encode::{EncodeError, PacketWrite},
     },
-    util::{BlockPosition, Identifier},
+    util::{BlockPosition, Key},
 };
 
 pub struct WorldPos {
-    pub dimension: Identifier,
+    pub dimension: Key,
     pub position: BlockPosition,
 }
 

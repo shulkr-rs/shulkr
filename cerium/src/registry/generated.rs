@@ -3,7 +3,6 @@ mod cat_variants;
 mod chicken_variants;
 mod cow_variants;
 mod damage_types;
-
 mod frog_variants;
 mod painting_variants;
 mod pig_variants;

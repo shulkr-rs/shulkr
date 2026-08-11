@@ -3,7 +3,7 @@ pub mod meta;
 
 mod entity;
 mod entity_animation;
-mod entity_type;
+pub(crate) mod entity_type;
 mod game_mode;
 mod hand;
 mod player;
