@@ -120,16 +120,17 @@ fn handle_player_session(_player: Player, _packet: PlayerSessionPacket) {
 
 fn handle_chunk_batch_received(player: Player, packet: ChunkBatchReceivedPacket) {
     let mut queue = player.0.chunk_queue.lock();
-    queue.lead -= 1;
+    queue.lead = (queue.lead - 1).max(0);
     queue.target_cpt = if packet.chunks_per_tick.is_nan() {
         0.01
     } else {
-        (packet.chunks_per_tick * 1.).clamp(0.01, 64.)
+        packet.chunks_per_tick.clamp(0.01, 64.)
     };
 
-    if queue.max_lead == 1 {
-        queue.max_lead = 10;
+    if queue.lead == 0 {
+        queue.pending_chunks = 1.;
     }
+    queue.max_lead = 10;
 }
 
 fn handle_client_tick_end(_player: Player, _packet: ClientTickEndPacket) {

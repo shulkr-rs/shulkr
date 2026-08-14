@@ -406,22 +406,20 @@ impl Player {
                 let this = this.clone();
                 tokio::spawn(async move {
                     let world = this.world();
-                    let chunk = world.load_chunk_async(pos.0, pos.1).await;
+                    let chunk = loop {
+                        let chunk = world.load_chunk_async(pos.0, pos.1).await;
 
-                    {
                         let mut tracked = this.0.tracked_chunks.lock();
-                        match tracked.get_mut(&pos) {
-                            Some(state @ TrackState::Pending) => {
-                                *state = TrackState::Viewing;
-                                world.add_viewer(pos.0, pos.1);
-                            }
-                            _ => return,
+                        if !matches!(tracked.get(&pos), Some(TrackState::Pending)) {
+                            return;
                         }
-                    }
+           
+                        if world.add_viewer(pos.0, pos.1) {
+                            tracked.insert(pos, TrackState::Viewing);
+                            break chunk;
+                        }
+                    };
 
-                    while this.0.chunk_queue.lock().queue.len() > 256 {
-                        tokio::time::sleep(Duration::from_millis(20)).await;
-                    }
                     drop(permit);
                     this.0.send_chunk(chunk);
                 });
@@ -792,47 +790,49 @@ impl PlayerData {
         queue.enqueue(chunk);
     }
 
-    fn is_loopback(&self) -> bool {
-        self.addr().ip().is_loopback()
-    }
-
     fn send_pending_chunks(&self) {
-        const MAX_CHUNKS_PER_TICK: f32 = 64.;
-
         let mut queue = self.chunk_queue.lock();
 
         if queue.queue.is_empty() || queue.lead >= queue.max_lead {
             return;
         }
 
-        let per_tick = if self.is_loopback() {
-            MAX_CHUNKS_PER_TICK
-        } else {
-            queue.target_cpt
-        };
-        queue.pending_chunks = (queue.pending_chunks + per_tick).min(64.);
+        let per_tick = queue.target_cpt;
+        queue.pending_chunks = (queue.pending_chunks + per_tick).min(per_tick.max(1.));
         if queue.pending_chunks < 1. {
             return;
         }
+
+        let quota = queue.pending_chunks as usize;
+        let batch_size = if self.is_local() {
+            queue.queue.len()
+        } else {
+            queue.queue.len().min(quota)
+        };
 
         let center = Chunk::to_chunk_pos(self.position());
         queue.sort_by_distance_to(center);
 
         self.send_packet(&ChunkBatchStartPacket {});
 
-        let mut batch_size = 0;
-        while queue.pending_chunks >= 1.
+        let mut sent = 0;
+        while sent < batch_size
             && let Some(chunk) = queue.dequeue()
         {
             let packet: ChunkDataAndUpdateLightPacket = (&chunk).into();
             self.send_packet(&packet);
-
-            queue.pending_chunks -= 1.;
-            batch_size += 1;
+            sent += 1;
         }
 
-        self.send_packet(&ChunkBatchFinishedPacket { batch_size });
+        queue.pending_chunks -= sent as f32;
+        self.send_packet(&ChunkBatchFinishedPacket {
+            batch_size: sent as i32,
+        });
         queue.lead += 1;
+    }
+
+    fn is_local(&self) -> bool {
+        self.addr().ip().is_loopback()
     }
 
     pub(crate) fn set_world(&self, world: World) {

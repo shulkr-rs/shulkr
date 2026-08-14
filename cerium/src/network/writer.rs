@@ -94,7 +94,7 @@ where
                     .await
                     .map_err(|e| EncodeError::IoError(e))?;
                 deflator
-                    .flush()
+                    .shutdown()
                     .await
                     .map_err(|e| EncodeError::IoError(e))?;
 

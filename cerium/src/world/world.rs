@@ -37,10 +37,7 @@ impl World {
     }
 
     pub fn set_chunk(&mut self, chunk: Chunk) {
-        self.0
-            .chunks
-            .write()
-            .insert((chunk.x(), chunk.z()), (chunk, 0));
+        self.0.set_chunk(chunk);
     }
 
     pub fn get_chunk(&self, chunk_x: i32, chunk_z: i32) -> Option<Chunk> {
@@ -90,8 +87,8 @@ impl World {
         }
     }
 
-    pub(crate) fn add_viewer(&self, chunk_x: i32, chunk_z: i32) {
-        self.0.add_viewer(chunk_x, chunk_z);
+    pub(crate) fn add_viewer(&self, chunk_x: i32, chunk_z: i32) -> bool {
+        self.0.add_viewer(chunk_x, chunk_z)
     }
 
     pub(crate) fn remove_viewer(&self, chunk_x: i32, chunk_z: i32) {
@@ -150,12 +147,25 @@ mod imp {
     };
     use parking_lot::RwLock;
     use std::collections::HashMap;
+    use std::sync::OnceLock;
     use tokio::sync::{Semaphore, watch};
+
+    #[derive(Default)]
+    pub(super) struct ChunkHolder {
+        chunk: Arc<OnceLock<Chunk>>,
+        viewers: usize,
+    }
+
+    impl ChunkHolder {
+        fn ready(&self) -> Option<&Chunk> {
+            self.chunk.get()
+        }
+    }
 
     pub(super) struct World {
         dimension: RegistryKey<DimensionType>,
         dimension_type: DimensionType,
-        pub(super) chunks: RwLock<HashMap<(i32, i32), (Chunk, usize)>>,
+        pub(super) chunks: RwLock<HashMap<(i32, i32), ChunkHolder>>,
         entities: RwLock<Vec<Entity>>,
         generator: Option<Arc<super::ChunkGenerator>>,
         pending: AsyncDedup<(i32, i32), Chunk>,
@@ -207,39 +217,63 @@ mod imp {
             self.pending.finish((chunk_x, chunk_z), chunk);
         }
 
+        pub(super) fn set_chunk(&self, chunk: Chunk) {
+            let pos = (chunk.x(), chunk.z());
+            let cell = Arc::new(OnceLock::new());
+            let _ = cell.set(chunk);
+            self.chunks.write().insert(
+                pos,
+                ChunkHolder {
+                    chunk: cell,
+                    viewers: 0,
+                },
+            );
+        }
+
         pub(super) fn get_chunk(&self, chunk_x: i32, chunk_z: i32) -> Option<Chunk> {
-            let chunks = self.chunks.read();
-            chunks
+            self.chunks
+                .read()
                 .get(&(chunk_x, chunk_z))
-                .map(|(chunk, _)| chunk.clone())
+                .and_then(ChunkHolder::ready)
+                .cloned()
         }
 
         pub(super) fn chunk_count(&self) -> usize {
-            self.chunks.read().len()
+            self.chunks
+                .read()
+                .values()
+                .filter(|slot| slot.ready().is_some())
+                .count()
         }
 
         pub(super) fn load_chunk(&self, chunk_x: i32, chunk_z: i32) -> Chunk {
-            let chunk = {
-                let mut chunks = self.chunks.write();
-                if let Some((existing, _)) = chunks.get(&(chunk_x, chunk_z)) {
-                    return existing.clone();
-                }
+            let cell = Arc::clone(
+                &self
+                    .chunks
+                    .write()
+                    .entry((chunk_x, chunk_z))
+                    .or_default()
+                    .chunk,
+            );
+
+            cell.get_or_init(|| {
                 let chunk = Chunk::new(chunk_x, chunk_z, self.dimension_type.min_y);
-                chunks.insert((chunk_x, chunk_z), (chunk.clone(), 0));
+                if let Some(generator) = &self.generator {
+                    generator(&chunk);
+                }
                 chunk
-            };
-
-            if let Some(generator) = &self.generator {
-                generator(&chunk);
-            }
-
-            chunk
+            })
+            .clone()
         }
 
-        pub(super) fn add_viewer(&self, chunk_x: i32, chunk_z: i32) {
+        pub(super) fn add_viewer(&self, chunk_x: i32, chunk_z: i32) -> bool {
             let mut chunks = self.chunks.write();
-            if let Some((_, refcount)) = chunks.get_mut(&(chunk_x, chunk_z)) {
-                *refcount += 1;
+            match chunks.get_mut(&(chunk_x, chunk_z)) {
+                Some(slot) if slot.ready().is_some() => {
+                    slot.viewers += 1;
+                    true
+                }
+                _ => false,
             }
         }
 
@@ -248,9 +282,14 @@ mod imp {
             if let std::collections::hash_map::Entry::Occupied(mut entry) =
                 chunks.entry((chunk_x, chunk_z))
             {
-                let (_, refcount) = entry.get_mut();
-                *refcount = refcount.saturating_sub(1);
-                if *refcount == 0 {
+                // A slot whose generator is still running has no viewer to drop
+                // and must not be evicted out from under it.
+                if entry.get().ready().is_none() {
+                    return;
+                }
+                let slot = entry.get_mut();
+                slot.viewers = slot.viewers.saturating_sub(1);
+                if slot.viewers == 0 {
                     entry.remove();
                 }
             }
