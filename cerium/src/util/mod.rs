@@ -1,6 +1,7 @@
 mod axis;
 mod direction;
 mod dye_color;
+mod either;
 mod hash_map;
 mod key;
 mod pose;
@@ -11,6 +12,7 @@ mod world_pos;
 pub use axis::*;
 pub use direction::*;
 pub use dye_color::*;
+pub use either::*;
 pub use hash_map::*;
 pub use key::*;
 pub use pose::*;

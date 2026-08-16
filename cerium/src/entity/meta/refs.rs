@@ -255,3 +255,41 @@ pub mod interaction {
     pub const HEIGHT: MetadataRef<f32> = MetadataRef::new(9, ValueType::FLOAT, 0.0);
     pub const RESPONSIVE: MetadataRef<bool> = MetadataRef::new(10, ValueType::BOOL, false);
 }
+
+#[rustfmt::skip]
+pub mod avatar {
+    use crate::entity::Hand;
+    use super::*;
+
+    pub const MAIN_HAND: MetadataRef<Hand>                  = MetadataRef::new(15, ValueType::HUMANOID_ARM, Hand::OffHand);
+
+    pub const AVATAR_FLAGS: MetadataRef<u8>                 = MetadataRef::new(16, ValueType::BYTE, 0);
+
+    pub const CAPE_ENABLED: MetadataRef<bool>               = MetadataRef::bitmask(16, 0x01, false);
+    pub const JACKET_ENABLED: MetadataRef<bool>             = MetadataRef::bitmask(16, 0x02, false);
+    pub const LEFT_SLEEVE_ENABLED: MetadataRef<bool>        = MetadataRef::bitmask(16, 0x04, false);
+    pub const RIGHT_SLEEVE_ENABLED: MetadataRef<bool>       = MetadataRef::bitmask(16, 0x08, false);
+    pub const LEFT_PANTS_LEG_ENABLED: MetadataRef<bool>     = MetadataRef::bitmask(16, 0x10, false);
+    pub const RIGHT_PANTS_LEG_ENABLED: MetadataRef<bool>    = MetadataRef::bitmask(16, 0x20, false);
+    pub const HAT_ENABLED: MetadataRef<bool>                = MetadataRef::bitmask(16, 0x40, false);
+}
+
+#[rustfmt::skip]
+pub mod mannequin {
+    use crate::auth::ResolvableProfile;
+    use super::*;
+
+    pub const PROFILE: MetadataRef<ResolvableProfile>        = MetadataRef::new(17, ValueType::RESOLVABLE_PROFILE, ResolvableProfile::empty());
+    pub const IMMOVABLE: MetadataRef<bool>                   = MetadataRef::new(18, ValueType::BOOL, false);
+    pub const TEXT_BELOW: MetadataRef<Option<TextComponent>> = MetadataRef::new(19, ValueType::OPTIONAL_TEXT_COMPONENT, None);
+}
+
+#[rustfmt::skip]
+pub mod player {
+    use super::*;
+
+    pub const ADDITIONAL_HEARTS: MetadataRef<f32>                  = MetadataRef::new(17, ValueType::FLOAT, 0.0);
+    pub const SCORE: MetadataRef<i32>                              = MetadataRef::new(18, ValueType::VAR_INT, 0);
+    pub const LEFT_SHOULDER_ENTITY_DATA: MetadataRef<Option<i32>>  = MetadataRef::new(19, ValueType::OPTIONAL_VAR_INT, None);
+    pub const RIGHT_SHOULDER_ENTITY_DATA: MetadataRef<Option<i32>> = MetadataRef::new(20, ValueType::OPTIONAL_VAR_INT, None);
+}

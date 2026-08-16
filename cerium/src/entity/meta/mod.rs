@@ -4,25 +4,38 @@ use uuid::Uuid;
 
 pub mod refs;
 
+use crate::auth::GameProfile;
+use crate::auth::PartialProfile;
+use crate::auth::PlayerModel;
+use crate::auth::ProfileKind;
+use crate::auth::Property;
+use crate::auth::ResolvableProfile;
+use crate::entity::Hand;
 use crate::item::DataType2;
 use crate::item::VarInt;
 
+use crate::protocol::decode::Decode as _;
 use crate::protocol::decode::DecodeError;
 use crate::protocol::decode::PacketRead;
+use crate::protocol::encode::Encode as _;
 use crate::protocol::encode::EncodeError;
 use crate::protocol::encode::PacketWrite;
 use crate::text::TextComponent;
 use crate::util::BlockPosition;
+use crate::util::Either;
 use crate::util::EntityPose;
 use crate::util::HashMap;
 
+mod avatar;
 mod entity;
+mod interaction;
 mod living_entity;
+mod mannequin;
 mod mob;
 mod painting_variant;
+mod player;
 mod raider;
 mod spellcaster_illager;
-mod interaction;
 mod neutral {
     mod fox;
     mod llama;
@@ -87,16 +100,19 @@ mod hostile {
     pub use zoglin::*;
 }
 
+pub use avatar::*;
 pub use entity::*;
 pub use hostile::*;
+pub use interaction::*;
 pub use living_entity::*;
+pub use mannequin::*;
 pub use mob::*;
 pub use neutral::*;
 pub use painting_variant::*;
 pub use passive::*;
+pub use player::*;
 pub use raider::*;
 pub use spellcaster_illager::*;
-pub use interaction::*;
 
 pub trait MetaAccessor {
     fn new(holder: MetadataHolder) -> Self;
@@ -332,10 +348,76 @@ define_types! {
     const OPTIONAL_POSITION: ValueType<Option<BlockPosition>> = ValueType::new(7);
     const OPTIONAL_LIVING_ENTITY: ValueType<Option<Uuid>> = ValueType::new(13);
     const VILLAGER_DATA: ValueType<VillagerData> = ValueType::new(18);
+    const OPTIONAL_VAR_INT: ValueType<Option<i32>, Option<VarInt>> = ValueType::new(19);
     const POSE: ValueType<EntityPose> = ValueType::new(20);
 
     const COPPER_GOLEM_STATE: ValueType<CopperGolemState> = ValueType::new(32);
     const WEATHERING_COPPER_STATE: ValueType<WeatheringCopperState> = ValueType::new(33);
+
+    const RESOLVABLE_PROFILE: ValueType<ResolvableProfile> = ValueType::new(41);
+    const HUMANOID_ARM: ValueType<Hand> = ValueType::new(42);
+}
+
+impl DataType2<Self> for ResolvableProfile {
+    fn decode<R: PacketRead>(r: &mut R) -> Result<Self, DecodeError> {
+        let kind = ProfileKind::try_from(r.read_varint()?)
+            .map_err(|_| DecodeError::Decode("Invalid ProfileKind"))?;
+
+        Ok(Self {
+            kind,
+            unpack: match kind {
+                ProfileKind::Partial => Either::Left(PartialProfile {
+                    username: r.read_option(R::read_string)?,
+                    uuid: r.read_option(R::read_uuid)?,
+                    properties: r.read_array(Property::decode)?,
+                }),
+                ProfileKind::Complete => Either::Right(GameProfile {
+                    uuid: r.read_uuid()?,
+                    name: r.read_string()?,
+                    properties: r.read_array(Property::decode)?,
+                }),
+            },
+            body: r.read_option(R::read_identifier)?,
+            cape: r.read_option(R::read_identifier)?,
+            elytra: r.read_option(R::read_identifier)?,
+            model: r
+                .read_option(R::read_varint)?
+                .map(PlayerModel::try_from)
+                .transpose()
+                .map_err(|_| DecodeError::Decode("Invalid PlayerModel"))?,
+        })
+    }
+
+    fn encode<W: PacketWrite>(w: &mut W, this: &Self) -> Result<(), EncodeError> {
+        w.write_varint(this.kind() as i32)?;
+        match this.profile() {
+            Either::Left(p) => {
+                w.write_option(&p.username, W::write_string)?;
+                w.write_option(&p.uuid, W::write_uuid)?;
+                w.write_array(&p.properties, Property::encode)?;
+            }
+            Either::Right(p) => {
+                w.write_uuid(&p.uuid)?;
+                w.write_string(&p.name)?;
+                w.write_array(&p.properties, Property::encode)?;
+            }
+        }
+        w.write_option(&this.body(), |w, v| w.write_identifier(v))?;
+        w.write_option(&this.cape(), |w, v| w.write_identifier(v))?;
+        w.write_option(&this.elytra(), |w, v| w.write_identifier(v))?;
+        w.write_option(&this.player_model(), |w, v| w.write_varint(**v as i32))?;
+        Ok(())
+    }
+}
+
+impl DataType2<Hand> for Hand {
+    fn decode<R: PacketRead>(r: &mut R) -> Result<Hand, DecodeError> {
+        Hand::try_from(r.read_varint()?).map_err(|_| DecodeError::Decode("Invalid Hand"))
+    }
+
+    fn encode<W: PacketWrite>(w: &mut W, this: &Hand) -> Result<(), EncodeError> {
+        w.write_varint(*this as i32)
+    }
 }
 
 impl DataType2<u8> for u8 {
@@ -385,6 +467,19 @@ where
             T::encode(w, this)?;
         }
         Ok(())
+    }
+}
+
+impl DataType2<Option<i32>> for Option<VarInt> {
+    fn decode<R: PacketRead>(r: &mut R) -> Result<Option<i32>, DecodeError> {
+        Ok(match r.read_varint()? {
+            0 => None,
+            value => Some(value - 1),
+        })
+    }
+
+    fn encode<W: PacketWrite>(w: &mut W, this: &Option<i32>) -> Result<(), EncodeError> {
+        w.write_varint(this.map_or(0, |value| value + 1))
     }
 }
 

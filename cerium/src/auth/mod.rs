@@ -1,5 +1,5 @@
-use serde::{Deserialize, Serialize};
-use uuid::Uuid;
+mod profile;
+pub use profile::*;
 
 #[derive(Debug, Clone, Default, PartialEq, Eq)]
 pub enum AuthMode {
@@ -7,21 +7,6 @@ pub enum AuthMode {
     Online,
     Offline,
     Velocity(String),
-}
-
-#[derive(Debug, Clone, Deserialize, Serialize)]
-pub struct GameProfile {
-    #[serde(alias = "id")]
-    pub uuid: Uuid,
-    pub name: String,
-    pub properties: Vec<Property>,
-}
-
-#[derive(Debug, Clone, Deserialize, Serialize)]
-pub struct Property {
-    pub name: String,
-    pub value: String,
-    pub signature: Option<String>,
 }
 
 #[derive(thiserror::Error, Debug)]
