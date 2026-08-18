@@ -61,6 +61,20 @@ impl Chunk {
         self.0.write().set_biome(x, y, z, biome)
     }
 
+    pub fn fill_blocks(&self, blocks: impl IntoIterator<Item = (i32, i32, i32, BlockState)>) {
+        let mut guard = self.0.write();
+        for (x, y, z, state) in blocks {
+            guard.set_block(x, y, z, &state);
+        }
+    }
+
+    pub fn fill_biomes(&self, biomes: impl IntoIterator<Item = (i32, i32, i32, i32)>) {
+        let mut guard = self.0.write();
+        for (x, y, z, biome) in biomes {
+            guard.set_biome(x, y, z, biome);
+        }
+    }
+
     pub fn to_chunk_pos(position: impl Into<BlockPosition>) -> (i32, i32) {
         let position = position.into();
         let chunk_x = position.x().div_euclid(16) as i32;
