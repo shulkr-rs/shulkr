@@ -648,7 +648,7 @@ pub(crate) fn handle_set_creative_mode_slot(player: Player, packet: SetCreativeM
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::auth::{AuthMode, GameProfile};
+    use crate::auth::GameProfile;
     use crate::inventory::InventoryType;
     use crate::item::Material;
     use crate::network::client::Connection;
@@ -656,10 +656,7 @@ mod tests {
     use uuid::Uuid;
 
     fn test_server() -> crate::Server {
-        static SERVER: std::sync::OnceLock<crate::Server> = std::sync::OnceLock::new();
-        SERVER
-            .get_or_init(|| crate::Server::new(AuthMode::Offline))
-            .clone()
+        crate::Server::test_server()
     }
 
     fn test_player() -> Player {

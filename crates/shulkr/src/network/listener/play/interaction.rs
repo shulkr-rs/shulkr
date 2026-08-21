@@ -54,30 +54,33 @@ pub(crate) fn handle_player_action(player: Player, packet: PlayerActionPacket) {
     let position = packet.position;
     let face = packet.face;
 
-    match status {
+    let destroy_stage = match status {
         PlayerDiggingState::StartDigging => {
             if player.game_mode() == GameMode::Creative {
-                // intant break the block
                 world.break_block(player.clone(), position, face);
+                None
+            } else {
+                Some(0)
             }
         }
-        PlayerDiggingState::CancelledDigging => {}
+        PlayerDiggingState::CancelledDigging => Some(SetBlockDestroyStagePacket::CLEAR),
         PlayerDiggingState::FinishedDigging => {
             world.break_block(player.clone(), position, face);
+            Some(SetBlockDestroyStagePacket::CLEAR)
         }
-        PlayerDiggingState::DropItemStack => {}
-        PlayerDiggingState::DropItem => {}
-        PlayerDiggingState::ItemUpdated => {}
-        PlayerDiggingState::SwapItemInHand => {}
-    }
-
-    let packet = SetBlockDestroyStagePacket {
-        entitiy_id: player.id(),
-        location: position,
-        destroy_stage: status as u8,
+        PlayerDiggingState::DropItemStack
+        | PlayerDiggingState::DropItem
+        | PlayerDiggingState::ItemUpdated
+        | PlayerDiggingState::SwapItemInHand => None,
     };
-    player.send_packet(&packet);
-    player.broadcast_packet(&packet);
+
+    if let Some(destroy_stage) = destroy_stage {
+        player.broadcast_packet(&SetBlockDestroyStagePacket {
+            entitiy_id: player.id(),
+            location: position,
+            destroy_stage,
+        });
+    }
 }
 
 pub(crate) fn handle_swing_arm(player: Player, packet: SwingArmPacket) {

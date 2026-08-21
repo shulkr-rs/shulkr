@@ -1,121 +1,314 @@
+use std::sync::Arc;
+
 use parking_lot::RwLock;
 
-use crate::command::{Command, matches::CommandMatches};
+use crate::command::{
+    builder::LiteralArgumentBuilder,
+    context::CommandContextBuilder,
+    exceptions::CommandSyntaxException,
+    string_reader::StringReader,
+    suggestion::{StringRange, Suggestions, SuggestionsBuilder},
+    tree::CommandNode,
+};
 
-pub struct CommandDispatcher {
-    pub(crate) commands: RwLock<Vec<Command>>,
+pub const ARGUMENT_SEPARATOR: char = ' ';
+
+pub struct ParseResults<S> {
+    context: CommandContextBuilder<S>,
+    reader: StringReader,
+    exceptions: Vec<(Arc<CommandNode<S>>, CommandSyntaxException)>,
 }
 
-impl Default for CommandDispatcher {
+impl<S> ParseResults<S> {
+    pub fn reader(&self) -> &StringReader {
+        &self.reader
+    }
+
+    pub fn exceptions(&self) -> impl Iterator<Item = &CommandSyntaxException> {
+        self.exceptions.iter().map(|(_, e)| e)
+    }
+}
+
+pub struct CommandDispatcher<S> {
+    root: RwLock<Arc<CommandNode<S>>>,
+}
+
+impl<S> Default for CommandDispatcher<S> {
     fn default() -> Self {
         Self::new()
     }
 }
 
-impl CommandDispatcher {
+impl<S> CommandDispatcher<S> {
     pub fn new() -> Self {
         Self {
-            commands: RwLock::new(Vec::new()),
+            root: RwLock::new(Arc::new(CommandNode::root())),
         }
     }
 
-    pub fn register(&self, command: Command) {
-        let mut commands = self.commands.write();
-        commands.retain(|existing| existing.name != command.name);
-        commands.push(command);
+    pub fn root(&self) -> Arc<CommandNode<S>> {
+        self.root.read().clone()
     }
 
-    pub fn register_all(&self, commands: impl IntoIterator<Item = Command>) {
-        let mut cmds = self.commands.write();
+    pub fn register(&self, command: LiteralArgumentBuilder<S>) -> Arc<CommandNode<S>> {
+        let node = Arc::new(command.build());
+
+        let mut root = self.root.write();
+        let mut children: Vec<Arc<CommandNode<S>>> = root
+            .children
+            .iter()
+            .filter(|child| child.name() != node.name())
+            .cloned()
+            .collect();
+        children.push(node.clone());
+
+        let mut new_root = CommandNode::root();
+        new_root.children = children;
+        *root = Arc::new(new_root);
+
+        node
+    }
+
+    pub fn register_all(&self, commands: impl IntoIterator<Item = LiteralArgumentBuilder<S>>) {
         for command in commands {
-            cmds.retain(|existing| existing.name != command.name);
-            cmds.push(command);
+            self.register(command);
         }
     }
 
-    pub fn unregister(&mut self, command: Command) {
-        let mut commands = self.commands.write();
-        commands.retain(|existing| existing.name != command.name);
+    pub fn unregister(&self, name: &str) {
+        let mut root = self.root.write();
+        let mut new_root = CommandNode::root();
+        new_root.children = root
+            .children
+            .iter()
+            .filter(|child| child.name() != name)
+            .cloned()
+            .collect();
+        *root = Arc::new(new_root);
+    }
+}
+
+impl<S: Clone> CommandDispatcher<S> {
+    pub fn parse(&self, input: impl Into<String>, source: S) -> ParseResults<S> {
+        self.parse_reader(StringReader::new(input), source)
     }
 
-    pub fn parse(&self, input: &str) -> CommandResult {
-        let normalized = input.strip_prefix('/').unwrap_or(input).trim();
-        let tokens = split_command(normalized)?;
-        let Some((name, tail)) = tokens.split_first() else {
-            return Err(CommandError::Empty);
+    pub fn parse_reader(&self, reader: StringReader, source: S) -> ParseResults<S> {
+        let root = self.root();
+        let context = CommandContextBuilder::new(root.clone(), source, reader.cursor());
+        parse_nodes(&root, reader, context)
+    }
+
+    pub fn execute(
+        &self,
+        input: impl Into<String>,
+        source: S,
+    ) -> Result<i32, CommandSyntaxException> {
+        let input = input.into();
+        let parse = self.parse(input, source);
+        self.execute_parsed(parse)
+    }
+
+    pub fn execute_parsed(&self, parse: ParseResults<S>) -> Result<i32, CommandSyntaxException> {
+        if parse.reader.can_read() {
+            return Err(unparsed_error(&parse));
+        }
+
+        let input = parse.reader.string().to_string();
+        let original = parse.context.build(&input);
+
+        let mut result = 0;
+        let mut successful_forks = 0;
+        let mut forked = false;
+        let mut found_command = false;
+
+        let mut contexts = vec![original];
+        while !contexts.is_empty() {
+            let mut next = Vec::new();
+
+            for context in &contexts {
+                let Some(child) = context.child() else {
+                    if let Some(command) = context.command() {
+                        found_command = true;
+                        match command(context) {
+                            Ok(value) => {
+                                result += value;
+                                successful_forks += 1;
+                            }
+                            Err(error) if forked => {
+                                log::debug!("forked command failed for one source: {error}");
+                            }
+                            Err(error) => return Err(error),
+                        }
+                    }
+                    continue;
+                };
+
+                forked |= context.is_forked();
+
+                if !child.has_nodes() {
+                    continue;
+                }
+
+                found_command = true;
+                match context.redirect_modifier() {
+                    None => next.push(child.copy_for(context.source().clone())),
+                    Some(modifier) => match modifier(context) {
+                        Ok(sources) => {
+                            next.extend(sources.into_iter().map(|source| child.copy_for(source)));
+                        }
+                        Err(error) if forked => {
+                            log::debug!("forked redirect modifier failed: {error}");
+                        }
+                        Err(error) => return Err(error),
+                    },
+                }
+            }
+
+            contexts = next;
+        }
+
+        if !found_command {
+            return Err(CommandSyntaxException::unknown_command()
+                .with_context(&input, parse.reader.cursor()));
+        }
+
+        Ok(if forked { successful_forks } else { result })
+    }
+
+    pub fn completion_suggestions(
+        &self,
+        input: impl Into<String>,
+        cursor: usize,
+        source: S,
+    ) -> Suggestions {
+        let parse = self.parse(input, source);
+        self.completion_suggestions_for(&parse, cursor)
+    }
+
+    pub fn completion_suggestions_for(
+        &self,
+        parse: &ParseResults<S>,
+        cursor: usize,
+    ) -> Suggestions {
+        let full_input = parse.reader.string();
+        let cursor = cursor.min(full_input.len());
+        let Some(suggestion_context) = parse.context.find_suggestion_context(cursor) else {
+            return Suggestions::empty();
         };
 
-        let commands = self.commands.read();
-        let Some(command) = commands.iter().find(|command| command.matches_name(name)) else {
-            return Err(CommandError::UnknownCommand {
-                command: name.clone(),
+        let start = suggestion_context.start_pos.min(cursor);
+        let truncated = &full_input[..cursor];
+        let context = parse.context.build(truncated);
+
+        let gathered: Vec<Suggestions> = suggestion_context
+            .parent
+            .children()
+            .iter()
+            .filter(|child| child.can_use(context.source()))
+            .map(|child| {
+                child.list_suggestions(&context, SuggestionsBuilder::new(truncated, start))
+            })
+            .filter(|suggestions| !suggestions.is_empty())
+            .collect();
+
+        Suggestions::merge(full_input, gathered)
+    }
+}
+
+fn unparsed_error<S>(parse: &ParseResults<S>) -> CommandSyntaxException {
+    let input = parse.reader.string();
+    let cursor = parse.reader.cursor();
+
+    if parse.exceptions.len() == 1 {
+        return parse.exceptions[0].1.clone();
+    }
+
+    if parse.context.range().is_empty() {
+        CommandSyntaxException::unknown_command().with_context(input, cursor)
+    } else {
+        CommandSyntaxException::unknown_argument().with_context(input, cursor)
+    }
+}
+
+fn parse_nodes<S: Clone>(
+    node: &Arc<CommandNode<S>>,
+    original_reader: StringReader,
+    context_so_far: CommandContextBuilder<S>,
+) -> ParseResults<S> {
+    let source = context_so_far.source().clone();
+    let mut errors: Vec<(Arc<CommandNode<S>>, CommandSyntaxException)> = Vec::new();
+    let mut potentials: Vec<ParseResults<S>> = Vec::new();
+    let cursor = original_reader.cursor();
+
+    for child in node.relevant_nodes(&original_reader) {
+        if !child.can_use(&source) {
+            continue;
+        }
+
+        let mut context = context_so_far.clone();
+        let mut reader = original_reader.clone();
+
+        match child.parse(&mut reader, &mut context) {
+            Ok(()) => {
+                if reader.can_read() && reader.peek() != Some(ARGUMENT_SEPARATOR) {
+                    errors.push((
+                        child.clone(),
+                        CommandSyntaxException::expected_argument_separator()
+                            .with_context(reader.string(), reader.cursor()),
+                    ));
+                    continue;
+                }
+            }
+            Err(error) => {
+                errors.push((child.clone(), error));
+                continue;
+            }
+        }
+
+        context.with_command(child.command().cloned());
+        context.with_node(child.clone(), StringRange::between(cursor, reader.cursor()));
+
+        let lookahead = if child.redirect().is_some() { 1 } else { 2 };
+        if reader.can_read_length(lookahead) {
+            reader.skip();
+
+            if let Some(redirect) = child.redirect() {
+                let child_context =
+                    CommandContextBuilder::new(redirect.clone(), source.clone(), reader.cursor());
+                let parse = parse_nodes(redirect, reader, child_context);
+                context.with_child(parse.context);
+                return ParseResults {
+                    context,
+                    reader: parse.reader,
+                    exceptions: parse.exceptions,
+                };
+            }
+
+            potentials.push(parse_nodes(&child, reader, context));
+        } else {
+            potentials.push(ParseResults {
+                context,
+                reader,
+                exceptions: Vec::new(),
             });
-        };
-
-        command.parse_tokens(tail)
-    }
-}
-
-// Example:
-// let args = split_command("mycommand subcommand \"myvalue\"")?;
-// assert_eq!(args, vec!["mycommand", "subcommand", "myvalue"]);
-fn split_command(input: &str) -> Result<Vec<String>, CommandError> {
-    let mut tokens = Vec::new();
-    let mut token = String::new();
-    let mut chars = input.chars();
-    let mut quote = None;
-
-    while let Some(ch) = chars.next() {
-        match (quote, ch) {
-            (Some(q), c) if c == q => quote = None,
-            (Some(_), '\\') => {
-                if let Some(next) = chars.next() {
-                    token.push(next);
-                }
-            }
-            (Some(_), c) => token.push(c),
-            (None, '"' | '\'') => quote = Some(ch),
-            (None, c) if c.is_whitespace() => {
-                if !token.is_empty() {
-                    tokens.push(std::mem::take(&mut token));
-                }
-            }
-            (None, c) => token.push(c),
         }
     }
 
-    if quote.is_some() {
-        return Err(CommandError::UnclosedQuote);
+    if potentials.is_empty() {
+        return ParseResults {
+            context: context_so_far,
+            reader: original_reader,
+            exceptions: errors,
+        };
     }
 
-    if !token.is_empty() {
-        tokens.push(token);
+    if potentials.len() > 1 {
+        potentials.sort_by(|a, b| {
+            let key = |p: &ParseResults<S>| (p.reader.can_read(), !p.exceptions.is_empty());
+            key(a).cmp(&key(b))
+        });
     }
 
-    Ok(tokens)
-}
-
-pub type CommandResult = Result<CommandMatches, CommandError>;
-
-#[derive(Debug, Clone, PartialEq, Eq)]
-pub enum CommandError {
-    Empty,
-    UnknownCommand {
-        command: String,
-    },
-    MissingArgument {
-        command: String,
-        argument: String,
-    },
-    UnexpectedArgument {
-        command: String,
-        argument: String,
-    },
-    InvalidArgument {
-        command: String,
-        argument: String,
-        expected: String,
-        value: String,
-    },
-    UnclosedQuote,
+    potentials.into_iter().next().unwrap()
 }

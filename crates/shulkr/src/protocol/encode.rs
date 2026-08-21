@@ -8,7 +8,8 @@ use crate::{
         ProtocolState,
         packet::{
             AcknowledgeBlockChangePacket, BlockUpdatePacket, ChunkBatchFinishedPacket,
-            ChunkBatchStartPacket, ChunkDataAndUpdateLightPacket, CommandsPacket, DisconnectPacket,
+            ChunkBatchStartPacket, ChunkDataAndUpdateLightPacket, CommandSuggestionsPacket,
+            CommandsPacket, DisconnectPacket,
             DisplayObjectivePacket, EncryptionRequestPacket, EntityAnimationPacket,
             EntityEventPacket, EntityPositionPacket, EntityPositionRotationPacket,
             EntityRotationPacket, FeatureFlagsPacket, FinishConfigPacket, GameEventPacket,
@@ -324,7 +325,7 @@ fn play(type_id: TypeId) -> Option<i32> {
         _ if type_id == TypeId::of::<ChunkBatchStartPacket>() => 0x0C,
         // _ if type_id == TypeId::of::<ChunksBiomesPacket>() => 0x0D,
         // _ if type_id == TypeId::of::<ClearTitlesPacket>() => 0x0E,
-        // _ if type_id == TypeId::of::<CommandSuggestionsPacket>() => 0x0F,
+        _ if type_id == TypeId::of::<CommandSuggestionsPacket>() => 0x0F,
         _ if type_id == TypeId::of::<CommandsPacket>() => 0x10,
         _ if type_id == TypeId::of::<CloseContainerPacket>() => 0x11,
         _ if type_id == TypeId::of::<SetContainerContentPacket>() => 0x12,

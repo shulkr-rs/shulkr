@@ -1,7 +1,6 @@
 #![allow(unused)]
 
 mod attack;
-mod command;
 mod config;
 mod drop;
 mod gamemode;
@@ -13,7 +12,6 @@ mod spawn;
 mod teleport;
 
 pub use attack::PlayerAttackEvent;
-pub use command::CommandResultEvent;
 pub use config::PlayerConfigEvent;
 pub use gamemode::PlayerRequestGameModeEvent;
 pub use input::PlayerInputEvent;

@@ -282,17 +282,15 @@ mod imp {
 
         pub(super) fn remove_viewer(&self, chunk_x: i32, chunk_z: i32) {
             let mut chunks = self.chunks.write();
-            if let std::collections::hash_map::Entry::Occupied(mut entry) =
-                chunks.entry((chunk_x, chunk_z))
-            {
-                // A slot whose generator is still running has no viewer to drop
-                // and must not be evicted out from under it.
-                if entry.get().ready().is_none() {
-                    return;
-                }
-                let slot = entry.get_mut();
-                slot.viewers = slot.viewers.saturating_sub(1);
+            let Some(slot) = chunks.get_mut(&(chunk_x, chunk_z)) else {
+                return;
+            };
+            // A slot whose generator is still running has no viewer to drop
+            // and must not be evicted out from under it.
+            if slot.ready().is_none() {
+                return;
             }
+            slot.viewers = slot.viewers.saturating_sub(1);
         }
 
         pub(super) fn get_block(&self, x: i32, y: i32, z: i32) -> BlockState {

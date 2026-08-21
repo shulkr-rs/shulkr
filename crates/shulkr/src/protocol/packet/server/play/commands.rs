@@ -1,31 +1,50 @@
-use crate::command::arg::kind::ArgKind;
+use std::sync::Arc;
+
 use crate::command::{
-    Command, arg::Arg, arg::kind::StringBehaviour, dispatcher::CommandDispatcher,
+    dispatcher::CommandDispatcher,
+    tree::{CommandNode, NodeKind},
 };
 use crate::protocol::{
     encode::{Encode, EncodeError, PacketWrite},
     packet::{Packet, ServerPacket},
 };
+use crate::util::{HashMap, Key};
 
 const NODE_TYPE_ROOT: u8 = 0x00;
 const NODE_TYPE_LITERAL: u8 = 0x01;
 const NODE_TYPE_ARGUMENT: u8 = 0x02;
 const FLAG_EXECUTABLE: u8 = 0x04;
+const FLAG_HAS_REDIRECT: u8 = 0x08;
+const FLAG_HAS_SUGGESTIONS_TYPE: u8 = 0x10;
+
+const ASK_SERVER: Key = Key::const_vanilla("ask_server");
 
 #[derive(Debug, Clone)]
 pub struct CommandsPacket {
-    nodes: Vec<CommandNode>,
+    nodes: Vec<WireNode>,
     root_index: i32,
 }
 
 impl CommandsPacket {
-    pub fn from_dispatcher(dispatcher: &CommandDispatcher) -> Self {
-        let mut builder = CommandTreeBuilder::default();
-        let commands = dispatcher.commands.read();
-        for command in commands.iter() {
-            builder.add_command(command);
+    pub fn from_dispatcher<S>(dispatcher: &CommandDispatcher<S>, source: &S) -> Self {
+        let root = dispatcher.root();
+        let mut builder = WireTreeBuilder {
+            nodes: vec![WireNode::root()],
+            indices: HashMap::default(),
+        };
+
+        for child in root.children() {
+            if let Some(index) = builder.add(child, source) {
+                builder.nodes[0].children.push(index);
+            }
         }
-        builder.finish()
+
+        builder.resolve_redirects();
+
+        Self {
+            nodes: builder.nodes,
+            root_index: 0,
+        }
     }
 }
 
@@ -44,178 +63,160 @@ impl Encode for CommandsPacket {
 }
 
 #[derive(Debug, Clone)]
-struct CommandNode {
+struct WireNode {
     flags: u8,
     children: Vec<i32>,
     name: Option<String>,
-    parser: Option<ArgKind>,
+    parser: Option<(i32, Vec<u8>)>,
+    redirect: Option<i32>,
+    suggestions_type: Option<Key>,
 }
 
-impl CommandNode {
+impl WireNode {
     fn root() -> Self {
         Self {
             flags: NODE_TYPE_ROOT,
             children: Vec::new(),
             name: None,
             parser: None,
-        }
-    }
-
-    fn literal(name: impl Into<String>, executable: bool) -> Self {
-        Self {
-            flags: NODE_TYPE_LITERAL | if executable { FLAG_EXECUTABLE } else { 0 },
-            children: Vec::new(),
-            name: Some(name.into()),
-            parser: None,
-        }
-    }
-
-    fn argument(arg: &Arg, executable: bool) -> Self {
-        Self {
-            flags: NODE_TYPE_ARGUMENT | if executable { FLAG_EXECUTABLE } else { 0 },
-            children: Vec::new(),
-            name: Some(arg.name.to_string()),
-            parser: Some(arg.kind.clone()),
+            redirect: None,
+            suggestions_type: None,
         }
     }
 
     fn encode<W: PacketWrite>(&self, w: &mut W) -> Result<(), EncodeError> {
         w.write_u8(self.flags)?;
+
         w.write_varint(self.children.len() as i32)?;
         for child in &self.children {
             w.write_varint(*child)?;
+        }
+
+        if let Some(redirect) = self.redirect {
+            w.write_varint(redirect)?;
         }
 
         if let Some(name) = &self.name {
             w.write_string(name)?;
         }
 
-        if let Some(kind) = &self.parser {
-            w.write_varint(kind.parser_id())?;
-            encode_parser_properties(w, kind)?;
+        if let Some((id, properties)) = &self.parser {
+            w.write_varint(*id)?;
+            for byte in properties {
+                w.write_u8(*byte)?;
+            }
+        }
+
+        if let Some(suggestions_type) = &self.suggestions_type {
+            w.write_identifier(suggestions_type)?;
         }
 
         Ok(())
     }
 }
 
-fn encode_parser_properties<W: PacketWrite>(w: &mut W, kind: &ArgKind) -> Result<(), EncodeError> {
-    match kind {
-        ArgKind::Float { min, max } => encode_number_bounds(w, *min, *max, PacketWrite::write_f32),
-        ArgKind::Double { min, max } => encode_number_bounds(w, *min, *max, PacketWrite::write_f64),
-        ArgKind::Integer { min, max } => {
-            encode_number_bounds(w, *min, *max, PacketWrite::write_i32)
-        }
-        ArgKind::Long { min, max } => encode_number_bounds(w, *min, *max, PacketWrite::write_i64),
-        ArgKind::String(behaviour) => encode_string_behaviour(w, *behaviour),
-        ArgKind::Entity {
-            single,
-            players_only,
-        } => w.write_u8(u8::from(*single) | (u8::from(*players_only) << 1)),
-        ArgKind::ScoreHolder { multiple } => w.write_u8(u8::from(*multiple)),
-        ArgKind::Time { min } => w.write_i32(*min),
-        ArgKind::Resource { registry }
-        | ArgKind::ResourceKey { registry }
-        | ArgKind::ResourceOrTag { registry }
-        | ArgKind::ResourceOrTagKey { registry }
-        | ArgKind::ResourceSelector { registry } => w.write_identifier(registry),
-        ArgKind::Bool | ArgKind::IntRange | ArgKind::FloatRange | ArgKind::GameMode => Ok(()),
+struct WireTreeBuilder<S> {
+    nodes: Vec<WireNode>,
+    indices: HashMap<NodeKey<S>, i32>,
+}
+
+struct NodeKey<S>(Arc<CommandNode<S>>);
+
+impl<S> PartialEq for NodeKey<S> {
+    fn eq(&self, other: &Self) -> bool {
+        Arc::ptr_eq(&self.0, &other.0)
     }
 }
 
-fn encode_string_behaviour<W: PacketWrite>(
-    w: &mut W,
-    behaviour: StringBehaviour,
-) -> Result<(), EncodeError> {
-    match behaviour {
-        StringBehaviour::SingleWord => w.write_varint(0),
-        StringBehaviour::QuotablePhrase => w.write_varint(1),
-        StringBehaviour::GreedyPhrase => w.write_varint(2),
+impl<S> Eq for NodeKey<S> {}
+
+impl<S> std::hash::Hash for NodeKey<S> {
+    fn hash<H: std::hash::Hasher>(&self, state: &mut H) {
+        (Arc::as_ptr(&self.0) as *const ()).hash(state);
     }
 }
 
-fn encode_number_bounds<W, T, F>(
-    w: &mut W,
-    min: Option<T>,
-    max: Option<T>,
-    mut write: F,
-) -> Result<(), EncodeError>
-where
-    W: PacketWrite,
-    F: FnMut(&mut W, T) -> Result<(), EncodeError>,
-{
-    let flags = u8::from(min.is_some()) | (u8::from(max.is_some()) << 1);
-    w.write_u8(flags)?;
-    if let Some(min) = min {
-        write(w, min)?;
-    }
-    if let Some(max) = max {
-        write(w, max)?;
-    }
-    Ok(())
-}
-
-struct CommandTreeBuilder {
-    nodes: Vec<CommandNode>,
-}
-
-impl Default for CommandTreeBuilder {
-    fn default() -> Self {
-        Self {
-            nodes: vec![CommandNode::root()],
-        }
+impl<S> Clone for NodeKey<S> {
+    fn clone(&self) -> Self {
+        Self(self.0.clone())
     }
 }
 
-impl CommandTreeBuilder {
-    fn add_command(&mut self, command: &Command) {
-        let index = self.push_command(command);
-        self.nodes[0].children.push(index);
-
-        for alias in &command.aliases {
-            let alias_index = self.push_command_named(command, alias);
-            self.nodes[0].children.push(alias_index);
-        }
-    }
-
-    fn push_command(&mut self, command: &Command) -> i32 {
-        self.push_command_named(command, &command.name)
-    }
-
-    fn push_command_named(&mut self, command: &Command, name: &str) -> i32 {
-        let executable =
-            command.args.iter().all(|arg| !arg.required) && command.subcommands.is_empty();
-        let index = self.push_node(CommandNode::literal(name, executable));
-
-        self.append_args(index, &command.args);
-        for subcommand in &command.subcommands {
-            let child = self.push_command(subcommand);
-            self.nodes[index as usize].children.push(child);
+impl<S> WireTreeBuilder<S> {
+    fn add(&mut self, node: &Arc<CommandNode<S>>, source: &S) -> Option<i32> {
+        if !node.can_use(source) {
+            return None;
         }
 
-        index
-    }
-
-    fn append_args(&mut self, parent: i32, args: &[Arg]) {
-        let mut current = parent;
-        for (idx, arg) in args.iter().enumerate() {
-            let executable = args[idx + 1..].iter().all(|a| !a.required);
-            let child = self.push_node(CommandNode::argument(arg, executable));
-            self.nodes[current as usize].children.push(child);
-            current = child;
+        if let Some(index) = self.indices.get(&NodeKey(node.clone())) {
+            return Some(*index);
         }
-    }
 
-    fn push_node(&mut self, node: CommandNode) -> i32 {
+        let mut flags = match &node.kind {
+            NodeKind::Root => NODE_TYPE_ROOT,
+            NodeKind::Literal { .. } => NODE_TYPE_LITERAL,
+            NodeKind::Argument { .. } => NODE_TYPE_ARGUMENT,
+        };
+        if node.command().is_some() {
+            flags |= FLAG_EXECUTABLE;
+        }
+        if node.redirect().is_some() {
+            flags |= FLAG_HAS_REDIRECT;
+        }
+
+        let (name, parser, suggestions_type) = match &node.kind {
+            NodeKind::Root => (None, None, None),
+            NodeKind::Literal { literal } => (Some(literal.clone()), None, None),
+            NodeKind::Argument {
+                name,
+                argument_type,
+                custom_suggestions,
+            } => (
+                Some(name.clone()),
+                Some((argument_type.id(), argument_type.properties())),
+                custom_suggestions.as_ref().map(|_| ASK_SERVER),
+            ),
+        };
+        if suggestions_type.is_some() {
+            flags |= FLAG_HAS_SUGGESTIONS_TYPE;
+        }
+
         let index = self.nodes.len() as i32;
-        self.nodes.push(node);
-        index
+        self.nodes.push(WireNode {
+            flags,
+            children: Vec::new(),
+            name,
+            parser,
+            suggestions_type,
+            redirect: None,
+        });
+        self.indices.insert(NodeKey(node.clone()), index);
+
+        let mut children = Vec::new();
+        for child in node.children() {
+            if let Some(child_index) = self.add(child, source) {
+                children.push(child_index);
+            }
+        }
+        self.nodes[index as usize].children = children;
+
+        Some(index)
     }
 
-    fn finish(self) -> CommandsPacket {
-        CommandsPacket {
-            nodes: self.nodes,
-            root_index: 0,
+    fn resolve_redirects(&mut self) {
+        let pending: Vec<(i32, Arc<CommandNode<S>>)> = self
+            .indices
+            .iter()
+            .filter_map(|(key, index)| key.0.redirect().map(|target| (*index, target.clone())))
+            .collect();
+
+        for (index, target) in pending {
+            let target_index = match self.indices.get(&NodeKey(target.clone())) {
+                Some(target_index) => *target_index,
+                None if matches!(target.kind, NodeKind::Root) => 0,
+                None => continue,
+            };
+            self.nodes[index as usize].redirect = Some(target_index);
         }
     }
 }

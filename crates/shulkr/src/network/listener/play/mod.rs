@@ -1,9 +1,10 @@
 use std::io::Cursor;
 
 use crate::{
+    command::StringReader,
     entity::{GameMode, Player},
     event::player::{
-        CommandResultEvent, PlayerInputEvent, PlayerRequestGameModeEvent, PlayerStartSneakingEvent,
+        PlayerInputEvent, PlayerRequestGameModeEvent, PlayerStartSneakingEvent,
         PlayerStopSneakingEvent,
     },
     protocol::{
@@ -11,12 +12,13 @@ use crate::{
         packet::{
             AttackPacket, ChangeRecipeBookSettingsPacket, ChatCommandPacket, ChatMessagePacket,
             ChunkBatchReceivedPacket, ClickContainerPacket, ClientInfoPacket, ClientTickEndPacket,
-            ConfirmTeleportationPacket, InteractPacket, PickItemFromBlockPacket,
-            PickItemFromEntityPacket, PlayerActionPacket, PlayerCommand, PlayerCommandPacket,
-            PlayerInputFlags, PlayerInputPacket, PlayerLoadedPacket, PlayerMovementFlagsPacket,
-            PlayerPositionAndRotationPacket, PlayerPositionPacket, PlayerRequestGameModePacket,
-            PlayerRotationPacket, PlayerSessionPacket, SeenAdvancementsPacket,
-            SetCreativeModeSlotPacket, SwingArmPacket, UseItemOnPacket, UseItemPacket,
+            CommandSuggestionPacket, CommandSuggestionsPacket, ConfirmTeleportationPacket,
+            InteractPacket, PickItemFromBlockPacket, PickItemFromEntityPacket, PlayerActionPacket,
+            PlayerCommand, PlayerCommandPacket, PlayerInputFlags, PlayerInputPacket,
+            PlayerLoadedPacket, PlayerMovementFlagsPacket, PlayerPositionAndRotationPacket,
+            PlayerPositionPacket, PlayerRequestGameModePacket, PlayerRotationPacket,
+            PlayerSessionPacket, SeenAdvancementsPacket, SetCreativeModeSlotPacket,
+            SwingArmPacket, UseItemOnPacket, UseItemPacket,
             client::{
                 self,
                 play::{
@@ -26,6 +28,7 @@ use crate::{
             },
         },
     },
+    text::{NamedColor, TextComponent},
 };
 
 mod interaction;
@@ -48,6 +51,7 @@ pub fn handle_packet(player: Player, id: i32, data: &mut Cursor<&[u8]>) -> Resul
         0x0B => handle_chunk_batch_received(player, ChunkBatchReceivedPacket::decode(data)?),
         0x0D => handle_client_tick_end(player, ClientTickEndPacket::decode(data)?),
         0x0E => handle_client_info(player, ClientInfoPacket::decode(data)?),
+        0x0F => handle_command_suggestion(player, CommandSuggestionPacket::decode(data)?),
         0x12 => handle_click_container(player, ClickContainerPacket::decode(data)?),
         0x13 => handle_close_container(player, CloseContainerPacket::decode(data)?),
         0x16 => handle_plugin_message(player, client::play::PluginMessagePacket::decode(data)?),
@@ -88,13 +92,41 @@ fn handle_request_game_mode(player: Player, packet: PlayerRequestGameModePacket)
 
 fn handle_chat_command(player: Player, packet: ChatCommandPacket) {
     let server = player.server();
-    let input = &packet.command;
 
-    let result = server.command_dispatcher().parse(input);
+    if let Err(error) = server
+        .command_dispatcher()
+        .execute(&packet.command, player.clone())
+    {
+        player
+            .send_message(TextComponent::text(error.message().to_string()).color(NamedColor::Red));
+        if let Some(context) = error.context() {
+            player.send_message(TextComponent::text(context).color(NamedColor::Gray));
+        }
+    }
+}
 
-    server
-        .events()
-        .fire(&mut CommandResultEvent::new(player.clone(), input, result));
+fn handle_command_suggestion(player: Player, packet: CommandSuggestionPacket) {
+    let server = player.server();
+
+    let mut reader = StringReader::new(&packet.text);
+    if reader.peek() == Some('/') {
+        reader.skip();
+    }
+
+    let cursor = packet.text.len();
+
+    let parse = server
+        .command_dispatcher()
+        .parse_reader(reader, player.clone());
+    let suggestions = server
+        .command_dispatcher()
+        .completion_suggestions_for(&parse, cursor);
+
+    player.send_packet(&CommandSuggestionsPacket::from_suggestions(
+        packet.transaction_id,
+        &packet.text,
+        &suggestions,
+    ));
 }
 
 fn handle_chat_message(player: Player, packet: ChatMessagePacket) {

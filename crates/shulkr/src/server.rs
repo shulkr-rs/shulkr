@@ -4,7 +4,7 @@ use tokio::net::ToSocketAddrs;
 
 use crate::{
     auth::{AuthMode, KeyStore},
-    command::dispatcher::CommandDispatcher,
+    command::CommandDispatcher,
     entity::Player,
     event::Events,
     registry::Registries,
@@ -41,6 +41,13 @@ impl Server {
         CURRENT.get().map(|r| Self(r.clone()))
     }
 
+    #[cfg(test)]
+    pub(crate) fn test_server() -> Self {
+        static LOCK: std::sync::Mutex<()> = std::sync::Mutex::new(());
+        let _guard = LOCK.lock().unwrap_or_else(|poisoned| poisoned.into_inner());
+        Self::try_current().unwrap_or_else(|| Self::new(crate::auth::AuthMode::Offline))
+    }
+
     /// Bind and run server
     pub fn bind<A: ToSocketAddrs>(&self, addr: A) -> Result<(), ServerError> {
         let imp = self.0.clone();
@@ -59,7 +66,7 @@ impl Server {
         &self.players
     }
 
-    pub fn command_dispatcher(&self) -> &Arc<CommandDispatcher> {
+    pub fn command_dispatcher(&self) -> &Arc<CommandDispatcher<Player>> {
         &self.command_dispatcher
     }
 
@@ -109,7 +116,7 @@ mod imp {
 
     use crate::{
         auth::{AuthMode, KeyStore},
-        command::dispatcher::CommandDispatcher,
+        command::CommandDispatcher,
         entity::Player,
         event::Events,
         network::client::Connection,
@@ -127,7 +134,7 @@ mod imp {
         pub(super) key_store: Arc<KeyStore>,
         pub(super) events: Events,
         pub(super) players: Arc<Mutex<Vec<Player>>>,
-        pub(super) command_dispatcher: Arc<CommandDispatcher>,
+        pub(super) command_dispatcher: Arc<CommandDispatcher<Player>>,
         pub(super) brand: Mutex<String>,
     }
 
