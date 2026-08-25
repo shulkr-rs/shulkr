@@ -17,7 +17,11 @@ pub struct Server(Arc<imp::Server>);
 
 impl Server {
     pub fn new(auth_mode: AuthMode) -> Self {
-        let imp = Arc::new(imp::Server::new(auth_mode));
+        Self::with_registries(auth_mode, Registries::new())
+    }
+
+    pub fn with_registries(auth_mode: AuthMode, registries: Registries) -> Self {
+        let imp = Arc::new(imp::Server::new(auth_mode, registries));
 
         CURRENT
             .set(imp.clone())
@@ -128,7 +132,7 @@ mod imp {
     }
 
     impl Server {
-        pub(super) fn new(auth_mode: AuthMode) -> Self {
+        pub(super) fn new(auth_mode: AuthMode, registries: Registries) -> Self {
             let runtime = tokio::runtime::Builder::new_multi_thread()
                 .enable_all()
                 .build()
@@ -139,7 +143,7 @@ mod imp {
                 closed: AtomicBool::new(false),
 
                 auth_mode,
-                registries: Registries::new(),
+                registries,
                 key_store: Arc::new(KeyStore::new()),
                 events: Events::new(),
                 players: Arc::new(Mutex::new(Vec::new())),

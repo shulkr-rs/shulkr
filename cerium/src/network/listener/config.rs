@@ -1,13 +1,12 @@
 use std::collections::{HashMap, HashSet};
 use std::{io::Cursor, sync::Arc};
 
-use cerium_nbt::NbtCompound;
 use serde::de::DeserializeOwned;
 use serde::{Deserialize, Serialize};
 
 use crate::entity::{EntityLike as _, MAX_VIEW_DISTANCE, Player};
 use crate::event::player::PlayerSpawnEvent;
-use crate::protocol::packet::{CommandsPacket, RegistryEntry, Tag, TagRegistry, UpdateTagsPacket};
+use crate::protocol::packet::{CommandsPacket, Tag, TagRegistry, UpdateTagsPacket};
 use crate::registry::{Registries, Registry, RegistryKey};
 use crate::util::{Position, TeleportFlags, Viewable};
 use crate::world::{DimensionType, chunk::Chunk};
@@ -43,12 +42,6 @@ pub fn handle_packet(client: Arc<Connection>, id: i32, data: &mut Cursor<&[u8]>)
 }
 
 #[derive(Debug, Deserialize)]
-pub struct TagsFile {
-    #[serde(flatten)]
-    pub tags: HashMap<String, TagSection>,
-}
-
-#[derive(Debug, Deserialize)]
 pub struct TagSection {
     pub values: Vec<String>,
 }
@@ -71,14 +64,18 @@ fn resolve_tag(
     }
 }
 
-fn load_tags(_registry: &str, data: &str) -> HashMap<String, Vec<String>> {
-    let tags_file: TagsFile = serde_json::from_str(data).unwrap();
+fn load_tags(registry: &str) -> HashMap<String, Vec<String>> {
+    let sections: HashMap<String, TagSection> =
+        crate::assets::load_json(&format!("tags/{registry}"))
+            .into_iter()
+            .map(|(name, section)| (format!("minecraft:{name}"), section))
+            .collect();
 
     let mut result = HashMap::new();
 
-    for tag_name in tags_file.tags.keys() {
+    for tag_name in sections.keys() {
         let mut resolved = HashSet::new();
-        resolve_tag(tag_name, &tags_file.tags, &mut resolved);
+        resolve_tag(tag_name, &sections, &mut resolved);
 
         result.insert(tag_name.clone(), resolved.into_iter().collect());
     }
@@ -86,11 +83,11 @@ fn load_tags(_registry: &str, data: &str) -> HashMap<String, Vec<String>> {
     result
 }
 
-fn tags<T>(registry: &'static str, reg: &Registry<T>, data: &str) -> TagRegistry
+fn tags<T>(registry: &'static str, reg: &Registry<T>) -> TagRegistry
 where
     T: Serialize + DeserializeOwned,
 {
-    let resolved_tags = load_tags("minecraft:timeline", data);
+    let resolved_tags = load_tags(registry);
 
     let packet_tags: Vec<Tag> = resolved_tags
         .into_iter()
@@ -110,8 +107,8 @@ where
     }
 }
 
-fn block_tags(data: &str) -> TagRegistry {
-    let resolved_tags = load_tags("minecraft:block", data);
+fn block_tags() -> TagRegistry {
+    let resolved_tags = load_tags("block");
 
     let packet_tags: Vec<Tag> = resolved_tags
         .into_iter()
@@ -170,20 +167,8 @@ fn handle_client_info(client: Arc<Connection>, packet: ClientInfoPacket) {
     ));
     client.send_packet(&RegistryDataPacket::from(&registries.damage_type));
 
-    client.send_packet(&RegistryDataPacket::from(&registries.biome));
-    client.send_packet(&RegistryDataPacket {
-        registry_id: Key::vanilla("world_clock"),
-        entries: vec![
-            RegistryEntry {
-                entry_id: Key::new("minecraft", "overworld"),
-                data: Some(NbtCompound::new().into()),
-            },
-            RegistryEntry {
-                entry_id: Key::new("minecraft", "the_end"),
-                data: Some(NbtCompound::new().into()),
-            },
-        ],
-    });
+    client.send_packet(&RegistryDataPacket::from(&*Registries::biomes()));
+    client.send_packet(&RegistryDataPacket::from(&registries.world_clock));
     client.send_packet(&RegistryDataPacket::from(&registries.timeline));
     client.send_packet(&RegistryDataPacket::from(&registries.dimension_type));
     client.send_packet(&RegistryDataPacket::from(&registries.trim_material));
@@ -193,27 +178,11 @@ fn handle_client_info(client: Arc<Connection>, packet: ClientInfoPacket) {
 
     client.send_packet(&UpdateTagsPacket {
         registries: vec![
-            tags(
-                "timeline",
-                &registries.timeline,
-                include_str!("../../../build_assets/tags/timeline.json"),
-            ),
-            tags(
-                "damage_type",
-                &registries.damage_type,
-                include_str!("../../../build_assets/tags/damage_type.json"),
-            ),
-            tags(
-                "banner_pattern",
-                &registries.banner_pattern,
-                include_str!("../../../build_assets/tags/banner_pattern.json"),
-            ),
-            tags(
-                "instrument",
-                &registries.instrument,
-                include_str!("../../../build_assets/tags/instrument.json"),
-            ),
-            block_tags(include_str!("../../../build_assets/tags/block.json")),
+            tags("timeline", &registries.timeline),
+            tags("damage_type", &registries.damage_type),
+            tags("banner_pattern", &registries.banner_pattern),
+            tags("instrument", &registries.instrument),
+            block_tags(),
         ],
     });
 

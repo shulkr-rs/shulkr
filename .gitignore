@@ -1,7 +1,2 @@
 /target
 cerium/src/registry/generated/*
-datagen/.gradle
-datagen/.idea
-datagen/logs
-datagen/run
-datagen/build

@@ -166,7 +166,7 @@ impl Chunk {
             dim,
             min_bpe: 1,
             max_bpe: 3,
-            direct_bpe: 6,
+            direct_bpe: Palette::biome_direct_bpe(),
 
             bpe: 0,
             format: PaletteFormat::SingleValued { value: biome },

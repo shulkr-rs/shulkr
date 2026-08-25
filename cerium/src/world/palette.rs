@@ -28,7 +28,11 @@ impl Palette {
     }
 
     pub fn biomes() -> Self {
-        Palette::empty(4, 1, 3, 6)
+        Palette::empty(4, 1, 3, Palette::biome_direct_bpe())
+    }
+
+    pub fn biome_direct_bpe() -> u8 {
+        Palette::required_bpe(crate::registry::Registries::biomes().len() as i32).max(1) as u8
     }
 
     fn empty(dim: usize, min_bpe: u8, max_bpe: u8, direct_bpe: u8) -> Self {

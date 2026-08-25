@@ -13,6 +13,7 @@ pub mod tickable;
 pub mod util;
 pub mod world;
 
+pub(crate) mod assets;
 mod network;
 mod server;
 mod server_ping;

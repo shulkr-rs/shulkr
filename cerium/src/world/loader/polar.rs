@@ -88,10 +88,7 @@ impl PolarLoader {
             other => return Err(PolarError::UnknownCompression(other)),
         };
 
-        let biomes = crate::registry::load(
-            "minecraft:worldgen/biome".into(),
-            include_str!("../../../build_assets/worldgen/biome.json"),
-        );
+        let biomes = crate::registry::load_datapack("minecraft:worldgen/biome");
 
         let min_section = read_i8(&mut body)?;
         let max_section = read_i8(&mut body)?;

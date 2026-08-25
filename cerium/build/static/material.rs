@@ -8,10 +8,8 @@ use crate::object::StaticObjectBuilder;
 use crate::write_file;
 
 pub fn generate() {
-    println!("cargo:rerun-if-changed=build_assets/item.json");
-
     let object = StaticObjectBuilder::new("Material")
-        .with_json(include_str!("../../build_assets/item.json").to_owned())
+        .with_json(crate::read_asset("item.json"))
         .with_init(generate_init)
         .build();
 

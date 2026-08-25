@@ -1,0 +1,15 @@
+{
+  "id": "26.2",
+  "name": "26.2",
+  "world_version": 4903,
+  "series_id": "main",
+  "protocol_version": 776,
+  "pack_version": {
+    "resource_major": 88,
+    "resource_minor": 0,
+    "data_major": 107,
+    "data_minor": 1
+  },
+  "stable": true,
+  "use_editor": false
+}

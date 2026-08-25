@@ -1,9 +1,12 @@
-use crate::{item::trim_material::TrimMaterial, world::block::BlockEntityType};
+use std::path::{Path, PathBuf};
+
+use parking_lot::{RwLock, RwLockReadGuard};
+
+use crate::world::block::BlockEntityType;
 
 use super::*;
 
 pub struct Registries {
-    pub biome: Registry<Biome>,
     pub cat_variant: Registry<CatVariant>,
     pub cat_sound_variant: Registry<CatSoundVariant>,
     pub chicken_variant: Registry<ChickenVariant>,
@@ -22,30 +25,115 @@ pub struct Registries {
     pub world_clock: Registry<WorldClock>,
     pub zombie_nautilus_variant: Registry<ZombieNautilusVariant>,
     pub trim_material: Registry<TrimMaterial>,
-    pub jukebox_song: Registry<JukeBoxSong>,
+    pub jukebox_song: Registry<JukeboxSong>,
     pub banner_pattern: Registry<BannerPattern>,
     pub instrument: Registry<Instrument>,
 }
 
-pub fn load<T>(id: &'static str, data: &str) -> Registry<T>
+const FIRST_KEY: Key = Key::const_vanilla("plains");
+
+fn move_first<T>(entries: &mut IndexMap<Key, T>) {
+    if let Some(value) = entries.swap_remove(&FIRST_KEY) {
+        let old_entries = std::mem::take(entries);
+        entries.insert(FIRST_KEY, value);
+        entries.extend(old_entries);
+    }
+}
+
+pub fn load_datapack<T>(id: &'static str) -> Registry<T>
 where
     T: Serialize + DeserializeOwned,
 {
-    let mut entries: IndexMap<String, T> = serde_json::from_str(&data).unwrap();
-
-    let key = "plains";
-    if let Some(value) = entries.swap_remove(key) {
-        let old_entries = std::mem::take(&mut entries);
-        entries.insert(key.to_string(), value);
-        entries.extend(old_entries);
-    }
-
     let mut registry = Registry::<T>::new(RegistryKey::const_vanilla(id));
+
+    let dir = id.strip_prefix("minecraft:").unwrap_or(id);
+    let mut entries: IndexMap<Key, T> = crate::assets::load_json(dir)
+        .into_iter()
+        .map(|(name, value)| (Key::of(name), value))
+        .collect();
+    move_first(&mut entries);
+
     for (key, value) in entries {
-        Registry::register(&mut registry, key.into(), value);
+        Registry::register(&mut registry, key, value);
     }
 
     registry
+}
+
+#[derive(thiserror::Error, Debug)]
+pub enum RegistryLoadError {
+    #[error("failed to read {path}: {source}")]
+    Read {
+        path: PathBuf,
+        source: std::io::Error,
+    },
+    #[error("failed to parse {path}: {source}")]
+    Parse {
+        path: PathBuf,
+        source: serde_json::Error,
+    },
+}
+
+fn collect_json_files(dir: &Path, files: &mut Vec<PathBuf>) -> Result<(), RegistryLoadError> {
+    let entries = std::fs::read_dir(dir).map_err(|source| RegistryLoadError::Read {
+        path: dir.to_path_buf(),
+        source,
+    })?;
+
+    for entry in entries {
+        let entry = entry.map_err(|source| RegistryLoadError::Read {
+            path: dir.to_path_buf(),
+            source,
+        })?;
+        let path = entry.path();
+        if path.is_dir() {
+            collect_json_files(&path, files)?;
+        } else if path
+            .extension()
+            .is_some_and(|extension| extension == "json")
+        {
+            files.push(path);
+        }
+    }
+
+    Ok(())
+}
+
+fn path_to_key(namespace: &str, root: &Path, path: &Path) -> Key {
+    let relative = path.strip_prefix(root).unwrap_or(path).with_extension("");
+    let path = relative
+        .components()
+        .map(|component| component.as_os_str().to_string_lossy())
+        .collect::<Vec<_>>()
+        .join("/");
+    Key::new(namespace.to_owned(), path)
+}
+
+pub fn register_biome(key: impl Into<Key>, biome: Biome) -> Id {
+    Registry::register(&mut Registries::BIOME.write(), key.into(), biome)
+}
+
+pub fn load_biomes(namespace: &str, dir: impl AsRef<Path>) -> Result<usize, RegistryLoadError> {
+    let dir = dir.as_ref();
+    let mut files = Vec::new();
+    collect_json_files(dir, &mut files)?;
+    files.sort();
+
+    for path in &files {
+        let data = std::fs::read_to_string(path).map_err(|source| RegistryLoadError::Read {
+            path: path.clone(),
+            source,
+        })?;
+        let biome: Biome =
+            serde_json::from_str(&data).map_err(|source| RegistryLoadError::Parse {
+                path: path.clone(),
+                source,
+            })?;
+
+        register_biome(path_to_key(namespace, dir, path), biome);
+    }
+
+    Ok(files.len())
 }
 
 macro_rules! registry {
@@ -57,6 +145,21 @@ macro_rules! registry {
         });
         &VALUE
     }};
+}
+
+macro_rules! mutable_registry {
+    ($path:path, $ty:ty, $expr:expr) => {{
+        static VALUE: LazyLock<RwLock<Registry<$ty>>> = LazyLock::new(|| {
+            let mut registry = Registry::new($expr);
+            $path(&mut registry);
+            RwLock::new(registry)
+        });
+        &VALUE
+    }};
+}
+
+fn register_biomes(registry: &mut Registry<Biome>) {
+    *registry = load_datapack("worldgen/biome");
 }
 
 impl Registries {
@@ -80,36 +183,47 @@ impl Registries {
         EntityType,
         RegistryKeys::ENTITY_TYPE
     );
+    pub const ENVIRONMENT_ATTRIBUTE: &LazyLock<Registry<EnvironmentAttribute>> = registry!(
+        crate::world::attribute::register_all,
+        EnvironmentAttribute,
+        RegistryKeys::ENVIRONMENT_ATTRIBUTE
+    );
+    pub const BIOME: &LazyLock<RwLock<Registry<Biome>>> =
+        mutable_registry!(register_biomes, Biome, RegistryKeys::BIOME);
+
+    pub fn biomes() -> RwLockReadGuard<'static, Registry<Biome>> {
+        Self::BIOME.read()
+    }
 
     #[rustfmt::skip]
     pub fn new() -> Self {
+
         Self {
-            damage_type: load("damage_type", include_str!("../../build_assets/damage_type.json")),
-            banner_pattern: load("banner_pattern", include_str!("../../build_assets/banner_pattern.json")),
-            instrument: load("instrument", include_str!("../../build_assets/instrument.json")),
-            jukebox_song: load("jukebox_song", include_str!("../../build_assets/jukebox_song.json")),
-            trim_material: load("trim_material", include_str!("../../build_assets/trim_material.json")),
+            damage_type:                load_datapack("damage_type"),
+            banner_pattern:             load_datapack("banner_pattern"),
+            instrument:                 load_datapack("instrument"),
+            jukebox_song:               load_datapack("jukebox_song"),
+            trim_material:              load_datapack("trim_material"),
 
             // World
-            biome:                      load("worldgen/biome", include_str!("../../build_assets/worldgen/biome.json")),
-            dimension_type:             load("dimension_type", include_str!("../../build_assets/dimension_type.json")),
-            timeline:                   load("timeline", include_str!("../../build_assets/timeline.json")),
-            world_clock:                load("world_clock", include_str!("../../build_assets/world_clock.json")),
+            dimension_type:             load_datapack("dimension_type"),
+            timeline:                   load_datapack("timeline"),
+            world_clock:                load_datapack("world_clock"),
 
             // Entities
-            cat_variant:                load("cat_variant", include_str!("../../build_assets/cat_variant.json")),
-            cat_sound_variant:          load("cat_sound_variant", include_str!("../../build_assets/cat_sound_variant.json")),
-            chicken_variant:            load("chicken_variant", include_str!("../../build_assets/chicken_variant.json")),
-            chicken_sound_variant:      load("chicken_sound_variant", include_str!("../../build_assets/chicken_sound_variant.json")),
-            cow_variant:                load("cow_variant", include_str!("../../build_assets/cow_variant.json")),
-            cow_sound_variant:          load("cow_sound_variant", include_str!("../../build_assets/cow_sound_variant.json")),
-            frog_variant:               load("frog_variant", include_str!("../../build_assets/frog_variant.json")),
-            painting_variant:           load("painting_variant", include_str!("../../build_assets/painting_variant.json")),
-            pig_variant:                load("pig_variant", include_str!("../../build_assets/pig_variant.json")),
-            pig_sound_variant:          load("pig_sound_variant", include_str!("../../build_assets/pig_sound_variant.json")),
-            wolf_variant:               load("wolf_variant", include_str!("../../build_assets/wolf_variant.json")),
-            wolf_sound_variant:         load("wolf_sound_variant", include_str!("../../build_assets/wolf_sound_variant.json")),
-            zombie_nautilus_variant:    load("zombie_nautilus_variant", include_str!("../../build_assets/zombie_nautilus_variant.json")),
+            cat_variant:                load_datapack("cat_variant"),
+            cat_sound_variant:          load_datapack("cat_sound_variant"),
+            chicken_variant:            load_datapack("chicken_variant"),
+            chicken_sound_variant:      load_datapack("chicken_sound_variant"),
+            cow_variant:                load_datapack("cow_variant"),
+            cow_sound_variant:          load_datapack("cow_sound_variant"),
+            frog_variant:               load_datapack("frog_variant"),
+            painting_variant:           load_datapack("painting_variant"),
+            pig_variant:                load_datapack("pig_variant"),
+            pig_sound_variant:          load_datapack("pig_sound_variant"),
+            wolf_variant:               load_datapack("wolf_variant"),
+            wolf_sound_variant:         load_datapack("wolf_sound_variant"),
+            zombie_nautilus_variant:    load_datapack("zombie_nautilus_variant"),
         }
     }
 }

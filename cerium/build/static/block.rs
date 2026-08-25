@@ -7,10 +7,8 @@ use syn::{Ident, LitInt};
 use crate::{object::StaticObjectBuilder, write_file};
 
 pub fn generate() {
-    println!("cargo:rerun-if-changed=build_assets/block.json");
-
     let object = StaticObjectBuilder::new("Block")
-        .with_json(include_str!("../../build_assets/block.json").to_owned())
+        .with_json(crate::read_asset("block.json"))
         .with_init(generate_init)
         .build();
 

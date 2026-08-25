@@ -62,7 +62,10 @@ impl<T> Hash for RegistryKey<T> {
 
 impl<T> From<Key> for RegistryKey<T> {
     fn from(value: Key) -> Self {
-        RegistryKey::new(value.path().to_owned())
+        Self {
+            key: value,
+            _phantom: PhantomData,
+        }
     }
 }
 

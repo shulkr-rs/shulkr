@@ -40,10 +40,7 @@ impl AnvilLoader {
             min_section: -4,
             regions: HashMap::new(),
             decompress_buf: Vec::new(),
-            biomes: crate::registry::load(
-                "minecraft:worldgen/biome".into(),
-                include_str!("../../../build_assets/worldgen/biome.json"),
-            ),
+            biomes: crate::registry::load_datapack("minecraft:worldgen/biome"),
         }
     }
 

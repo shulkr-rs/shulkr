@@ -7,10 +7,11 @@ use crate::{
             WolfSoundVariant, WolfVariant, ZombieNautilusVariant,
         },
     },
-    item::Material,
+    item::{Material, trim_material::TrimMaterial},
     util::{HashMap, Key},
     world::{
         DimensionType,
+        attribute::EnvironmentAttribute,
         biome::Biome,
         block::{Block, BlockEntityType},
         clock::WorldClock,
@@ -23,7 +24,7 @@ use std::sync::LazyLock;
 
 mod banner_pattern;
 mod damage_type;
-mod generated;
+pub(crate) mod generated;
 mod instrument;
 mod jukebox_song;
 mod registries;
@@ -48,10 +49,12 @@ type RegisteredKey<T> = RegistryKey<Registry<T>>;
 #[rustfmt::skip]
 impl RegistryKeys {
     pub const ROOT: Key = Key::const_vanilla("root");
-    pub const BLOCK:       RegisteredKey<Block>      = RegistryKey::const_vanilla("block");
-    pub const BLOCK_ENTITY_TYPE: RegisteredKey<BlockEntityType> = RegistryKey::const_vanilla("block_entity_type");
-    pub const MATERIAL:    RegisteredKey<Material>   = RegistryKey::const_vanilla("material");
-    pub const ENTITY_TYPE: RegisteredKey<EntityType> = RegistryKey::const_vanilla("entity_type");
+    pub const BLOCK: RegisteredKey<Block>                                = RegistryKey::const_vanilla("block");
+    pub const BLOCK_ENTITY_TYPE: RegisteredKey<BlockEntityType>          = RegistryKey::const_vanilla("block_entity_type");
+    pub const MATERIAL: RegisteredKey<Material>                          = RegistryKey::const_vanilla("material");
+    pub const ENTITY_TYPE: RegisteredKey<EntityType>                     = RegistryKey::const_vanilla("entity_type");
+    pub const ENVIRONMENT_ATTRIBUTE: RegisteredKey<EnvironmentAttribute> = RegistryKey::const_vanilla("environment_attribute");
+    pub const BIOME: RegisteredKey<Biome>                                = RegistryKey::const_vanilla("worldgen/biome");
 }
 
 pub struct Registry<T> {
@@ -76,11 +79,25 @@ impl<T> Registry<T> {
         &self.key
     }
 
-    pub fn register(this: &mut Self, key: Key, value: T) {
+    pub fn register(this: &mut Self, key: Key, value: T) -> Id {
+        if let Some(&id) = this.by_key.get(&key) {
+            this.values[id] = value;
+            return id as Id;
+        }
+
         let id = this.values.len();
         this.values.push(value);
         this.keys.push(key.clone());
         this.by_key.insert(key, id);
+        id as Id
+    }
+
+    pub fn len(&self) -> usize {
+        self.values.len()
+    }
+
+    pub fn is_empty(&self) -> bool {
+        self.values.is_empty()
     }
 
     pub fn by_id(&self, id: Id) -> Option<&T> {
