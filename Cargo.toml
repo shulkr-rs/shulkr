@@ -1,11 +1,16 @@
 [workspace]
 members = [
-    "cerium",
-    "cerium-macros",
-    "cerium-nbt",
+    "crates/cerium",
+    "crates/cerium-macros",
+    "crates/cerium-nbt",
+    "codegen",
+]
+default-members = [
+    "crates/cerium",
+    "crates/cerium-macros",
+    "crates/cerium-nbt",
 ]
 resolver = "2"
-
 
 [workspace.package]
 version = "0.1.0"
@@ -13,11 +18,9 @@ edition = "2024"
 license = "Apache-2.0"
 repository = "https://github.com/garfxld/cerium"
 
-
 [workspace.dependencies]
-cerium-nbt = { path = "cerium-nbt" }
-cerium-macros = { path = "cerium-macros" }
-
+cerium-nbt = { path = "crates/cerium-nbt" }
+cerium-macros = { path = "crates/cerium-macros" }
 anyhow = "1.0"
 tokio = { version = "1.46.0", features = ["macros", "rt-multi-thread", "net", "time", "sync", "io-util"], default-features = false }
 bytes = "1.10.1"
@@ -35,11 +38,9 @@ rustc-hash = "2.1.1"
 parking_lot = "0.12.5"
 hmac = "0.13.0"
 sha2 = "0.11.0"
-
 # Logging
 log = "0.4.27"
 env_logger = "0.11.8"
-
 # Encryption
 aes = "0.8.4"
 cfb8 = "0.8.1"
@@ -55,5 +56,4 @@ syn = "2.0"
 proc-macro2 = "1.0.95"
 paste = "1.0.15"
 convert_case = "0.8.0"
-
 phf = { version = "0.13.1", features = ["macros"]}

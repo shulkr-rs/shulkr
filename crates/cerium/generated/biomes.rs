@@ -1,0 +1,73 @@
+// This file was auto-generated. Do not edit it manually.
+
+use crate::registry::{Biome, RegistryKey};
+
+#[rustfmt::skip]
+impl Biome {
+    pub const BADLANDS: RegistryKey<Biome> = RegistryKey::const_vanilla("badlands");
+    pub const BAMBOO_JUNGLE: RegistryKey<Biome> = RegistryKey::const_vanilla("bamboo_jungle");
+    pub const BASALT_DELTAS: RegistryKey<Biome> = RegistryKey::const_vanilla("basalt_deltas");
+    pub const BEACH: RegistryKey<Biome> = RegistryKey::const_vanilla("beach");
+    pub const BIRCH_FOREST: RegistryKey<Biome> = RegistryKey::const_vanilla("birch_forest");
+    pub const CHERRY_GROVE: RegistryKey<Biome> = RegistryKey::const_vanilla("cherry_grove");
+    pub const COLD_OCEAN: RegistryKey<Biome> = RegistryKey::const_vanilla("cold_ocean");
+    pub const CRIMSON_FOREST: RegistryKey<Biome> = RegistryKey::const_vanilla("crimson_forest");
+    pub const DARK_FOREST: RegistryKey<Biome> = RegistryKey::const_vanilla("dark_forest");
+    pub const DEEP_COLD_OCEAN: RegistryKey<Biome> = RegistryKey::const_vanilla("deep_cold_ocean");
+    pub const DEEP_DARK: RegistryKey<Biome> = RegistryKey::const_vanilla("deep_dark");
+    pub const DEEP_FROZEN_OCEAN: RegistryKey<Biome> = RegistryKey::const_vanilla("deep_frozen_ocean");
+    pub const DEEP_LUKEWARM_OCEAN: RegistryKey<Biome> = RegistryKey::const_vanilla("deep_lukewarm_ocean");
+    pub const DEEP_OCEAN: RegistryKey<Biome> = RegistryKey::const_vanilla("deep_ocean");
+    pub const DESERT: RegistryKey<Biome> = RegistryKey::const_vanilla("desert");
+    pub const DRIPSTONE_CAVES: RegistryKey<Biome> = RegistryKey::const_vanilla("dripstone_caves");
+    pub const END_BARRENS: RegistryKey<Biome> = RegistryKey::const_vanilla("end_barrens");
+    pub const END_HIGHLANDS: RegistryKey<Biome> = RegistryKey::const_vanilla("end_highlands");
+    pub const END_MIDLANDS: RegistryKey<Biome> = RegistryKey::const_vanilla("end_midlands");
+    pub const ERODED_BADLANDS: RegistryKey<Biome> = RegistryKey::const_vanilla("eroded_badlands");
+    pub const FLOWER_FOREST: RegistryKey<Biome> = RegistryKey::const_vanilla("flower_forest");
+    pub const FOREST: RegistryKey<Biome> = RegistryKey::const_vanilla("forest");
+    pub const FROZEN_OCEAN: RegistryKey<Biome> = RegistryKey::const_vanilla("frozen_ocean");
+    pub const FROZEN_PEAKS: RegistryKey<Biome> = RegistryKey::const_vanilla("frozen_peaks");
+    pub const FROZEN_RIVER: RegistryKey<Biome> = RegistryKey::const_vanilla("frozen_river");
+    pub const GROVE: RegistryKey<Biome> = RegistryKey::const_vanilla("grove");
+    pub const ICE_SPIKES: RegistryKey<Biome> = RegistryKey::const_vanilla("ice_spikes");
+    pub const JAGGED_PEAKS: RegistryKey<Biome> = RegistryKey::const_vanilla("jagged_peaks");
+    pub const JUNGLE: RegistryKey<Biome> = RegistryKey::const_vanilla("jungle");
+    pub const LUKEWARM_OCEAN: RegistryKey<Biome> = RegistryKey::const_vanilla("lukewarm_ocean");
+    pub const LUSH_CAVES: RegistryKey<Biome> = RegistryKey::const_vanilla("lush_caves");
+    pub const MANGROVE_SWAMP: RegistryKey<Biome> = RegistryKey::const_vanilla("mangrove_swamp");
+    pub const MEADOW: RegistryKey<Biome> = RegistryKey::const_vanilla("meadow");
+    pub const MUSHROOM_FIELDS: RegistryKey<Biome> = RegistryKey::const_vanilla("mushroom_fields");
+    pub const NETHER_WASTES: RegistryKey<Biome> = RegistryKey::const_vanilla("nether_wastes");
+    pub const OCEAN: RegistryKey<Biome> = RegistryKey::const_vanilla("ocean");
+    pub const OLD_GROWTH_BIRCH_FOREST: RegistryKey<Biome> = RegistryKey::const_vanilla("old_growth_birch_forest");
+    pub const OLD_GROWTH_PINE_TAIGA: RegistryKey<Biome> = RegistryKey::const_vanilla("old_growth_pine_taiga");
+    pub const OLD_GROWTH_SPRUCE_TAIGA: RegistryKey<Biome> = RegistryKey::const_vanilla("old_growth_spruce_taiga");
+    pub const PALE_GARDEN: RegistryKey<Biome> = RegistryKey::const_vanilla("pale_garden");
+    pub const PLAINS: RegistryKey<Biome> = RegistryKey::const_vanilla("plains");
+    pub const RIVER: RegistryKey<Biome> = RegistryKey::const_vanilla("river");
+    pub const SAVANNA: RegistryKey<Biome> = RegistryKey::const_vanilla("savanna");
+    pub const SAVANNA_PLATEAU: RegistryKey<Biome> = RegistryKey::const_vanilla("savanna_plateau");
+    pub const SMALL_END_ISLANDS: RegistryKey<Biome> = RegistryKey::const_vanilla("small_end_islands");
+    pub const SNOWY_BEACH: RegistryKey<Biome> = RegistryKey::const_vanilla("snowy_beach");
+    pub const SNOWY_PLAINS: RegistryKey<Biome> = RegistryKey::const_vanilla("snowy_plains");
+    pub const SNOWY_SLOPES: RegistryKey<Biome> = RegistryKey::const_vanilla("snowy_slopes");
+    pub const SNOWY_TAIGA: RegistryKey<Biome> = RegistryKey::const_vanilla("snowy_taiga");
+    pub const SOUL_SAND_VALLEY: RegistryKey<Biome> = RegistryKey::const_vanilla("soul_sand_valley");
+    pub const SPARSE_JUNGLE: RegistryKey<Biome> = RegistryKey::const_vanilla("sparse_jungle");
+    pub const STONY_PEAKS: RegistryKey<Biome> = RegistryKey::const_vanilla("stony_peaks");
+    pub const STONY_SHORE: RegistryKey<Biome> = RegistryKey::const_vanilla("stony_shore");
+    pub const SULFUR_CAVES: RegistryKey<Biome> = RegistryKey::const_vanilla("sulfur_caves");
+    pub const SUNFLOWER_PLAINS: RegistryKey<Biome> = RegistryKey::const_vanilla("sunflower_plains");
+    pub const SWAMP: RegistryKey<Biome> = RegistryKey::const_vanilla("swamp");
+    pub const TAIGA: RegistryKey<Biome> = RegistryKey::const_vanilla("taiga");
+    pub const THE_END: RegistryKey<Biome> = RegistryKey::const_vanilla("the_end");
+    pub const THE_VOID: RegistryKey<Biome> = RegistryKey::const_vanilla("the_void");
+    pub const WARM_OCEAN: RegistryKey<Biome> = RegistryKey::const_vanilla("warm_ocean");
+    pub const WARPED_FOREST: RegistryKey<Biome> = RegistryKey::const_vanilla("warped_forest");
+    pub const WINDSWEPT_FOREST: RegistryKey<Biome> = RegistryKey::const_vanilla("windswept_forest");
+    pub const WINDSWEPT_GRAVELLY_HILLS: RegistryKey<Biome> = RegistryKey::const_vanilla("windswept_gravelly_hills");
+    pub const WINDSWEPT_HILLS: RegistryKey<Biome> = RegistryKey::const_vanilla("windswept_hills");
+    pub const WINDSWEPT_SAVANNA: RegistryKey<Biome> = RegistryKey::const_vanilla("windswept_savanna");
+    pub const WOODED_BADLANDS: RegistryKey<Biome> = RegistryKey::const_vanilla("wooded_badlands");
+}

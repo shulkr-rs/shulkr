@@ -23,15 +23,15 @@ You can use one of the examples to quick-start a project.
 
 ## Examples
 
-There are some simple (and maybe not fully functional) examples in the [examples](/cerium/examples/) directory in the `cerium` crate.
+There are some simple (and maybe not fully functional) examples in the [examples](./crates/cerium/examples/) directory in the `cerium` crate.
 
 ### List of Examples
 
-- [debug_world.rs](/cerium/examples/debug_world.rs)
-- [flat_world.rs](/cerium/examples/flat_world.rs)
-- [inventory.rs](/cerium/examples/inventory.rs)
-- [npc.rs](/cerium/examples/npc.rs)
-- [text.rs](/cerium/examples/text.rs)
+- [debug_world.rs](./crates/cerium/examples/debug_world.rs)
+- [flat_world.rs](./crates/cerium/examples/flat_world.rs)
+- [inventory.rs](./crates/cerium/examples/inventory.rs)
+- [npc.rs](./crates/cerium/examples/npc.rs)
+- [text.rs](./crates/cerium/examples/text.rs)
 
 
 ### Running
@@ -42,15 +42,16 @@ cargo r --example debug_world
 
 ```rust
 fn main() {
-    let server = Server::new();
+    let server = Server::new(AuthMode::Online);
     let world = World::new(DimensionType::OVERWORLD);
 
-    for (ix, pos) in (0..27946).enumerate() {
-        let bz = (pos / 168) + 1;
-        let bx = (pos % 168) + 1;
+    let mut states = BlockState::all();
+    states.sort_by_key(|s| s.state_id());
 
-        let block = BlockState::from_id(ix as i32).unwrap();
-        world.set_block((bz * 2) - 1, 70, (bx * 2) - 1, block);
+    for (pos, block) in states.iter().enumerate() {
+        let bz = ((pos / 168) + 1) as i32;
+        let bx = ((pos % 168) + 1) as i32;
+        world.set_block((bz * 2) - 1, 70, (bx * 2) - 1, *block);
     }
 
     server
@@ -58,11 +59,21 @@ fn main() {
         .subscribe(move |event: &mut PlayerConfigEvent| {
             event.set_world(world.clone());
             event.set_position((0.5, 71., 0.5));
+        })
+        .subscribe(move |event: &mut PlayerSpawnEvent| {
+            let player = event.get_player();
+            player.set_game_mode(GameMode::Creative);
+            player.set_flying(true);
+            player.set_permission_level(4);
+        })
+        .subscribe(|event: &mut PlayerRequestGameModeEvent| {
+            event
+                .get_player()
+                .set_game_mode(event.requested_game_mode());
         });
 
     server.bind("127.0.0.1:25565").unwrap();
 }
-
 ```
 
 <img src="thumbnail.png" alt="Debug World">
