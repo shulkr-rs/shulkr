@@ -1,12 +1,14 @@
 [workspace]
 members = [
     "crates/shulkr",
+    "crates/shulkr-data",
     "crates/shulkr-macros",
     "crates/shulkr-nbt",
     "codegen",
 ]
 default-members = [
     "crates/shulkr",
+    "crates/shulkr-data",
     "crates/shulkr-macros",
     "crates/shulkr-nbt",
 ]
@@ -17,10 +19,12 @@ version = "0.1.0"
 edition = "2024"
 license = "Apache-2.0"
 repository = "https://github.com/garfxld/shulkr"
+description = "Yet another library for building Minecraft servers in Rust."
 
 [workspace.dependencies]
-shulkr-nbt = { path = "crates/shulkr-nbt" }
-shulkr-macros = { path = "crates/shulkr-macros" }
+shulkr-nbt = { path = "crates/shulkr-nbt", version = "=0.1.0" }
+shulkr-macros = { path = "crates/shulkr-macros", version = "=0.1.0" }
+shulkr-data = { path = "crates/shulkr-data", version = "=0.1.0" }
 anyhow = "1.0"
 tokio = { version = "1.46.0", features = ["macros", "rt-multi-thread", "net", "time", "sync", "io-util"], default-features = false }
 bytes = "1.10.1"

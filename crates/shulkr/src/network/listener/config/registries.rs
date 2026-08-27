@@ -34,7 +34,7 @@ fn resolve_tag(
 
 fn load_tags(registry: &str) -> HashMap<String, Vec<String>> {
     let sections: HashMap<String, TagSection> =
-        crate::assets::load_json(&format!("tags/{registry}"))
+        shulkr_data::load_json(&format!("tags/{registry}"))
             .into_iter()
             .map(|(name, section)| (format!("minecraft:{name}"), section))
             .collect();

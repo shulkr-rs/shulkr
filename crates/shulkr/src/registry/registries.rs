@@ -47,7 +47,7 @@ where
     let mut registry = Registry::<T>::new(RegistryKey::const_vanilla(id));
 
     let dir = id.strip_prefix("minecraft:").unwrap_or(id);
-    let mut entries: IndexMap<Key, T> = crate::assets::load_json(dir)
+    let mut entries: IndexMap<Key, T> = shulkr_data::load_json(dir)
         .into_iter()
         .map(|(name, value)| (Key::of(name), value))
         .collect();

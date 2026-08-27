@@ -17,7 +17,6 @@ pub mod world;
 #[path = "../generated/version.rs"]
 pub mod version;
 
-pub(crate) mod assets;
 mod network;
 mod server;
 mod server_ping;

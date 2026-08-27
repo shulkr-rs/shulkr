@@ -25,7 +25,7 @@ pub use r#static::*;
 const HEADER: &str = "// This file was auto-generated. Do not edit it manually.\n";
 const MAX_WIDTH: usize = 50000;
 
-const ASSETS: &str = "../assets";
+const ASSETS: &str = "../crates/shulkr-data/assets";
 const OUT_DIR: &str = "../crates/shulkr/generated";
 
 const DATAPACK_REGISTRIES: &[&str] = &[

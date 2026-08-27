@@ -1591,12 +1591,12 @@ dependencies = [
  "rand",
  "rsa",
  "rsa-der",
- "rust-embed",
  "rustc-hash",
  "serde",
  "serde_json",
  "sha1",
  "sha2",
+ "shulkr-data",
  "shulkr-macros",
  "shulkr-nbt",
  "take_mut",
@@ -1605,6 +1605,15 @@ dependencies = [
  "ureq",
  "uuid",
  "zstd",
+]
+
+[[package]]
+name = "shulkr-data"
+version = "0.1.0"
+dependencies = [
+ "rust-embed",
+ "serde",
+ "serde_json",
 ]
 
 [[package]]

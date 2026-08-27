@@ -1,5 +1,5 @@
 [package]
-name = "shulkr-nbt"
+name = "shulkr-data"
 version.workspace = true
 edition.workspace = true
 license.workspace = true
@@ -7,7 +7,6 @@ repository.workspace = true
 description.workspace = true
 
 [dependencies]
+rust-embed = { workspace = true }
 serde = { workspace = true }
-thiserror = { workspace = true }
-paste = { workspace = true }
-bytes = { workspace = true }
+serde_json = { workspace = true }

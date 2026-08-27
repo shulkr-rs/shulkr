@@ -3,12 +3,12 @@ use serde::de::DeserializeOwned;
 use std::collections::BTreeMap;
 
 #[derive(Embed)]
-#[folder = "../../assets/datapack/"]
-pub(crate) struct Assets;
+#[folder = "assets/datapack/"]
+struct Assets;
 
 const NAMESPACE: &str = "minecraft";
 
-pub(crate) fn load_json<T: DeserializeOwned>(registry: &str) -> BTreeMap<String, T> {
+pub fn load_json<T: DeserializeOwned>(registry: &str) -> BTreeMap<String, T> {
     let prefix = format!("{NAMESPACE}/{registry}/");
 
     let entries: BTreeMap<String, T> = Assets::iter()
