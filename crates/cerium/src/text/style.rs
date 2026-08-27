@@ -3,7 +3,7 @@ use uuid::Uuid;
 
 use crate::{
     item::ItemStack,
-    registry::Registries,
+    registry::{Id, Registries},
     text::{
         TextComponent,
         color::{Rgb, Rgba},
@@ -258,7 +258,7 @@ impl HoverEvent {
         Self {
             ty: HoverEventType::ShowItem {
                 id: Registries::MATERIAL
-                    .get_key(&stack.material())
+                    .key_of(Id::from(stack.material()))
                     .expect(&format!("{:?} has no key", stack.material()))
                     .to_string(),
                 count: show_amount.then_some(stack.amount()),

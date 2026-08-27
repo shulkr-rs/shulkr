@@ -111,6 +111,14 @@ impl<T> Registry<T> {
         self.by_id(*id as Id)
     }
 
+    pub fn key_of(&self, id: Id) -> Option<&Key> {
+        self.keys.get(id as usize)
+    }
+
+    pub fn iter(&self) -> impl Iterator<Item = (&Key, &T)> {
+        self.keys.iter().zip(self.values.iter())
+    }
+
     pub fn get_id<'a>(&self, value: impl Into<Holder<'a, T>>) -> Option<Id>
     where
         T: 'a,

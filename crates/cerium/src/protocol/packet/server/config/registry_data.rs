@@ -48,13 +48,12 @@ where
 {
     fn from(value: &Registry<T>) -> Self {
         let registry_id = value.key().to_key();
-        let entries = value.values();
         RegistryDataPacket {
             registry_id,
-            entries: entries
-                .into_iter()
-                .map(|v| RegistryEntry {
-                    entry_id: value.get_key(v).unwrap().clone(),
+            entries: value
+                .iter()
+                .map(|(key, v)| RegistryEntry {
+                    entry_id: key.clone(),
                     data: Some(to_nbt_compound(v).unwrap().into()),
                 })
                 .collect(),

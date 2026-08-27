@@ -44,7 +44,7 @@ impl Material {
             | Material::POTION => 16,
             _ => {
                 let name = Registries::MATERIAL
-                    .get_key(self)
+                    .key_of(Id::from(*self))
                     .map(Key::path)
                     .unwrap_or_default();
                 if name.ends_with("disc_fragment")
