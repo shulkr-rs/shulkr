@@ -16,6 +16,12 @@ impl From<BlockEntityType> for Id {
 
 pub struct BlockEntityTypeData;
 
+impl Default for BlockEntityTypeData {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl BlockEntityTypeData {
     pub const fn new() -> Self {
         Self

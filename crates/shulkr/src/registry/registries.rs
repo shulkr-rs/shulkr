@@ -162,6 +162,12 @@ fn register_biomes(registry: &mut Registry<Biome>) {
     *registry = load_datapack("worldgen/biome");
 }
 
+impl Default for Registries {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl Registries {
     pub const BLOCK: &LazyLock<Registry<Block>> = registry!(
         crate::world::block::block::register_all,

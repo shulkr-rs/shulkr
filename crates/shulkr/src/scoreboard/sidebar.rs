@@ -76,9 +76,9 @@ impl Sidebar {
         };
         f(&mut line);
 
-        lines.insert(id.into(), line);
+        lines.insert(id, line);
 
-        for (_, line) in lines.iter() {
+        for line in lines.values() {
             self.viewers.broadcast_packet(&line.create_packet());
         }
     }
@@ -107,7 +107,7 @@ impl Viewable for Sidebar {
         });
 
         let lines = self.lines.read();
-        for (_, line) in lines.iter() {
+        for line in lines.values() {
             player.send_packet(&line.create_packet());
         }
         drop(lines);

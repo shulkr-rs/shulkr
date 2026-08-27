@@ -138,7 +138,7 @@ impl<R: Buf> PacketRead for R {
                 return Ok(value);
             }
         }
-        return Err(DecodeError::Decode("VarInt too large"));
+        Err(DecodeError::Decode("VarInt too large"))
     }
 
     fn read_uuid(&mut self) -> Result<Uuid> {
@@ -198,7 +198,7 @@ impl<R: Buf> PacketRead for R {
             len = std::cmp::min(len, max as usize);
         }
 
-        let mut buf = vec![0u8; len as usize];
+        let mut buf = vec![0u8; len];
         self.copy_to_slice(&mut buf);
         Ok(buf)
     }

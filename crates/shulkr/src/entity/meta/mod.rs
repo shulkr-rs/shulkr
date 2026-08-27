@@ -123,6 +123,12 @@ pub struct MetadataHolder {
     pub entries: Arc<Mutex<HashMap<i32, AnyValue>>>,
 }
 
+impl Default for MetadataHolder {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl MetadataHolder {
     pub fn new() -> Self {
         Self {
@@ -392,7 +398,7 @@ impl DataType2<Self> for ResolvableProfile {
         w.write_varint(this.kind() as i32)?;
         match this.profile() {
             Either::Left(p) => {
-                w.write_option(&p.username, W::write_string)?;
+                w.write_option(&p.username, |w, v| w.write_string(v))?;
                 w.write_option(&p.uuid, W::write_uuid)?;
                 w.write_array(&p.properties, Property::encode)?;
             }

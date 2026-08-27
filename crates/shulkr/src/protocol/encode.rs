@@ -38,7 +38,7 @@ pub enum EncodeError {
     #[error("{0}")]
     Encode(String),
     #[error("std::io::Error - {0}")]
-    IoError(std::io::Error),
+    StdIo(std::io::Error),
 }
 
 pub trait Encode
@@ -79,7 +79,7 @@ pub trait PacketWrite {
 
     fn write_varint(&mut self, value: i32) -> Result<()>;
 
-    fn write_string(&mut self, value: &String) -> Result<()>;
+    fn write_string(&mut self, value: &str) -> Result<()>;
 
     fn write_identifier(&mut self, value: &Key) -> Result<()>;
 
@@ -97,13 +97,13 @@ pub trait PacketWrite {
     where
         F: FnMut(&mut Self, &T) -> Result<()>;
 
-    fn write_array<T, F>(&mut self, value: &Vec<T>, f: F) -> Result<()>
+    fn write_array<T, F>(&mut self, value: &[T], f: F) -> Result<()>
     where
         F: FnMut(&mut Self, &T) -> Result<()>;
 
-    fn write_boxed_slice(&mut self, value: &Box<[u8]>) -> Result<()>;
+    fn write_boxed_slice(&mut self, value: &[u8]) -> Result<()>;
 
-    fn write_unprefixed_array<T, F>(&mut self, value: &Vec<T>, f: F) -> Result<()>
+    fn write_unprefixed_array<T, F>(&mut self, value: &[T], f: F) -> Result<()>
     where
         F: FnMut(&mut Self, &T) -> Result<()>;
 }
@@ -161,7 +161,7 @@ impl<B: BufMut> PacketWrite for B {
         Ok(())
     }
 
-    fn write_string(&mut self, value: &String) -> Result<()> {
+    fn write_string(&mut self, value: &str) -> Result<()> {
         self.write_varint(value.len() as i32)?;
         self.put(value.as_bytes());
         Ok(())
@@ -210,12 +210,12 @@ impl<B: BufMut> PacketWrite for B {
     {
         self.write_bool(value.is_some())?;
         if let Some(value) = value {
-            f(self, &value)?;
+            f(self, value)?;
         }
         Ok(())
     }
 
-    fn write_array<T, F>(&mut self, value: &Vec<T>, mut f: F) -> Result<()>
+    fn write_array<T, F>(&mut self, value: &[T], mut f: F) -> Result<()>
     where
         F: FnMut(&mut Self, &T) -> Result<()>,
     {
@@ -226,7 +226,7 @@ impl<B: BufMut> PacketWrite for B {
         Ok(())
     }
 
-    fn write_boxed_slice(&mut self, value: &Box<[u8]>) -> Result<()> {
+    fn write_boxed_slice(&mut self, value: &[u8]) -> Result<()> {
         self.write_varint(value.len() as i32)?;
         for element in value {
             self.write_u8(*element)?;
@@ -234,7 +234,7 @@ impl<B: BufMut> PacketWrite for B {
         Ok(())
     }
 
-    fn write_unprefixed_array<T, F>(&mut self, value: &Vec<T>, mut f: F) -> Result<()>
+    fn write_unprefixed_array<T, F>(&mut self, value: &[T], mut f: F) -> Result<()>
     where
         F: FnMut(&mut Self, &T) -> Result<()>,
     {
@@ -252,17 +252,14 @@ where
     let type_id = TypeId::of::<P>();
     match state {
         ProtocolState::Handshake => None,
-        ProtocolState::Status => status::<P>(type_id),
-        ProtocolState::Login => login::<P>(type_id),
-        ProtocolState::Config => config::<P>(type_id),
-        ProtocolState::Play => play::<P>(type_id),
+        ProtocolState::Status => status(type_id),
+        ProtocolState::Login => login(type_id),
+        ProtocolState::Config => config(type_id),
+        ProtocolState::Play => play(type_id),
     }
 }
 
-fn status<P>(type_id: TypeId) -> Option<i32>
-where
-    P: Packet + ServerPacket,
-{
+fn status(type_id: TypeId) -> Option<i32> {
     Some(match () {
         _ if type_id == TypeId::of::<StatusResponsePacket>() => 0x00,
         _ if type_id == TypeId::of::<PongResponsePacket>() => 0x01,
@@ -270,10 +267,7 @@ where
     })
 }
 
-fn login<P>(type_id: TypeId) -> Option<i32>
-where
-    P: Packet + ServerPacket,
-{
+fn login(type_id: TypeId) -> Option<i32> {
     Some(match () {
         _ if type_id == TypeId::of::<LoginDisconnectPacket>() => 0x00,
         _ if type_id == TypeId::of::<EncryptionRequestPacket>() => 0x01,
@@ -285,10 +279,7 @@ where
     })
 }
 
-fn config<P>(type_id: TypeId) -> Option<i32>
-where
-    P: Packet + ServerPacket,
-{
+fn config(type_id: TypeId) -> Option<i32> {
     Some(match () {
         // _ if type_id == TypeId::of::<CookieRequestPacket>() => 0x00,
         _ if type_id == TypeId::of::<server::config::PluginMessagePacket>() => 0x01,
@@ -314,10 +305,7 @@ where
     })
 }
 
-fn play<P>(type_id: TypeId) -> Option<i32>
-where
-    P: Packet + ServerPacket,
-{
+fn play(type_id: TypeId) -> Option<i32> {
     Some(match () {
         // _ if type_id == TypeId::of::<BundleDelimiterPacket>() => 0x00,
         _ if type_id == TypeId::of::<SpawnEntityPacket>() => 0x01,

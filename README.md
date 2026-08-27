@@ -12,10 +12,9 @@ Yet another high-performance Minecraft server library written in Rust.
 
 ## Usage
 
-The project is still very experimental so you would need to add it as a git dependency.
-To add it to you project add the following line in your `Cargo.toml`:
+Add shulkr with `cargo add shulkr` to your project, or add the following to your `Cargo.toml`:
 ```
-shulkr = { git = "https://github.com/garfxld/shulkr.git" }
+shulkr = "0.1.0"
 ```
 
 You can use one of the examples to quick-start a project.

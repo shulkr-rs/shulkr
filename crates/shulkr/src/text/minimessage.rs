@@ -116,13 +116,12 @@ impl Parser {
             self.pos += 1;
             match c {
                 '\\' => {
-                    if let Some(&next) = self.chars.get(self.pos) {
-                        if next == '<' || next == '\\' {
+                    if let Some(&next) = self.chars.get(self.pos)
+                        && (next == '<' || next == '\\') {
                             self.buffer.push(next);
                             self.pos += 1;
                             continue;
                         }
-                    }
                     self.buffer.push('\\');
                 }
                 '<' => self.read_tag(),
@@ -309,12 +308,11 @@ impl Parser {
             return;
         }
 
-        if name == "object" {
-            if let [atlas, sprite, ..] = args.as_slice() {
+        if name == "object"
+            && let [atlas, sprite, ..] = args.as_slice() {
                 self.emit_object(atlas, sprite);
                 return;
             }
-        }
 
         if name == "gradient" {
             self.flush();
@@ -374,11 +372,10 @@ fn resolve(name: &str, args: &[&str]) -> Option<TextFormat> {
 
 fn parse_color(name: &str) -> Option<Rgb> {
     if let Some(hex) = name.strip_prefix('#') {
-        if hex.len() == 6 {
-            if let Ok(v) = u32::from_str_radix(hex, 16) {
+        if hex.len() == 6
+            && let Ok(v) = u32::from_str_radix(hex, 16) {
                 return Some(Rgb::of(v));
             }
-        }
         return None;
     }
 
@@ -395,13 +392,12 @@ fn parse_shadow(value: &str) -> Option<Rgba> {
         return Some(Rgba::of(0));
     }
 
-    if let Some(hex) = value.strip_prefix('#') {
-        if hex.len() == 8 {
+    if let Some(hex) = value.strip_prefix('#')
+        && hex.len() == 8 {
             let rgba = u32::from_str_radix(hex, 16).ok()?;
-            let packed = (rgba << 24) | (rgba >> 8);
+            let packed = rgba.rotate_right(8);
             return Some(Rgba::of(packed));
         }
-    }
 
     parse_color(value).map(Rgba::from)
 }

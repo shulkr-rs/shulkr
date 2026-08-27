@@ -105,9 +105,7 @@ impl<T> Registry<T> {
     }
 
     pub fn by_key(&self, key: &Key) -> Option<&T> {
-        let Some(id) = self.by_key.get(key) else {
-            return None;
-        };
+        let id = self.by_key.get(key)?;
         self.by_id(*id as Id)
     }
 

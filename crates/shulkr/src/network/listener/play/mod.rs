@@ -110,7 +110,7 @@ fn handle_chat_message(player: Player, packet: ChatMessagePacket) {
     for player in player.server().players().lock().iter() {
         // Instead of sending a real PlayerChatMessagePacket we send a system chat message
         // to avoid player reporting.
-        player.send_message(&format!("<{}> {}", player.name(), &packet.message));
+        player.send_message(format!("<{}> {}", player.name(), packet.message));
     }
 }
 

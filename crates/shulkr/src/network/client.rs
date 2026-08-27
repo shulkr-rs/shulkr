@@ -191,7 +191,7 @@ impl Connection {
         };
 
         // Enqueue packet
-        if let Err(_) = self.packet_tx.try_send(data) {
+        if self.packet_tx.try_send(data).is_err() {
             log::error!(
                 "Failed to enqueue packet, closing connection. ({})",
                 std::any::type_name::<P>()
@@ -242,7 +242,6 @@ impl Connection {
         if let Err(err) = swriter.write_packet(&data).await {
             log::error!("Failed to send packet: {}", err);
             self.close();
-            return;
         }
     }
 

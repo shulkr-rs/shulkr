@@ -163,7 +163,7 @@ impl<'de, R: Buf> de::Deserializer<'de> for &mut Deserializer<R> {
         visitor.visit_some(self)
     }
 
-    fn deserialize_map<V>(mut self, visitor: V) -> Result<V::Value>
+    fn deserialize_map<V>(self, visitor: V) -> Result<V::Value>
     where
         V: Visitor<'de>,
     {
@@ -187,7 +187,7 @@ impl<'de, R: Buf> de::Deserializer<'de> for &mut Deserializer<R> {
             }
         }
 
-        let value = visitor.visit_map(CompoundAccess { de: &mut self })?;
+        let value = visitor.visit_map(CompoundAccess { de: self })?;
         Ok(value)
     }
 

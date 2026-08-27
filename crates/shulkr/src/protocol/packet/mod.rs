@@ -2,6 +2,7 @@
 
 pub mod client {
     pub mod handshake {
+        #[allow(clippy::module_inception)]
         mod handshake;
 
         pub use handshake::HandshakePacket;

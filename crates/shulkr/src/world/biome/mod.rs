@@ -36,6 +36,12 @@ pub struct BiomeBuilder {
     effects: Option<BiomeEffects>,
 }
 
+impl Default for BiomeBuilder {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl BiomeBuilder {
     pub fn new() -> Self {
         Self {

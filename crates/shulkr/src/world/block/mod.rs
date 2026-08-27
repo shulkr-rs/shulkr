@@ -1,3 +1,4 @@
+#[allow(clippy::module_inception)]
 pub(crate) mod block;
 pub(crate) mod block_entity;
 mod block_state;

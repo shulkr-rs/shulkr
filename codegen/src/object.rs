@@ -12,10 +12,13 @@ pub struct StaticObjectJson {
     entries: IndexMap<String, Value>,
 }
 
+type InitFn = Box<dyn Fn(Ident, &str, Value) -> TokenStream>;
+type IdentFn = Box<dyn Fn(&str) -> Ident>;
+
 pub struct StaticObjectBuilder {
     name: String,
-    init: Option<Box<dyn Fn(Ident, &str, Value) -> TokenStream>>,
-    ident: Option<Box<dyn Fn(&str) -> Ident>>,
+    init: Option<InitFn>,
+    ident: Option<IdentFn>,
     json: Option<String>,
 }
 
@@ -79,8 +82,8 @@ impl StaticObjectBuilder {
 pub struct StaticObject {
     name: String,
     json: StaticObjectJson,
-    init: Box<dyn Fn(Ident, &str, Value) -> TokenStream>,
-    ident: Box<dyn Fn(&str) -> Ident>,
+    init: InitFn,
+    ident: IdentFn,
 }
 
 fn default_ident_for(key: &str) -> Ident {

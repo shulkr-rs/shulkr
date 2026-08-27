@@ -67,7 +67,7 @@ where
             let mut data = Vec::with_capacity(take.limit() as usize);
             take.read_to_end(&mut data).await.unwrap();
 
-            return Ok(RawPacket::new(id, data));
+            Ok(RawPacket::new(id, data))
         } else {
             // WITH compression
 
@@ -92,7 +92,7 @@ where
 
             let id = data.read_varint().await.unwrap();
 
-            return Ok(RawPacket::new(id, data.to_vec()));
+            Ok(RawPacket::new(id, data.to_vec()))
         }
     }
 }
@@ -149,6 +149,6 @@ where
                 return Ok(value);
             }
         }
-        return Err(ErrorKind::Other.into());
+        Err(ErrorKind::Other.into())
     }
 }

@@ -25,6 +25,12 @@ pub struct KeyStore {
     pub public_key_der: Box<[u8]>,
 }
 
+impl Default for KeyStore {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl KeyStore {
     pub fn new() -> Self {
         use rsa::{RsaPrivateKey, traits::PublicKeyParts as _};
@@ -55,7 +61,7 @@ impl KeyStore {
 
         num_bigint::BigInt::from_signed_bytes_be(
             &Sha1::new()
-                .chain_update(&secret)
+                .chain_update(secret)
                 .chain_update(&self.public_key_der)
                 .finalize(),
         )
@@ -66,19 +72,19 @@ impl KeyStore {
 pub type Decryptor = cfb8::Decryptor<aes::Aes128>;
 pub type Encryptor = cfb8::Encryptor<aes::Aes128>;
 
-const MOJANG_AUTH_URL: &'static str = "https://sessionserver.mojang.com/session/minecraft/hasJoined?username={username}&serverId={hash}";
+const MOJANG_AUTH_URL: &str = "https://sessionserver.mojang.com/session/minecraft/hasJoined?username={username}&serverId={hash}";
 
 pub fn authenthicate(
-    username: &String,
-    hash: &String,
+    username: &str,
+    hash: &str,
     ip: Option<std::net::Ipv4Addr>,
 ) -> Result<GameProfile, AuthError> {
-    let url = if let Some(_) = ip {
+    let url = if ip.is_some() {
         todo!()
     } else {
         MOJANG_AUTH_URL
-            .replace("{username}", &username)
-            .replace("{hash}", &hash)
+            .replace("{username}", username)
+            .replace("{hash}", hash)
     };
 
     let mut response = ureq::get(url)

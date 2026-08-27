@@ -12,6 +12,12 @@ pub struct Ticker {
     interval: Interval,
 }
 
+impl Default for Ticker {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl Ticker {
     pub fn new() -> Self {
         Self {

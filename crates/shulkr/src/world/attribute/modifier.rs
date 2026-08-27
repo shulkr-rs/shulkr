@@ -27,7 +27,7 @@ pub enum AttributeModifier {
 #[derive(Debug, Clone, Serialize)]
 #[serde(untagged)]
 pub enum AttributeArgument {
-    Value(AttributeValue),
+    Value(Box<AttributeValue>),
     Float(f32),
     FloatWithAlpha { value: f32, alpha: f32 },
     Boolean(bool),
@@ -49,7 +49,7 @@ impl AttributeEntry {
     pub fn of(value: AttributeValue) -> Self {
         Self {
             modifier: AttributeModifier::Override,
-            argument: AttributeArgument::Value(value),
+            argument: AttributeArgument::Value(Box::new(value)),
         }
     }
 

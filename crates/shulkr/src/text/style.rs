@@ -219,6 +219,7 @@ impl ClickEvent {
 
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 #[serde(tag = "action", rename_all = "snake_case")]
+#[allow(clippy::enum_variant_names)]
 enum HoverEventType {
     ShowText {
         // valid are: string, list, or object.
@@ -259,7 +260,7 @@ impl HoverEvent {
             ty: HoverEventType::ShowItem {
                 id: Registries::MATERIAL
                     .key_of(Id::from(stack.material()))
-                    .expect(&format!("{:?} has no key", stack.material()))
+                    .unwrap_or_else(|| panic!("{:?} has no key", stack.material()))
                     .to_string(),
                 count: show_amount.then_some(stack.amount()),
                 components: show_components.then_some(()),

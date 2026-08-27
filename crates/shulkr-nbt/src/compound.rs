@@ -10,6 +10,12 @@ pub struct NbtCompound {
     pub children: Vec<(String, NbtTag)>,
 }
 
+impl Default for NbtCompound {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl NbtCompound {
     pub fn new() -> NbtCompound {
         NbtCompound {
@@ -27,7 +33,7 @@ impl NbtCompound {
     pub fn get(&self, name: &str) -> Option<&NbtTag> {
         self.children
             .iter()
-            .find(|(key, _)| key == &name)
+            .find(|(key, _)| key == name)
             .map(|t| &t.1)
     }
 

@@ -6,6 +6,12 @@ pub struct CommandDispatcher {
     pub(crate) commands: RwLock<Vec<Command>>,
 }
 
+impl Default for CommandDispatcher {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl CommandDispatcher {
     pub fn new() -> Self {
         Self {

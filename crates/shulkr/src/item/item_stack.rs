@@ -129,12 +129,12 @@ impl From<Slot> for ItemStack {
     }
 }
 
-impl Into<Slot> for ItemStack {
-    fn into(self) -> Slot {
+impl From<ItemStack> for Slot {
+    fn from(value: ItemStack) -> Self {
         Slot {
-            item_count: self.amount,
-            item_id: Some(Id::from(self.material) as i32),
-            to_add: self.components,
+            item_count: value.amount,
+            item_id: Some(Id::from(value.material) as i32),
+            to_add: value.components,
             to_remove: vec![],
         }
     }

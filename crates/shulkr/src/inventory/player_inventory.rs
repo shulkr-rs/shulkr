@@ -27,6 +27,12 @@ pub struct PlayerInventory {
     drag: Mutex<Option<DragState>>,
 }
 
+impl Default for PlayerInventory {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl PlayerInventory {
     pub fn new() -> Self {
         let mut content = Vec::with_capacity(PLAYER_INVENTORY_SIZE as usize);

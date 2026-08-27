@@ -120,7 +120,7 @@ impl Palette {
 
         if bpe <= self.max_bpe {
             // Indirect Format
-            let bpe = bpe.max(self.min_bpe) as u8;
+            let bpe = bpe.max(self.min_bpe);
             let palette: Box<[u16]> = self
                 .count
                 .keys()
@@ -149,13 +149,13 @@ impl Palette {
                 })
                 .collect();
 
-            return (
+            (
                 bpe,
                 PaletteFormat::Indirect {
-                    values: palette.iter().copied().collect(),
+                    values: palette.to_vec(),
                 },
                 values,
-            );
+            )
         } else {
             // Direct Format
             let bpe = self.direct_bpe;
@@ -171,7 +171,7 @@ impl Palette {
                 })
                 .collect();
 
-            return (bpe, PaletteFormat::Direct, values);
+            (bpe, PaletteFormat::Direct, values)
         }
     }
 }

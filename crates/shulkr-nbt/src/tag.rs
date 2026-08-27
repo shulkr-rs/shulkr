@@ -155,7 +155,7 @@ impl NbtTag {
                 }
 
                 w.write_u16_be(len as u16)?;
-                w.write_slice(&java_string)?;
+                w.write_slice(java_string)?;
             }
             NbtTag::List(list) => {
                 let len = list.len();
@@ -306,7 +306,7 @@ impl From<&str> for NbtTag {
 
 impl From<String> for NbtTag {
     fn from(value: String) -> Self {
-        NbtTag::String(value.into())
+        NbtTag::String(value)
     }
 }
 
@@ -332,31 +332,6 @@ pub fn to_nbt_compound<T: Serialize>(value: &T) -> Result<NbtCompound, Error> {
     match value.serialize(Serializer)? {
         NbtTag::Compound(compound) => Ok(compound),
         _ => Err(Error::SerdeError("Expected a compound tag".to_string())),
-    }
-}
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-    use serde::Serialize;
-
-    #[derive(Serialize)]
-    struct TestStruct {
-        name: String,
-        age: i32,
-        scores: Vec<f32>,
-    }
-
-    #[test]
-    fn test_serialization() {
-        let test = TestStruct {
-            name: "Alice".to_string(),
-            age: 30,
-            scores: vec![95.5, 87.3, 92.1],
-        };
-
-        let nbt = to_nbt_compound(&test).unwrap();
-        println!("{:?}", nbt);
     }
 }
 
@@ -690,5 +665,30 @@ impl ser::SerializeStructVariant for StructVariantSerializer {
             .children
             .push((self.variant, NbtTag::Compound(inner_compound)));
         Ok(NbtTag::Compound(outer_compound))
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use serde::Serialize;
+
+    #[derive(Serialize)]
+    struct TestStruct {
+        name: String,
+        age: i32,
+        scores: Vec<f32>,
+    }
+
+    #[test]
+    fn test_serialization() {
+        let test = TestStruct {
+            name: "Alice".to_string(),
+            age: 30,
+            scores: vec![95.5, 87.3, 92.1],
+        };
+
+        let nbt = to_nbt_compound(&test).unwrap();
+        println!("{:?}", nbt);
     }
 }

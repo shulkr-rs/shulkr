@@ -33,11 +33,10 @@ fn resolve_tag(
 }
 
 fn load_tags(registry: &str) -> HashMap<String, Vec<String>> {
-    let sections: HashMap<String, TagSection> =
-        shulkr_data::load_json(&format!("tags/{registry}"))
-            .into_iter()
-            .map(|(name, section)| (format!("minecraft:{name}"), section))
-            .collect();
+    let sections: HashMap<String, TagSection> = shulkr_data::load_json(&format!("tags/{registry}"))
+        .into_iter()
+        .map(|(name, section)| (format!("minecraft:{name}"), section))
+        .collect();
 
     let mut result = HashMap::default();
 
@@ -60,7 +59,7 @@ pub fn tags<T>(registry: &'static str, reg: &Registry<T>) -> TagRegistry {
             tag_name: Key::of(name),
             entries: values
                 .into_iter()
-                .filter_map(|v| reg.get_id(&RegistryKey::of(v)).map(|id| id as i32))
+                .filter_map(|v| reg.get_id(RegistryKey::of(v)).map(|id| id as i32))
                 .collect(),
         })
         .collect();

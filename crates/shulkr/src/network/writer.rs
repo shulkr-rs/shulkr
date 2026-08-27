@@ -70,16 +70,16 @@ where
     pub async fn write_packet(&mut self, packet: &[u8]) -> Result<(), EncodeError> {
         let compressed = self.threshold != -1;
 
-        let mut data = packet;
+        let data = packet;
         let data_len = data.len() as i32;
 
         if !compressed {
             // WITHOUT compression
 
             self.write_varint(data_len).await?;
-            self.write_all(&mut data)
+            self.write_all(data)
                 .await
-                .map_err(|e| EncodeError::IoError(e))?;
+                .map_err(EncodeError::StdIo)?;
         } else {
             // WITH compression
 
@@ -90,13 +90,13 @@ where
 
                 let mut deflator = ZlibEncoder::with_quality(&mut compressed, Level::Default);
                 deflator
-                    .write_all(&data)
+                    .write_all(data)
                     .await
-                    .map_err(|e| EncodeError::IoError(e))?;
+                    .map_err(EncodeError::StdIo)?;
                 deflator
                     .shutdown()
                     .await
-                    .map_err(|e| EncodeError::IoError(e))?;
+                    .map_err(EncodeError::StdIo)?;
 
                 // len of data_len + compressed_len
                 self.write_varint(Self::varint_size(data_len) + compressed.len() as i32)
@@ -106,7 +106,7 @@ where
                 self.write_varint(data_len).await?;
                 self.write_all(&compressed)
                     .await
-                    .map_err(|e| EncodeError::IoError(e))?;
+                    .map_err(EncodeError::StdIo)?;
             } else {
                 // size < threshold
 
@@ -116,13 +116,13 @@ where
                 // data_len (0 to indicate uncompressed)
                 self.write_varint(0).await?;
 
-                self.write_all(&data)
+                self.write_all(data)
                     .await
-                    .map_err(|e| EncodeError::IoError(e))?;
+                    .map_err(EncodeError::StdIo)?;
             }
         }
 
-        self.flush().await.map_err(|e| EncodeError::IoError(e))
+        self.flush().await.map_err(EncodeError::StdIo)
     }
 }
 

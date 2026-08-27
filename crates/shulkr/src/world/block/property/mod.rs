@@ -23,6 +23,11 @@ pub trait Property: Debug + Sync + Send {
         Self: Sized;
 
     fn len(&self) -> usize;
+
+    fn is_empty(&self) -> bool {
+        self.len() == 0
+    }
+
     fn value_name_from_index(&self, index: usize) -> &str;
     fn get_possible_value_names(&self) -> Box<[&str]>;
 

@@ -27,9 +27,7 @@ fn generate_init(ident: Ident, value: Value) -> TokenStream {
             |v| {
                 let block = format_ident!(
                     "{}",
-                    v.split_once(":")
-                        .map_or(v, |v| v.1)
-                        .to_case(Case::Constant)
+                    v.split_once(":").map_or(v, |v| v.1).to_case(Case::Constant)
                 );
                 quote! { Some(Block::#block) }
             },

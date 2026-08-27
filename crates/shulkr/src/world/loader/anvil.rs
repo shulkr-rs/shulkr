@@ -1,17 +1,3 @@
-use std::{
-    collections::HashMap,
-    fs::File,
-    io::{Read as _, Seek as _, SeekFrom},
-    path::{Path, PathBuf},
-};
-
-use bitfield_struct::bitfield;
-use byteorder::{BigEndian, ReadBytesExt as _};
-use bytes::Buf as _;
-use shulkr_nbt::{COMPOUND_ID, Nbt, NbtCompound, NbtTag};
-use flate2::bufread::{GzDecoder, ZlibDecoder};
-use thiserror::Error;
-
 use crate::{
     registry::{Registry, RegistryKey},
     world::{
@@ -20,6 +6,18 @@ use crate::{
         chunk::Chunk,
     },
 };
+use bitfield_struct::bitfield;
+use byteorder::{BigEndian, ReadBytesExt as _};
+use bytes::Buf as _;
+use flate2::bufread::{GzDecoder, ZlibDecoder};
+use shulkr_nbt::{COMPOUND_ID, Nbt, NbtCompound, NbtTag};
+use std::{
+    collections::HashMap,
+    fs::File,
+    io::{Read as _, Seek as _, SeekFrom},
+    path::{Path, PathBuf},
+};
+use thiserror::Error;
 
 const SECTOR_SIZE: usize = 4096;
 const BLOCKS_PER_SECTION: usize = 16 * 16 * 16;
@@ -349,7 +347,7 @@ fn parse_block_states(chunk: &mut Chunk, sect_y: u32, tag: NbtTag) -> Option<()>
         let y = i / (16 * 16);
         chunk.set_block(
             x as i32,
-            (chunk.min_y() + (sect_y * 16) as i32 + y as i32) as i32,
+            chunk.min_y() + (sect_y * 16) as i32 + y as i32,
             z as i32,
             &blocks[idx],
         );
@@ -410,7 +408,7 @@ fn parse_biomes(
         };
 
         let lookup = name.strip_prefix("minecraft:").unwrap_or(&name);
-        ids.push(biomes.get_id(&RegistryKey::new(lookup.to_owned()))? as i32);
+        ids.push(biomes.get_id(RegistryKey::new(lookup.to_owned()))? as i32);
     }
 
     if ids.len() == 1 {

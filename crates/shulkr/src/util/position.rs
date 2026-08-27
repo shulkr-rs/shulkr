@@ -220,12 +220,12 @@ impl BlockPosition {
     }
 }
 
-impl Into<BlockPosition> for Position {
-    fn into(self) -> BlockPosition {
+impl From<Position> for BlockPosition {
+    fn from(val: Position) -> Self {
         BlockPosition::new(
-            self.x().floor() as i64,
-            self.y().floor() as i64,
-            self.z().floor() as i64,
+            val.x().floor() as i64,
+            val.y().floor() as i64,
+            val.z().floor() as i64,
         )
     }
 }

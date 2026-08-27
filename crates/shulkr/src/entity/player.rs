@@ -83,7 +83,7 @@ impl Player {
     }
 
     pub fn server(&self) -> &Server {
-        &self.0.server()
+        self.0.server()
     }
 
     pub fn despawn(&self) {
@@ -434,10 +434,12 @@ enum TrackState {
     Viewing,
 }
 
+type TrackedDiff = (Vec<(i32, i32)>, Vec<(i32, i32)>);
+
 fn diff_tracked(
     tracked: &mut HashMap<(i32, i32), TrackState>,
     desired: &HashSet<(i32, i32)>,
-) -> (Vec<(i32, i32)>, Vec<(i32, i32)>) {
+) -> TrackedDiff {
     let mut added = Vec::new();
     for &pos in desired {
         if let std::collections::hash_map::Entry::Vacant(entry) = tracked.entry(pos) {

@@ -65,8 +65,8 @@ impl Command {
     }
 
     pub(crate) fn parse_tokens(&self, tokens: &[String]) -> Result<CommandMatches, CommandError> {
-        if let Some((head, tail)) = tokens.split_first() {
-            if let Some(subcommand) = self
+        if let Some((head, tail)) = tokens.split_first()
+            && let Some(subcommand) = self
                 .subcommands
                 .iter()
                 .find(|command| command.matches_name(head))
@@ -78,7 +78,6 @@ impl Command {
                     Some(matches),
                 ));
             }
-        }
 
         let mut args = HashMap::default();
         let mut cursor = 0;

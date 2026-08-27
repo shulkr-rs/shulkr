@@ -36,6 +36,12 @@ pub struct BiomeEffectsBuilder {
     grass_color_modifier: GrassColorModifier,
 }
 
+impl Default for BiomeEffectsBuilder {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl BiomeEffectsBuilder {
     pub fn new() -> Self {
         Self {

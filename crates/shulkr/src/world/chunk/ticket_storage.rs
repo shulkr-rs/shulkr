@@ -1,11 +1,13 @@
 use super::ticket::Ticket;
 use std::collections::HashMap;
 
+type ChunkLevelListener = Box<dyn FnMut((i32, i32), i32, bool) + Send>;
+
 pub struct TicketStorage {
     tickets: HashMap<(i32, i32), Vec<Ticket>>,
     max_level: i32,
-    loading_listener: Option<Box<dyn FnMut((i32, i32), i32, bool) + Send>>,
-    simulation_listener: Option<Box<dyn FnMut((i32, i32), i32, bool) + Send>>,
+    loading_listener: Option<ChunkLevelListener>,
+    simulation_listener: Option<ChunkLevelListener>,
 }
 
 impl TicketStorage {
@@ -51,16 +53,14 @@ impl TicketStorage {
         let old_loading_level = Self::ticket_level_in(existing, false, self.max_level);
         existing.push(ticket);
 
-        if ticket.ticket_type.does_simulate() && ticket.level < old_simulation_level {
-            if let Some(listener) = &mut self.simulation_listener {
+        if ticket.ticket_type.does_simulate() && ticket.level < old_simulation_level
+            && let Some(listener) = &mut self.simulation_listener {
                 listener(pos, ticket.level, true);
             }
-        }
-        if ticket.ticket_type.does_load() && ticket.level < old_loading_level {
-            if let Some(listener) = &mut self.loading_listener {
+        if ticket.ticket_type.does_load() && ticket.level < old_loading_level
+            && let Some(listener) = &mut self.loading_listener {
                 listener(pos, ticket.level, true);
             }
-        }
 
         true
     }
@@ -127,10 +127,9 @@ mod tests {
 
     const MAX_LEVEL: i32 = 34;
 
-    fn recording_listener() -> (
-        impl FnMut((i32, i32), i32, bool) + Send,
-        Arc<Mutex<Vec<((i32, i32), i32, bool)>>>,
-    ) {
+    type RecordedCalls = Arc<Mutex<Vec<((i32, i32), i32, bool)>>>;
+
+    fn recording_listener() -> (impl FnMut((i32, i32), i32, bool) + Send, RecordedCalls) {
         let log = Arc::new(Mutex::new(Vec::new()));
         let recorder = log.clone();
         let listener = move |pos, level, only_decreased| {

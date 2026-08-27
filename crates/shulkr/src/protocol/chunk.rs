@@ -73,7 +73,7 @@ impl Encode for PaletteFormat {
                 w.write_varint(*value as i32)?;
             }
             PaletteFormat::Indirect { values } => {
-                w.write_array(&values, |buffer, value| buffer.write_varint(*value as i32))?;
+                w.write_array(values, |buffer, value| buffer.write_varint(*value as i32))?;
             }
             PaletteFormat::Direct => {}
         }
@@ -91,13 +91,13 @@ impl ChunkSection {
     }
 }
 
-impl Into<ChunkDataAndUpdateLightPacket> for &Chunk {
-    fn into(self) -> ChunkDataAndUpdateLightPacket {
+impl From<&Chunk> for ChunkDataAndUpdateLightPacket {
+    fn from(value: &Chunk) -> Self {
         let mut data = BytesMut::new();
-        for section in self.sections() {
+        for section in value.sections() {
             let fluid_count = match section.block_states.format {
                 PaletteFormat::SingleValued { value } => {
-                    if is_fluid(value as u16) {
+                    if is_fluid(value) {
                         section.block_states.count()
                     } else {
                         0
@@ -115,13 +115,13 @@ impl Into<ChunkDataAndUpdateLightPacket> for &Chunk {
             ChunkSection::encode(&mut data, &section, fluid_count as i16).unwrap()
         }
 
-        let chunk_x = self.x();
-        let chunk_z = self.z();
+        let chunk_x = value.x();
+        let chunk_z = value.z();
 
         let data = ChunkData {
             heightmaps: vec![],
             data: data.to_vec(),
-            block_entities: self.block_entites(),
+            block_entities: value.block_entites(),
         };
         let light = LightData {};
 

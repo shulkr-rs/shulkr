@@ -6,6 +6,12 @@ pub struct ChunkSection {
     pub biomes: Palette,
 }
 
+impl Default for ChunkSection {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl ChunkSection {
     pub fn new() -> Self {
         Self {

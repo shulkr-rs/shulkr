@@ -6,8 +6,16 @@ use std::{
 
 use crate::event::Event;
 
+type Listener = Box<dyn Fn(&mut dyn Any) + Send + Sync>;
+
 pub struct Events {
-    listeners: RwLock<HashMap<TypeId, Vec<Box<dyn Fn(&mut dyn Any) + Send + Sync>>>>,
+    listeners: RwLock<HashMap<TypeId, Vec<Listener>>>,
+}
+
+impl Default for Events {
+    fn default() -> Self {
+        Self::new()
+    }
 }
 
 impl Events {
@@ -24,7 +32,7 @@ impl Events {
     {
         let type_id = TypeId::of::<E>();
         let mut listeners = self.listeners.write().unwrap();
-        let listeners = listeners.entry(type_id).or_insert(Vec::new());
+        let listeners = listeners.entry(type_id).or_default();
 
         let wrapper = Box::new(move |event: &mut dyn Any| {
             if let Some(concrete_event) = event.downcast_mut::<E>() {

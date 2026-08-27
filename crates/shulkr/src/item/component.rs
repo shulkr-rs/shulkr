@@ -346,7 +346,8 @@ impl DataType for ItemBlockState {
     }
 
     fn encode<W: PacketWrite>(w: &mut W, this: &Self) -> Result<(), EncodeError> {
-        w.write_array(&this.properties.iter().collect(), |w, (k, v)| {
+        let properties: Vec<(&String, &String)> = this.properties.iter().collect();
+        w.write_array(&properties, |w, (k, v)| {
             w.write_string(k)?;
             w.write_string(v)?;
             Ok(())

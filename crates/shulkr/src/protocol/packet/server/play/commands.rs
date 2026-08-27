@@ -189,7 +189,7 @@ impl CommandTreeBuilder {
 
         self.append_args(index, &command.args);
         for subcommand in &command.subcommands {
-            let child = self.push_command(&subcommand);
+            let child = self.push_command(subcommand);
             self.nodes[index as usize].children.push(child);
         }
 

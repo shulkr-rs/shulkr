@@ -4,13 +4,6 @@
 //! The whole file is read and decoded up front into owned [`Chunk`]s; pull them
 //! out with [`PolarLoader::load_chunk`] (each chunk is yielded once).
 
-use std::collections::HashMap;
-use std::path::Path;
-
-use bytes::Buf as _;
-use shulkr_nbt::{Nbt, NbtCompound};
-use thiserror::Error;
-
 use crate::{
     registry::{Registry, RegistryKey},
     world::{
@@ -19,6 +12,11 @@ use crate::{
         chunk::Chunk,
     },
 };
+use bytes::Buf as _;
+use shulkr_nbt::{Nbt, NbtCompound};
+use std::collections::HashMap;
+use std::path::Path;
+use thiserror::Error;
 
 const MAGIC: u32 = 0x506F_6C72; // "Polr"
 
@@ -267,7 +265,7 @@ fn read_section(
         let name = read_string(body)?;
         let lookup = name.strip_prefix("minecraft:").unwrap_or(&name);
         let id = biomes
-            .get_id(&RegistryKey::new(lookup.to_owned()))
+            .get_id(RegistryKey::new(lookup.to_owned()))
             .ok_or(PolarError::Malformed)? as i32;
         ids.push(id);
     }

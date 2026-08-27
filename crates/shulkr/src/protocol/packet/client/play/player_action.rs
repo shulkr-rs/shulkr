@@ -58,16 +58,16 @@ impl TryFrom<i32> for PlayerDiggingState {
     }
 }
 
-impl Into<i32> for PlayerDiggingState {
-    fn into(self) -> i32 {
-        match self {
-            Self::StartDigging => 0,
-            Self::CancelledDigging => 1,
-            Self::FinishedDigging => 2,
-            Self::DropItemStack => 3,
-            Self::DropItem => 4,
-            Self::ItemUpdated => 5,
-            Self::SwapItemInHand => 6,
+impl From<PlayerDiggingState> for i32 {
+    fn from(val: PlayerDiggingState) -> Self {
+        match val {
+            PlayerDiggingState::StartDigging => 0,
+            PlayerDiggingState::CancelledDigging => 1,
+            PlayerDiggingState::FinishedDigging => 2,
+            PlayerDiggingState::DropItemStack => 3,
+            PlayerDiggingState::DropItem => 4,
+            PlayerDiggingState::ItemUpdated => 5,
+            PlayerDiggingState::SwapItemInHand => 6,
         }
     }
 }

@@ -1,6 +1,7 @@
 pub mod entity_status;
 pub mod meta;
 
+#[allow(clippy::module_inception)]
 mod entity;
 mod entity_animation;
 pub(crate) mod entity_type;

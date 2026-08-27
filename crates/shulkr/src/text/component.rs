@@ -81,6 +81,12 @@ macro_rules! component {
     };
 }
 
+impl Default for TextComponent {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl TextComponent {
     /// An empty text component.
     pub const EMPTY: TextComponent = component!("");
@@ -274,7 +280,7 @@ where
     S: Into<String>,
 {
     fn from(value: S) -> Self {
-        TextComponent::text(value.into()).into()
+        TextComponent::text(value.into())
     }
 }
 

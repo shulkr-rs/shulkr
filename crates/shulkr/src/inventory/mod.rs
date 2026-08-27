@@ -1,5 +1,6 @@
 use std::{any::Any, sync::Arc};
 
+#[allow(clippy::module_inception)]
 mod inventory;
 pub use inventory::*;
 

@@ -134,7 +134,7 @@ impl Chunk {
         let volume = dim * dim * dim;
 
         let mut count = HashMap::with_capacity(1);
-        count.insert(block as u16, volume as i32);
+        count.insert(block, volume as i32);
 
         self.0.write().sections[sect_y as usize].block_states = Palette {
             dim,
@@ -146,7 +146,7 @@ impl Chunk {
             format: PaletteFormat::SingleValued { value: block },
             values: Vec::new(),
 
-            data: vec![block as u16; volume].into_boxed_slice(),
+            data: vec![block; volume].into_boxed_slice(),
             count,
         };
     }
@@ -160,7 +160,7 @@ impl Chunk {
         let volume = dim * dim * dim;
 
         let mut count = HashMap::with_capacity(1);
-        count.insert(biome as u16, volume as i32);
+        count.insert(biome, volume as i32);
 
         self.0.write().sections[sect_y as usize].biomes = Palette {
             dim,
@@ -172,7 +172,7 @@ impl Chunk {
             format: PaletteFormat::SingleValued { value: biome },
             values: Vec::new(),
 
-            data: vec![biome as u16; volume].into_boxed_slice(),
+            data: vec![biome; volume].into_boxed_slice(),
             count,
         };
     }

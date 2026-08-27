@@ -86,6 +86,12 @@ pub struct VillagerData {
     level: i32,
 }
 
+impl Default for VillagerData {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl VillagerData {
     pub const fn new() -> Self {
         Self {

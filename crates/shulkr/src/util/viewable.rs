@@ -30,6 +30,12 @@ pub struct Viewers {
     viewers: RwLock<Vec<Player>>,
 }
 
+impl Default for Viewers {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl Viewers {
     pub fn new() -> Self {
         Self {
@@ -85,7 +91,7 @@ impl IntoIterator for Viewers {
     }
 }
 
-impl<'a> IntoIterator for &'a Viewers {
+impl IntoIterator for &Viewers {
     type Item = Player;
     type IntoIter = std::vec::IntoIter<Self::Item>;
 
