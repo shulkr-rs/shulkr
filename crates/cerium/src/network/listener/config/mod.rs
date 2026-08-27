@@ -1,13 +1,8 @@
-use std::collections::{HashMap, HashSet};
 use std::{io::Cursor, sync::Arc};
-
-use serde::de::DeserializeOwned;
-use serde::{Deserialize, Serialize};
 
 use crate::entity::{EntityLike as _, MAX_VIEW_DISTANCE, Player};
 use crate::event::player::PlayerSpawnEvent;
-use crate::protocol::packet::{CommandsPacket, Tag, TagRegistry, UpdateTagsPacket};
-use crate::registry::{Registries, Registry, RegistryKey};
+use crate::protocol::packet::CommandsPacket;
 use crate::util::{Position, TeleportFlags, Viewable};
 use crate::world::{DimensionType, chunk::Chunk};
 use crate::{event::player::PlayerConfigEvent, network::client::Connection};
@@ -17,12 +12,13 @@ use crate::{
         decode::{Decode as _, DecodeError},
         packet::{
             AcknowledgeFinishConfigPacket, ClientInfoPacket, FeatureFlagsPacket,
-            FinishConfigPacket, GameEventPacket, LoginPacket, RegistryDataPacket,
-            SetCenterChunkPacket, client, server,
+            FinishConfigPacket, GameEventPacket, LoginPacket, SetCenterChunkPacket, client, server,
         },
     },
     util::Key,
 };
+
+mod registries;
 
 #[rustfmt::skip]
 pub fn handle_packet(client: Arc<Connection>, id: i32, data: &mut Cursor<&[u8]>) -> Result<(), DecodeError> {
@@ -41,99 +37,8 @@ pub fn handle_packet(client: Arc<Connection>, id: i32, data: &mut Cursor<&[u8]>)
     Ok(())
 }
 
-#[derive(Debug, Deserialize)]
-pub struct TagSection {
-    pub values: Vec<String>,
-}
-
-fn resolve_tag(
-    tag_name: &str,
-    all_tags: &HashMap<String, TagSection>,
-    output: &mut HashSet<String>,
-) {
-    let section = all_tags
-        .get(tag_name)
-        .unwrap_or_else(|| panic!("Missing tag: {}", tag_name));
-
-    for value in &section.values {
-        if let Some(stripped) = value.strip_prefix('#') {
-            resolve_tag(stripped, all_tags, output);
-        } else {
-            output.insert(value.clone());
-        }
-    }
-}
-
-fn load_tags(registry: &str) -> HashMap<String, Vec<String>> {
-    let sections: HashMap<String, TagSection> =
-        crate::assets::load_json(&format!("tags/{registry}"))
-            .into_iter()
-            .map(|(name, section)| (format!("minecraft:{name}"), section))
-            .collect();
-
-    let mut result = HashMap::new();
-
-    for tag_name in sections.keys() {
-        let mut resolved = HashSet::new();
-        resolve_tag(tag_name, &sections, &mut resolved);
-
-        result.insert(tag_name.clone(), resolved.into_iter().collect());
-    }
-
-    result
-}
-
-fn tags<T>(registry: &'static str, reg: &Registry<T>) -> TagRegistry
-where
-    T: Serialize + DeserializeOwned,
-{
-    let resolved_tags = load_tags(registry);
-
-    let packet_tags: Vec<Tag> = resolved_tags
-        .into_iter()
-        .map(|(name, values)| Tag {
-            tag_name: Key::of(name),
-            entries: values
-                .into_iter()
-                .map(|v| reg.get_id(&RegistryKey::new(v)).map(|v| v as i32))
-                .flatten()
-                .collect(),
-        })
-        .collect();
-
-    TagRegistry {
-        registry: Key::new("minecraft", registry),
-        tags: packet_tags,
-    }
-}
-
-fn block_tags() -> TagRegistry {
-    let resolved_tags = load_tags("block");
-
-    let packet_tags: Vec<Tag> = resolved_tags
-        .into_iter()
-        .map(|(name, values)| Tag {
-            tag_name: Key::of(name),
-            entries: values
-                .into_iter()
-                .filter_map(|v| {
-                    Registries::BLOCK
-                        .get_id(&RegistryKey::of(v))
-                        .map(|id| id as i32)
-                })
-                .collect(),
-        })
-        .collect();
-
-    TagRegistry {
-        registry: Key::vanilla("block"),
-        tags: packet_tags,
-    }
-}
-
 fn handle_client_info(client: Arc<Connection>, packet: ClientInfoPacket) {
     let server = client.server();
-    let registries = server.registries();
 
     client.set_view_distance(packet.view_distance as i32);
 
@@ -150,41 +55,9 @@ fn handle_client_info(client: Arc<Connection>, packet: ClientInfoPacket) {
         feature_flags: vec![Key::vanilla("vanilla")],
     });
 
-    client.send_packet(&RegistryDataPacket::from(&registries.cat_variant));
-    client.send_packet(&RegistryDataPacket::from(&registries.cat_sound_variant));
-    client.send_packet(&RegistryDataPacket::from(&registries.chicken_variant));
-    client.send_packet(&RegistryDataPacket::from(&registries.chicken_sound_variant));
-    client.send_packet(&RegistryDataPacket::from(&registries.cow_variant));
-    client.send_packet(&RegistryDataPacket::from(&registries.cow_sound_variant));
-    client.send_packet(&RegistryDataPacket::from(&registries.frog_variant));
-    client.send_packet(&RegistryDataPacket::from(&registries.painting_variant));
-    client.send_packet(&RegistryDataPacket::from(&registries.pig_variant));
-    client.send_packet(&RegistryDataPacket::from(&registries.pig_sound_variant));
-    client.send_packet(&RegistryDataPacket::from(&registries.wolf_sound_variant));
-    client.send_packet(&RegistryDataPacket::from(&registries.wolf_variant));
-    client.send_packet(&RegistryDataPacket::from(
-        &registries.zombie_nautilus_variant,
-    ));
-    client.send_packet(&RegistryDataPacket::from(&registries.damage_type));
-
-    client.send_packet(&RegistryDataPacket::from(&*Registries::biomes()));
-    client.send_packet(&RegistryDataPacket::from(&registries.world_clock));
-    client.send_packet(&RegistryDataPacket::from(&registries.timeline));
-    client.send_packet(&RegistryDataPacket::from(&registries.dimension_type));
-    client.send_packet(&RegistryDataPacket::from(&registries.trim_material));
-    client.send_packet(&RegistryDataPacket::from(&registries.jukebox_song));
-    client.send_packet(&RegistryDataPacket::from(&registries.banner_pattern));
-    client.send_packet(&RegistryDataPacket::from(&registries.instrument));
-
-    client.send_packet(&UpdateTagsPacket {
-        registries: vec![
-            tags("timeline", &registries.timeline),
-            tags("damage_type", &registries.damage_type),
-            tags("banner_pattern", &registries.banner_pattern),
-            tags("instrument", &registries.instrument),
-            block_tags(),
-        ],
-    });
+    let registries = server.registries();
+    registries::send_registries(&client, registries);
+    registries::send_registry_tags(&client, registries);
 
     client.send_packet(&FinishConfigPacket {});
 }
