@@ -45,9 +45,9 @@ enum TextContent {
         text: Cow<'static, str>,
     },
     Translatable {
-        translate: String,
+        translate: Cow<'static, str>,
         #[serde(default, skip_serializing_if = "Option::is_none")]
-        fallback: Option<String>,
+        fallback: Option<Cow<'static, str>>,
         #[serde(default, skip_serializing_if = "Vec::is_empty")]
         with: Vec<TextComponent>,
     },
@@ -105,8 +105,8 @@ impl TextComponent {
 
     /// Creates a new component with the type set to [TextContent::Translatable].
     pub fn translatable(
-        translate: impl Into<String>,
-        fallback: Option<impl Into<String>>,
+        translate: impl Into<Cow<'static, str>>,
+        fallback: Option<impl Into<Cow<'static, str>>>,
         with: Vec<TextComponent>,
     ) -> TextComponent {
         Self::create(TextContent::Translatable {
@@ -114,6 +114,18 @@ impl TextComponent {
             fallback: fallback.map(Into::into),
             with,
         })
+    }
+
+    pub const fn const_translatable(translate: &'static str) -> TextComponent {
+        TextComponent {
+            content: TextContent::Translatable {
+                translate: Cow::Borrowed(translate),
+                fallback: None,
+                with: Vec::new(),
+            },
+            style: TextStyle::const_default(),
+            children: Vec::new(),
+        }
     }
 
     /// Creates a new component with the type set to [TextContent::Scoreboard].

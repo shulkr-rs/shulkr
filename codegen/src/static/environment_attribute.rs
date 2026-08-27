@@ -61,23 +61,41 @@ fn generate_init(ident: Ident, key: &str, value: Value) -> TokenStream {
             quote! { AttributeValue::MoonPhase(MoonPhase::#variant) }
         }
         "Activity" => {
-            let activity = data.as_str().unwrap();
+            let full = data.as_str().unwrap();
+            let activity = full.split_once(':').map_or(full, |(_, path)| path);
             quote! { AttributeValue::Activity(Key::const_vanilla(#activity)) }
         }
         "BedRule" => {
             let can_sleep = variant(&data["can_sleep"], Case::UpperCamel);
             let can_set_spawn = variant(&data["can_set_spawn"], Case::UpperCamel);
+
+            let explodes = match data.get("explodes").and_then(Value::as_bool) {
+                Some(b) => quote! { Some(#b) },
+                None => quote! { None },
+            };
+
+            let error_message = match data.get("error_message") {
+                Some(v) if v.as_object().is_some_and(|o| o.len() == 1) => {
+                    let translate = v["translate"].as_str().unwrap();
+                    quote! { Some(TextComponent::const_translatable(#translate)) }
+                }
+                Some(v) => panic!(
+                    "BedRule.error_message only supports a bare {{\"translate\": ..}}, got {v}"
+                ),
+                None => quote! { None },
+            };
+
             quote! {
                 AttributeValue::BedRule(BedRule {
                     can_sleep: BedRuleKind::#can_sleep,
                     can_set_spawn: BedRuleKind::#can_set_spawn,
-                    explodes: None,
-                    error_message: None,
+                    explodes: #explodes,
+                    error_message: #error_message,
                 })
             }
         }
         "Particle" => {
-            let kind = data["kind"].as_str().unwrap();
+            let kind = data["type"].as_str().unwrap();
             quote! {
                 AttributeValue::Particle(Particle {
                     kind: std::borrow::Cow::Borrowed(#kind),

@@ -1,6 +1,7 @@
 use std::borrow::Cow;
 
 use crate::registry::{Id, Registries};
+use crate::text::TextComponent;
 use crate::util::Key;
 use crate::world::Particle;
 use crate::world::attribute::{
