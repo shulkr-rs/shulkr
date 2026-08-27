@@ -370,7 +370,7 @@ mod imp {
                 position.x() as i32,
                 position.y() as i32,
                 position.z() as i32,
-                Block::Air.default_state(),
+                Block::AIR.default_state(),
             );
 
             // todo: should be only sent to players that are viewing the block/chunk

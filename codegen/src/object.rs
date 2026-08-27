@@ -14,7 +14,8 @@ pub struct StaticObjectJson {
 
 pub struct StaticObjectBuilder {
     name: String,
-    init: Option<Box<dyn Fn(Ident, Value) -> TokenStream>>,
+    init: Option<Box<dyn Fn(Ident, &str, Value) -> TokenStream>>,
+    ident: Option<Box<dyn Fn(&str) -> Ident>>,
     json: Option<String>,
 }
 
@@ -23,6 +24,7 @@ impl StaticObjectBuilder {
         Self {
             name: name.into(),
             init: None,
+            ident: None,
             json: None,
         }
     }
@@ -37,9 +39,28 @@ impl StaticObjectBuilder {
         F: Fn(Ident, T) -> TokenStream + 'static,
         T: DeserializeOwned + 'static,
     {
-        self.init = Some(Box::new(move |ident, value: Value| {
+        self.init = Some(Box::new(move |ident, _key, value: Value| {
             f(ident, serde_json::from_value(value).unwrap())
         }));
+        self
+    }
+
+    pub fn with_keyed_init<F, T>(mut self, f: F) -> Self
+    where
+        F: Fn(Ident, &str, T) -> TokenStream + 'static,
+        T: DeserializeOwned + 'static,
+    {
+        self.init = Some(Box::new(move |ident, key, value: Value| {
+            f(ident, key, serde_json::from_value(value).unwrap())
+        }));
+        self
+    }
+
+    pub fn with_ident<F>(mut self, f: F) -> Self
+    where
+        F: Fn(&str) -> Ident + 'static,
+    {
+        self.ident = Some(Box::new(f));
         self
     }
 
@@ -47,9 +68,10 @@ impl StaticObjectBuilder {
         StaticObject {
             name: self.name.clone(),
             json: serde_json::from_str(&self.json.unwrap()).unwrap(),
-            init: self.init.unwrap_or(Box::new(move |ident, _| {
-                quote! { #ident }
+            init: self.init.unwrap_or(Box::new(move |ident, _, _| {
+                quote! { #ident::new() }
             })),
+            ident: self.ident.unwrap_or(Box::new(default_ident_for)),
         }
     }
 }
@@ -57,50 +79,33 @@ impl StaticObjectBuilder {
 pub struct StaticObject {
     name: String,
     json: StaticObjectJson,
-    init: Box<dyn Fn(Ident, Value) -> TokenStream>,
+    init: Box<dyn Fn(Ident, &str, Value) -> TokenStream>,
+    ident: Box<dyn Fn(&str) -> Ident>,
+}
+
+fn default_ident_for(key: &str) -> Ident {
+    format_ident!(
+        "{}",
+        key.split_once(":")
+            .map_or(key, |(_, name)| name)
+            .to_case(Case::Constant)
+    )
 }
 
 impl StaticObject {
-    fn parse_variants(&self) -> TokenStream {
-        let variants: TokenStream = self
-            .json
-            .entries
-            .keys()
-            .map(|key| {
-                let ident = format_ident!(
-                    "{}",
-                    key.split_once(":")
-                        .map_or(key.clone(), |v| v.1.to_owned())
-                        .to_case(Case::UpperCamel)
-                );
-
-                quote! {
-                    #ident,
-                }
-            })
-            .collect();
-
-        variants
-    }
-
-    pub fn static_variants(&self) -> TokenStream {
-        let name = format_ident!("{}Data", &self.name);
+    fn const_variants(&self) -> TokenStream {
+        let name = format_ident!("{}", &self.name);
         let constructor = &self.init;
 
         self.json
             .entries
             .iter()
             .map(move |(key, value)| {
-                let ident = format_ident!(
-                    "{}",
-                    key.split_once(":")
-                        .map_or(key.clone(), |v| v.1.to_owned())
-                        .to_case(Case::Constant)
-                );
-                let constructor = constructor(name.clone(), value.clone());
+                let ident = (self.ident)(key);
+                let constructor = constructor(name.clone(), key, value.clone());
 
                 quote! {
-                    pub static #ident: #name = #constructor;
+                    pub const #ident: #name = #constructor;
                 }
             })
             .collect()
@@ -108,45 +113,31 @@ impl StaticObject {
 
     fn register_variants(&self) -> TokenStream {
         let name = format_ident!("{}", &self.name);
-        let variants: TokenStream = self
-            .json
+        self.json
             .entries
             .keys()
             .map(|key| {
-                let ident = format_ident!(
-                    "{}",
-                    key.split_once(":")
-                        .map_or(key.clone(), |v| v.1.to_owned())
-                        .to_case(Case::UpperCamel)
-                );
-
+                let ident = (self.ident)(key);
                 quote! {
                     register(#key, #name::#ident);
                 }
             })
-            .collect();
-
-        variants
+            .collect()
     }
 
     pub fn generate(&self) -> TokenStream {
         let name = format_ident!("{}", &self.name);
-        let variants = self.parse_variants();
-        let static_variants = self.static_variants();
+        let const_variants = self.const_variants();
         let register_variants = self.register_variants();
 
         quote! {
-            use cerium_macros::StaticObject;
-            use cerium_macros::UnitEnum;
+            use cerium_macros::static_registry;
             use crate::registry::Registry;
 
-            #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, StaticObject, UnitEnum)]
-            #[repr(u16)]
-            pub enum #name {
-                #variants
+            #[static_registry]
+            impl #name {
+                #const_variants
             }
-
-            #static_variants
 
             pub(crate) fn register_all(registry: &mut Registry<#name>) {
                 let mut register = |key: &'static str, value: #name| {

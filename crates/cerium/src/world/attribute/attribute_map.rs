@@ -126,10 +126,10 @@ mod tests {
     #[test]
     fn round_trip() {
         let map = EnvironmentAttributeMap::new()
-            .with(EnvironmentAttribute::SkyColor, Cow::Borrowed("#7BA4FF"))
-            .with(EnvironmentAttribute::FastLava, true)
-            .with(EnvironmentAttribute::MoonPhase, MoonPhase::NewMoon)
-            .with(EnvironmentAttribute::CloudHeight, 192.5);
+            .with(EnvironmentAttribute::SKY_COLOR, Cow::Borrowed("#7BA4FF"))
+            .with(EnvironmentAttribute::FAST_LAVA, true)
+            .with(EnvironmentAttribute::MOON_PHASE, MoonPhase::NewMoon)
+            .with(EnvironmentAttribute::CLOUD_HEIGHT, 192.5);
 
         let json = serde_json::to_string(&map).unwrap();
         assert_eq!(
@@ -138,10 +138,10 @@ mod tests {
         );
 
         let map: EnvironmentAttributeMap = serde_json::from_str(&json).unwrap();
-        assert_eq!(map.get(EnvironmentAttribute::FastLava), Some(&true));
-        assert_eq!(map.get(EnvironmentAttribute::CloudHeight), Some(&192.5));
+        assert_eq!(map.get(EnvironmentAttribute::FAST_LAVA), Some(&true));
+        assert_eq!(map.get(EnvironmentAttribute::CLOUD_HEIGHT), Some(&192.5));
         assert_eq!(
-            map.get_or_default(EnvironmentAttribute::MusicVolume),
+            map.get_or_default(EnvironmentAttribute::MUSIC_VOLUME),
             Some(&1.0)
         );
     }

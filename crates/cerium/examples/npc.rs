@@ -14,11 +14,11 @@ fn main() {
 
     for bz in 0..16 {
         for bx in 0..16 {
-            world.set_block(bx, 70, bz, Block::GrassBlock);
+            world.set_block(bx, 70, bz, Block::GRASS_BLOCK);
         }
     }
 
-    let entity = Entity::new(EntityType::Player);
+    let entity = Entity::new(EntityType::PLAYER);
     entity.set_position((8, 71, 8, 0 as f32, 0 as f32));
 
     world.spawn_entity(entity.clone());

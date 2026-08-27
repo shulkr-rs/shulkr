@@ -17,7 +17,7 @@ pub struct ItemStack {
 }
 
 impl ItemStack {
-    pub const EMPTY: ItemStack = ItemStack::new(Material::Air, 0);
+    pub const EMPTY: ItemStack = ItemStack::new(Material::AIR, 0);
 
     pub const fn new(material: Material, amount: i32) -> Self {
         Self {
@@ -90,9 +90,9 @@ impl ItemStack {
         self.amount
     }
 
-    /// Returns true if this stack is empty (`Material::Air`).
+    /// Returns true if this stack is empty (`Material::AIR`).
     pub fn is_empty(&self) -> bool {
-        self.material == Material::Air || self.amount <= 0
+        self.material == Material::AIR || self.amount <= 0
     }
 
     /// Returns the maximum amount this stack can hold, taking a custom
@@ -133,7 +133,7 @@ impl Into<Slot> for ItemStack {
     fn into(self) -> Slot {
         Slot {
             item_count: self.amount,
-            item_id: Some(self.material as i32),
+            item_id: Some(Id::from(self.material) as i32),
             to_add: self.components,
             to_remove: vec![],
         }
@@ -146,7 +146,7 @@ mod tests {
 
     #[test]
     fn test_data_components() {
-        let stack = ItemStack::of(Material::Stone)
+        let stack = ItemStack::of(Material::STONE)
             .with(DataComponent::MAX_STACK_SIZE, 16)
             .with(DataComponent::MAX_DAMAGE, 99)
             .with(DataComponent::UNBREAKABLE, ());

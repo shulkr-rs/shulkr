@@ -4,7 +4,7 @@ use quote::{format_ident, quote};
 use serde_json::Value;
 use syn::{Ident, LitInt};
 
-use crate::{object::StaticObjectBuilder, write_file};
+use crate::{object::StaticObjectBuilder, write_wide_file};
 
 pub fn generate() {
     let object = StaticObjectBuilder::new("Block")
@@ -13,10 +13,11 @@ pub fn generate() {
         .build();
 
     let tokens = object.generate();
-    write_file(&tokens, "blocks.rs");
+    write_wide_file(&tokens, "blocks.rs");
 }
 
-fn generate_init(ident: Ident, value: Value) -> TokenStream {
+fn generate_init(_ident: Ident, value: Value) -> TokenStream {
+    let ident = format_ident!("Block");
     let props = value
         .get("properties")
         .and_then(Value::as_array)
@@ -44,9 +45,7 @@ fn generate_init(ident: Ident, value: Value) -> TokenStream {
             |v| {
                 let block = format_ident!(
                     "{}",
-                    v.split_once(":")
-                        .map_or(v, |v| v.1)
-                        .to_case(Case::UpperCamel)
+                    v.split_once(":").map_or(v, |v| v.1).to_case(Case::Constant)
                 );
                 quote! { Some(BlockEntityType::#block) }
             },

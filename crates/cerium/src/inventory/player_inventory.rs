@@ -94,15 +94,15 @@ mod tests {
     #[test]
     pub fn test_player_inventory() {
         let inventory = PlayerInventory::new();
-        inventory.set_item_stack(9, ItemStack::of(Material::AcaciaBoat));
+        inventory.set_item_stack(9, ItemStack::of(Material::ACACIA_BOAT));
 
         assert_eq!(
             inventory.get_item_stack(9).map(|v| v.material()),
-            Some(Material::AcaciaBoat)
+            Some(Material::ACACIA_BOAT)
         );
         assert_eq!(
             inventory.get_item_stack(10).map(|v| v.material()),
-            Some(Material::Air)
+            Some(Material::AIR)
         );
     }
 
@@ -111,19 +111,19 @@ mod tests {
         let inventory = PlayerInventory::new();
         assert_eq!(
             inventory
-                .set_item_stack(0, ItemStack::of(Material::Stone))
+                .set_item_stack(0, ItemStack::of(Material::STONE))
                 .material(),
-            Material::Air
+            Material::AIR
         );
         assert_eq!(
             inventory
-                .set_item_stack(0, ItemStack::of(Material::Dirt))
+                .set_item_stack(0, ItemStack::of(Material::DIRT))
                 .material(),
-            Material::Stone
+            Material::STONE
         );
         assert_eq!(
             inventory.get_item_stack(0).unwrap().material(),
-            Material::Dirt
+            Material::DIRT
         );
     }
 }

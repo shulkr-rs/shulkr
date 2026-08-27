@@ -234,6 +234,7 @@ mod tests {
 
 mod imp {
     use super::*;
+    use crate::registry::Id;
 
     pub(super) struct Chunk {
         pub(super) chunk_x: i32,
@@ -277,7 +278,7 @@ mod imp {
                 let block_entity = BlockEntity {
                     packed_xz,
                     y: y as i16,
-                    r#type: *info as i32,
+                    r#type: Id::from(*info) as i32,
                     data: None,
                 };
 

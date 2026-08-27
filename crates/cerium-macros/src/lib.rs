@@ -1,48 +1,10 @@
 use convert_case::{Case, Casing};
 use proc_macro::TokenStream;
+use proc_macro2::Span;
 use quote::{format_ident, quote};
-use syn::{Data, DeriveInput, Fields, ItemEnum, parse_macro_input};
-
-#[proc_macro_derive(UnitEnum)]
-pub fn derive_unit_enum(input: TokenStream) -> TokenStream {
-    let input = parse_macro_input!(input as DeriveInput);
-
-    let name = &input.ident;
-
-    let Data::Enum(data) = &input.data else {
-        return syn::Error::new_spanned(name, "UnitEnum can only be derived for enums")
-            .to_compile_error()
-            .into();
-    };
-
-    let mut variants = Vec::new();
-
-    for variant in &data.variants {
-        match &variant.fields {
-            Fields::Unit => variants.push(&variant.ident),
-            _ => {
-                return syn::Error::new_spanned(
-                    &variant.ident,
-                    "UnitEnum only supports unit variants",
-                )
-                .to_compile_error()
-                .into();
-            }
-        }
-    }
-
-    quote! {
-        impl #name {
-            #[inline]
-            pub const fn all() -> &'static [Self] {
-                &[
-                    #(Self::#variants),*
-                ]
-            }
-        }
-    }
-    .into()
-}
+use syn::{Data, DeriveInput, parse_macro_input};
+use syn::{Expr, ExprCall, ExprPath, Ident, LitInt, Path, Type};
+use syn::{ImplItem, ImplItemConst, ItemImpl};
 
 #[proc_macro_derive(PropertyEnum)]
 pub fn derive_property_enum(input: TokenStream) -> TokenStream {
@@ -75,67 +37,105 @@ pub fn derive_property_enum(input: TokenStream) -> TokenStream {
     .into()
 }
 
-#[proc_macro_derive(StaticObject)]
-pub fn derive_static_object(input: TokenStream) -> TokenStream {
-    let input = parse_macro_input!(input as ItemEnum);
-    let enum_name = &input.ident;
-
-    // Generate a `Self::Variant => &OBJ_VARIANT` match arm for each variant
-    let arms = input.variants.iter().map(|v| {
-        let variant_ident = &v.ident;
-
-        // Converts "Air" -> "OBJ_AIR", "Stone" -> "OBJ_STONE"
-        let static_name = format!("{}", variant_ident.to_string().to_case(Case::Constant));
-        let static_ident = syn::Ident::new(&static_name, variant_ident.span());
-
-        quote! {
-            Self::#variant_ident => &#static_ident,
-        }
-    });
-
-    let name = format_ident!("{}Data", enum_name);
-
-    let expanded = quote! {
-        impl #enum_name {
-            /// Matches the enum variant to its corresponding static object
-            pub const fn data(&self) -> &'static #name {
-                match self {
-                    #(#arms)*
-                }
-            }
-        }
+fn self_ty_ident(self_ty: &Type) -> Ident {
+    let Type::Path(type_path) = self_ty else {
+        panic!("static_registry only supports plain type names, e.g. `impl Block`");
     };
-
-    TokenStream::from(expanded)
+    type_path
+        .path
+        .segments
+        .last()
+        .expect("type path must have a name")
+        .ident
+        .clone()
 }
 
-use syn::{ImplItem, ImplItemConst, ItemImpl};
+fn data_ty_ident(self_ident: &Ident) -> Ident {
+    format_ident!("{}Data", self_ident)
+}
+
+fn retarget_path(path: &Path, self_ident: &Ident, data_ty: &Ident) -> Option<Path> {
+    let first = path.segments.first()?;
+    if first.ident != *self_ident {
+        return None;
+    }
+    let mut path = path.clone();
+    path.segments.first_mut().unwrap().ident = data_ty.clone();
+    Some(path)
+}
+
+fn retarget_ctor(expr: &Expr, self_ident: &Ident, data_ty: &Ident) -> proc_macro2::TokenStream {
+    match expr {
+        Expr::Call(ExprCall { func, args, .. }) => {
+            if let Expr::Path(ExprPath {
+                path, qself: None, ..
+            }) = func.as_ref()
+                && let Some(path) = retarget_path(path, self_ident, data_ty)
+            {
+                return quote! { #path(#args) };
+            }
+        }
+        Expr::Struct(expr_struct) => {
+            if let Some(path) = retarget_path(&expr_struct.path, self_ident, data_ty) {
+                let mut expr_struct = expr_struct.clone();
+                expr_struct.path = path;
+                return quote! { #expr_struct };
+            }
+        }
+        _ => {}
+    }
+
+    quote! { #expr }
+}
 
 #[proc_macro_attribute]
-pub fn registry_values(_attr: TokenStream, item: TokenStream) -> TokenStream {
-    const MOD_NAME: &str = "static_objects";
-    let mod_ident = format_ident!("{}", MOD_NAME);
-
+pub fn static_registry(_attr: TokenStream, item: TokenStream) -> TokenStream {
     let input = parse_macro_input!(item as ItemImpl);
-    let self_ty = &input.self_ty; // `Test`
+    let self_ty = &input.self_ty; // `Block`
+    let self_ident = self_ty_ident(self_ty); // `Block`
+    let data_ty = data_ty_ident(&self_ident); // `BlockData`
 
+    let mod_ident = format_ident!(
+        "__{}_static_registry",
+        data_ty.to_string().to_case(Case::Snake)
+    );
+
+    let mut consts = Vec::new();
     let mut statics = Vec::new();
-    let mut impl_consts = Vec::new();
+    let mut match_arms = Vec::new();
+    let mut next_id: u16 = 0;
 
-    for item in &input.items {
-        if let ImplItem::Const(ImplItemConst { ident, expr, .. }) = item {
-            // pub static TEST1: Holder<Test> = Holder::new("key");
-            statics.push(quote! {
-                pub static #ident: Holder<super::#self_ty> = #expr;
-            });
-            // pub const TEST1: &Holder<Test> = &static_objects::TEST1;
-            impl_consts.push(quote! {
-                pub const #ident: &'static Holder<#self_ty> = &#mod_ident::#ident;
-            });
-        }
+    for impl_item in &input.items {
+        let ImplItem::Const(ImplItemConst { ident, expr, .. }) = impl_item else {
+            continue;
+        };
+
+        let id = next_id;
+        next_id += 1;
+        let id_lit = LitInt::new(&id.to_string(), Span::call_site());
+
+        // pub const AIR: Block = Block(0);
+        consts.push(quote! {
+            pub const #ident: #self_ty = #self_ty(#id_lit);
+        });
+
+        // pub static AIR: BlockData = BlockData::new(0, 0, &[], None);
+        let ctor = retarget_ctor(expr, &self_ident, &data_ty);
+        statics.push(quote! {
+            pub static #ident: #data_ty = #ctor;
+        });
+
+        // 0 => &static_objects::AIR,
+        match_arms.push(quote! {
+            #id_lit => &#mod_ident::#ident,
+        });
     }
 
     let expanded = quote! {
+        impl #self_ty {
+            #(#consts)*
+        }
+
         mod #mod_ident {
             use super::*;
 
@@ -143,7 +143,13 @@ pub fn registry_values(_attr: TokenStream, item: TokenStream) -> TokenStream {
         }
 
         impl #self_ty {
-            #(#impl_consts)*
+            #[inline]
+            pub const fn data(self) -> &'static #data_ty {
+                match self.0 {
+                    #(#match_arms)*
+                    _ => unreachable!(),
+                }
+            }
         }
     };
 

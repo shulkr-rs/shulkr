@@ -655,11 +655,11 @@ mod tests {
     }
 
     fn stone(n: i32) -> ItemStack {
-        ItemStack::new(Material::Stone, n)
+        ItemStack::new(Material::STONE, n)
     }
 
     fn dirt(n: i32) -> ItemStack {
-        ItemStack::new(Material::Dirt, n)
+        ItemStack::new(Material::DIRT, n)
     }
 
     #[test]
@@ -670,7 +670,7 @@ mod tests {
         let mut carried = ItemStack::EMPTY;
         click(&window, 9, 0, &mut carried);
 
-        assert_eq!(carried.material(), Material::Stone);
+        assert_eq!(carried.material(), Material::STONE);
         assert_eq!(carried.amount(), 10);
         assert!(window.get(9).is_empty());
 
@@ -700,9 +700,9 @@ mod tests {
         let mut carried = dirt(2);
         click(&window, 9, 0, &mut carried);
 
-        assert_eq!(window.get(9).material(), Material::Dirt);
+        assert_eq!(window.get(9).material(), Material::DIRT);
         assert_eq!(window.get(9).amount(), 2);
-        assert_eq!(carried.material(), Material::Stone);
+        assert_eq!(carried.material(), Material::STONE);
         assert_eq!(carried.amount(), 3);
     }
 
@@ -763,8 +763,8 @@ mod tests {
 
         number_click(&window, MAIN_START, 3);
 
-        assert_eq!(window.get(HOTBAR_START + 3).material(), Material::Stone);
-        assert_eq!(window.get(MAIN_START).material(), Material::Dirt);
+        assert_eq!(window.get(HOTBAR_START + 3).material(), Material::STONE);
+        assert_eq!(window.get(MAIN_START).material(), Material::DIRT);
     }
 
     #[test]
@@ -787,8 +787,8 @@ mod tests {
 
         offhand_swap(&window, MAIN_START, &ItemStack::EMPTY);
 
-        assert_eq!(window.get(MAIN_START).material(), Material::Dirt);
-        assert_eq!(window.get(OFFHAND_SLOT).material(), Material::Stone);
+        assert_eq!(window.get(MAIN_START).material(), Material::DIRT);
+        assert_eq!(window.get(OFFHAND_SLOT).material(), Material::STONE);
     }
 
     #[test]
@@ -799,8 +799,8 @@ mod tests {
 
         offhand_swap(&window, MAIN_START, &stone(1));
 
-        assert_eq!(window.get(MAIN_START).material(), Material::Stone);
-        assert_eq!(window.get(OFFHAND_SLOT).material(), Material::Dirt);
+        assert_eq!(window.get(MAIN_START).material(), Material::STONE);
+        assert_eq!(window.get(OFFHAND_SLOT).material(), Material::DIRT);
     }
 
     #[test]
@@ -831,9 +831,9 @@ mod tests {
         drag_click(&window, &mut drag, 12, 2, &mut carried, false);
 
         assert!(window.get(9).is_empty());
-        assert_eq!(window.get(10).material(), Material::Stone);
+        assert_eq!(window.get(10).material(), Material::STONE);
         assert_eq!(window.get(10).amount(), 5);
-        assert_eq!(window.get(11).material(), Material::Stone);
+        assert_eq!(window.get(11).material(), Material::STONE);
         assert_eq!(window.get(11).amount(), 4);
         assert!(window.get(12).is_empty());
         assert!(carried.is_empty());

@@ -11,6 +11,7 @@ use crate::{
         meta::{EntityMeta, MetaAccessor, MetadataHolder},
     },
     protocol::packet::{RemoveEntitiesPacket, SetEntityMetadataPacket, SpawnEntityPacket},
+    registry::Id,
     util::{EntityPose, Position, Viewable, Viewers},
     world::World,
 };
@@ -188,7 +189,7 @@ impl Entity {
         SpawnEntityPacket {
             id: self.id(),
             uuid: self.uuid(),
-            entity_type: self.r#type() as i32,
+            entity_type: Id::from(self.r#type()) as i32,
             position,
             head_yaw: position.yaw(),
             data: 0,

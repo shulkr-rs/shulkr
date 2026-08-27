@@ -9,7 +9,7 @@ fn main() {
 
     for bz in 0..16 {
         for bx in 0..16 {
-            world.set_block(bx, 70, bz, Block::Stone);
+            world.set_block(bx, 70, bz, Block::STONE);
         }
     }
 

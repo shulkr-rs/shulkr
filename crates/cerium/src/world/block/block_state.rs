@@ -60,7 +60,7 @@ impl BlockState {
             panic!(
                 "Property {} not found on block {}",
                 property.name(),
-                self.block as u16
+                Id::from(self.block)
             );
         };
         self.state_id = state_id;
@@ -113,7 +113,8 @@ impl BlockState {
     }
 
     pub fn all() -> Vec<BlockState> {
-        Block::all()
+        Registries::BLOCK
+            .values()
             .iter()
             .flat_map(|block| {
                 let min_state_id = block.data().min_state_id;

@@ -568,7 +568,7 @@ impl PlayerData {
         Self {
             connection,
             game_profile: game_profile.clone(),
-            entity: Entity::with_uuid(EntityType::Player, game_profile.uuid),
+            entity: Entity::with_uuid(EntityType::PLAYER, game_profile.uuid),
             world: Mutex::new(None),
             last_keep_alive: Mutex::new(Instant::now()),
             game_mode: Mutex::new(GameMode::Survival),

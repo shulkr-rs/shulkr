@@ -4,6 +4,9 @@ use crate::registry::{Id, Registries};
 use crate::util::Key;
 use crate::world::block::BlockEntityType;
 
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+pub struct Block(Id);
+
 include!("../../../generated/blocks.rs");
 
 #[derive(Clone)]
@@ -64,13 +67,17 @@ impl TryFrom<Id> for Block {
 
     #[inline]
     fn try_from(value: Id) -> Result<Self, Self::Error> {
-        Self::all().get(value as usize).copied().ok_or(())
+        if (value as usize) < Registries::BLOCK.len() {
+            Ok(Block(value))
+        } else {
+            Err(())
+        }
     }
 }
 
 impl From<Block> for Id {
     #[inline]
     fn from(block: Block) -> Self {
-        block as Id
+        block.0
     }
 }

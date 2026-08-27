@@ -222,11 +222,11 @@ mod tests {
     fn test_set_item_stack() {
         let inventory = Inventory::new(InventoryType::Generic9x6, "");
         inventory.set_item_stack(1, ItemStack::EMPTY);
-        inventory.set_item_stack(22, ItemStack::new(Material::AcaciaBoat, 1));
+        inventory.set_item_stack(22, ItemStack::new(Material::ACACIA_BOAT, 1));
 
-        assert_eq!(inventory.get_item_stack(0).material(), Material::Air);
-        assert_eq!(inventory.get_item_stack(1).material(), Material::Air);
-        assert_eq!(inventory.get_item_stack(22).material(), Material::AcaciaBoat);
+        assert_eq!(inventory.get_item_stack(0).material(), Material::AIR);
+        assert_eq!(inventory.get_item_stack(1).material(), Material::AIR);
+        assert_eq!(inventory.get_item_stack(22).material(), Material::ACACIA_BOAT);
     }
 
     #[test]
@@ -234,10 +234,10 @@ mod tests {
     fn test_add_item_stack() {
         let inventory = Inventory::new(InventoryType::Generic9x6, "");
         inventory.add_item_stack(ItemStack::EMPTY);
-        inventory.add_item_stack(ItemStack::new(Material::GraniteStairs, 1));
-        inventory.add_item_stack(ItemStack::new(Material::RedCandle, 1));
+        inventory.add_item_stack(ItemStack::new(Material::GRANITE_STAIRS, 1));
+        inventory.add_item_stack(ItemStack::new(Material::RED_CANDLE, 1));
 
-        assert_eq!(inventory.get_item_stack(0).material(), Material::GraniteStairs);
-        assert_eq!(inventory.get_item_stack(1).material(), Material::RedCandle);
+        assert_eq!(inventory.get_item_stack(0).material(), Material::GRANITE_STAIRS);
+        assert_eq!(inventory.get_item_stack(1).material(), Material::RED_CANDLE);
     }
 }

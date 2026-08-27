@@ -23,17 +23,17 @@ impl DataType for PotDecorations {
         }
 
         Ok(Self {
-            back: Material::from_id(r.read_varint()? as Id).unwrap_or(Material::Brick),
-            left: Material::from_id(r.read_varint()? as Id).unwrap_or(Material::Brick),
-            right: Material::from_id(r.read_varint()? as Id).unwrap_or(Material::Brick),
-            front: Material::from_id(r.read_varint()? as Id).unwrap_or(Material::Brick),
+            back: Material::from_id(r.read_varint()? as Id).unwrap_or(Material::BRICK),
+            left: Material::from_id(r.read_varint()? as Id).unwrap_or(Material::BRICK),
+            right: Material::from_id(r.read_varint()? as Id).unwrap_or(Material::BRICK),
+            front: Material::from_id(r.read_varint()? as Id).unwrap_or(Material::BRICK),
         })
     }
 
     fn encode<W: PacketWrite>(w: &mut W, this: &Self) -> Result<(), EncodeError> {
         w.write_array(
             &vec![this.back, this.left, this.right, this.front],
-            |w, v| w.write_varint(*v as i32),
+            |w, v| w.write_varint(Id::from(*v) as i32),
         )?;
         Ok(())
     }

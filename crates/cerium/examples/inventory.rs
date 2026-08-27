@@ -12,7 +12,7 @@ fn main() {
 
     for bz in 0..16 {
         for bx in 0..16 {
-            world.set_block(bx, 70, bz, Block::GrassBlock);
+            world.set_block(bx, 70, bz, Block::GRASS_BLOCK);
         }
     }
 
@@ -25,7 +25,7 @@ fn main() {
         .subscribe(move |event: &mut PlayerSpawnEvent| {
             let inventory = Inventory::new(InventoryType::CartographyTable, "Custom Inventory");
 
-            let stack = ItemStack::new(Material::EnderPearl, 16);
+            let stack = ItemStack::new(Material::ENDER_PEARL, 16);
             inventory.add_item_stack(stack);
 
             event.get_player().open_inventory(inventory);

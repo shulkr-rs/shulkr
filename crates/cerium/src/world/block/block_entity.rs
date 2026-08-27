@@ -1,8 +1,26 @@
 use cerium_nbt::Nbt;
 
+use crate::registry::Id;
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+pub struct BlockEntityType(Id);
+
 include!("../../../generated/block_entity_types.rs");
 
+impl From<BlockEntityType> for Id {
+    #[inline]
+    fn from(block_entity_type: BlockEntityType) -> Self {
+        block_entity_type.0
+    }
+}
+
 pub struct BlockEntityTypeData;
+
+impl BlockEntityTypeData {
+    pub const fn new() -> Self {
+        Self
+    }
+}
 
 #[derive(Debug, Clone)]
 pub struct BlockEntity {

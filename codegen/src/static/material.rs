@@ -5,7 +5,7 @@ use serde_json::Value;
 use syn::Ident;
 
 use crate::object::StaticObjectBuilder;
-use crate::write_file;
+use crate::write_wide_file;
 
 pub fn generate() {
     let object = StaticObjectBuilder::new("Material")
@@ -15,7 +15,7 @@ pub fn generate() {
 
     let tokens = object.generate();
 
-    write_file(&tokens, "materials.rs");
+    write_wide_file(&tokens, "materials.rs");
 }
 
 fn generate_init(ident: Ident, value: Value) -> TokenStream {
@@ -29,15 +29,13 @@ fn generate_init(ident: Ident, value: Value) -> TokenStream {
                     "{}",
                     v.split_once(":")
                         .map_or(v, |v| v.1)
-                        .to_case(Case::UpperCamel)
+                        .to_case(Case::Constant)
                 );
                 quote! { Some(Block::#block) }
             },
         );
 
     quote! {
-        #ident {
-            block: #corresponding_block
-        }
+        #ident::new(#corresponding_block)
     }
 }

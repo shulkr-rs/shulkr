@@ -1,0 +1,62 @@
+{
+  "minecraft:visual/fog_color": { "type": "RgbColor", "value": "#000000" },
+  "minecraft:visual/fog_start_distance": { "type": "Float", "value": 0.0 },
+  "minecraft:visual/fog_end_distance": { "type": "Float", "value": 1024.0 },
+  "minecraft:visual/sky_fog_end_distance": { "type": "Float", "value": 512.0 },
+  "minecraft:visual/cloud_fog_end_distance": { "type": "Float", "value": 2048.0 },
+  "minecraft:visual/water_fog_color": { "type": "RgbColor", "value": "#050533" },
+  "minecraft:visual/water_fog_start_distance": { "type": "Float", "value": -8.0 },
+  "minecraft:visual/water_fog_end_distance": { "type": "Float", "value": 96.0 },
+  "minecraft:visual/sky_color": { "type": "RgbColor", "value": "#000000" },
+  "minecraft:visual/sunrise_sunset_color": { "type": "ArgbColor", "value": "#00000000" },
+  "minecraft:visual/cloud_color": { "type": "ArgbColor", "value": "#00000000" },
+  "minecraft:visual/cloud_height": { "type": "Float", "value": 192.33 },
+  "minecraft:visual/sun_angle": { "type": "AngleDegrees", "value": 0.0 },
+  "minecraft:visual/moon_angle": { "type": "AngleDegrees", "value": 0.0 },
+  "minecraft:visual/star_angle": { "type": "AngleDegrees", "value": 0.0 },
+  "minecraft:visual/moon_phase": { "type": "MoonPhase", "value": "full_moon" },
+  "minecraft:visual/star_brightness": { "type": "Float", "value": 0.0 },
+  "minecraft:visual/block_light_tint": { "type": "RgbColor", "value": "#FFD88C" },
+  "minecraft:visual/sky_light_color": { "type": "RgbColor", "value": "#FFFFFF" },
+  "minecraft:visual/sky_light_factor": { "type": "Float", "value": 1.0 },
+  "minecraft:visual/night_vision_color": { "type": "RgbColor", "value": "#999999" },
+  "minecraft:visual/ambient_light_color": { "type": "RgbColor", "value": "#000000" },
+  "minecraft:visual/default_dripstone_particle": {
+    "type": "Particle",
+    "value": { "kind": "minecraft:dripping_dripstone_water" }
+  },
+  "minecraft:visual/ambient_particles": { "type": "AmbientParticles", "value": [] },
+  "minecraft:audio/background_music": {
+    "type": "BackgroundMusic",
+    "value": {}
+  },
+  "minecraft:audio/music_volume": { "type": "Float", "value": 1.0 },
+  "minecraft:audio/ambient_sounds": {
+    "type": "AmbientSounds",
+    "value": {}
+  },
+  "minecraft:audio/firefly_bush_sounds": { "type": "Boolean", "value": false },
+  "minecraft:gameplay/sky_light_level": { "type": "Float", "value": 15.0 },
+  "minecraft:gameplay/can_start_raid": { "type": "Boolean", "value": true },
+  "minecraft:gameplay/water_evaporates": { "type": "Boolean", "value": false },
+  "minecraft:gameplay/bed_rule": {
+    "type": "BedRule",
+    "value": { "can_sleep": "when_dark", "can_set_spawn": "always" }
+  },
+  "minecraft:gameplay/respawn_anchor_works": { "type": "Boolean", "value": false },
+  "minecraft:gameplay/nether_portal_spawns_piglin": { "type": "Boolean", "value": false },
+  "minecraft:gameplay/fast_lava": { "type": "Boolean", "value": false },
+  "minecraft:gameplay/increased_fire_burnout": { "type": "Boolean", "value": false },
+  "minecraft:gameplay/eyeblossom_open": { "type": "TriState", "value": "default" },
+  "minecraft:gameplay/turtle_egg_hatch_chance": { "type": "Float", "value": 0.002 },
+  "minecraft:gameplay/piglins_zombify": { "type": "Boolean", "value": true },
+  "minecraft:gameplay/snow_golem_melts": { "type": "Boolean", "value": false },
+  "minecraft:gameplay/creaking_active": { "type": "Boolean", "value": false },
+  "minecraft:gameplay/surface_slime_spawn_chance": { "type": "Float", "value": 0.0 },
+  "minecraft:gameplay/cat_waking_up_gift_chance": { "type": "Float", "value": 0.0 },
+  "minecraft:gameplay/bees_stay_in_hive": { "type": "Boolean", "value": false },
+  "minecraft:gameplay/monsters_burn": { "type": "Boolean", "value": false },
+  "minecraft:gameplay/can_pillager_patrol_spawn": { "type": "Boolean", "value": true },
+  "minecraft:gameplay/villager_activity": { "type": "Activity", "value": "idle" },
+  "minecraft:gameplay/baby_villager_activity": { "type": "Activity", "value": "idle" }
+}

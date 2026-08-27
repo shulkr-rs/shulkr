@@ -17,6 +17,7 @@ mod r#static {
     pub mod block;
     pub mod block_entity_type;
     pub mod entity_type;
+    pub mod environment_attribute;
     pub mod material;
 }
 pub use r#static::*;
@@ -67,6 +68,7 @@ fn main() {
     block::generate();
     block_entity_type::generate();
     entity_type::generate();
+    environment_attribute::generate();
     material::generate();
 }
 

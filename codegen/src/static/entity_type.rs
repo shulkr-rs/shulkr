@@ -1,5 +1,5 @@
 use crate::object::StaticObjectBuilder;
-use crate::write_file;
+use crate::write_wide_file;
 
 pub fn generate() {
     let object = StaticObjectBuilder::new("EntityType")
@@ -8,5 +8,5 @@ pub fn generate() {
 
     let tokens = object.generate();
 
-    write_file(&tokens, "entity_types.rs");
+    write_wide_file(&tokens, "entity_types.rs");
 }

@@ -1,180 +1,112 @@
 // This file was auto-generated. Do not edit it manually.
 
 use crate::registry::Registry;
-use cerium_macros::StaticObject;
-use cerium_macros::UnitEnum;
+use cerium_macros::static_registry;
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, StaticObject, UnitEnum)]
-#[repr(u16)]
-pub enum BlockEntityType {
-    Furnace,
-    Chest,
-    TrappedChest,
-    EnderChest,
-    Jukebox,
-    Dispenser,
-    Dropper,
-    Sign,
-    HangingSign,
-    MobSpawner,
-    CreakingHeart,
-    Piston,
-    BrewingStand,
-    EnchantingTable,
-    EndPortal,
-    Beacon,
-    Skull,
-    DaylightDetector,
-    Hopper,
-    Comparator,
-    Banner,
-    StructureBlock,
-    EndGateway,
-    CommandBlock,
-    ShulkerBox,
-    Conduit,
-    Barrel,
-    Smoker,
-    BlastFurnace,
-    Lectern,
-    Bell,
-    Jigsaw,
-    Campfire,
-    Beehive,
-    SculkSensor,
-    CalibratedSculkSensor,
-    SculkCatalyst,
-    SculkShrieker,
-    ChiseledBookshelf,
-    Shelf,
-    BrushableBlock,
-    DecoratedPot,
-    Crafter,
-    TrialSpawner,
-    Vault,
-    TestBlock,
-    TestInstanceBlock,
-    CopperGolemStatue,
-    PotentSulfur,
+#[rustfmt::skip]
+#[static_registry]
+impl BlockEntityType {
+    pub const FURNACE: BlockEntityType = BlockEntityType::new();
+    pub const CHEST: BlockEntityType = BlockEntityType::new();
+    pub const TRAPPED_CHEST: BlockEntityType = BlockEntityType::new();
+    pub const ENDER_CHEST: BlockEntityType = BlockEntityType::new();
+    pub const JUKEBOX: BlockEntityType = BlockEntityType::new();
+    pub const DISPENSER: BlockEntityType = BlockEntityType::new();
+    pub const DROPPER: BlockEntityType = BlockEntityType::new();
+    pub const SIGN: BlockEntityType = BlockEntityType::new();
+    pub const HANGING_SIGN: BlockEntityType = BlockEntityType::new();
+    pub const MOB_SPAWNER: BlockEntityType = BlockEntityType::new();
+    pub const CREAKING_HEART: BlockEntityType = BlockEntityType::new();
+    pub const PISTON: BlockEntityType = BlockEntityType::new();
+    pub const BREWING_STAND: BlockEntityType = BlockEntityType::new();
+    pub const ENCHANTING_TABLE: BlockEntityType = BlockEntityType::new();
+    pub const END_PORTAL: BlockEntityType = BlockEntityType::new();
+    pub const BEACON: BlockEntityType = BlockEntityType::new();
+    pub const SKULL: BlockEntityType = BlockEntityType::new();
+    pub const DAYLIGHT_DETECTOR: BlockEntityType = BlockEntityType::new();
+    pub const HOPPER: BlockEntityType = BlockEntityType::new();
+    pub const COMPARATOR: BlockEntityType = BlockEntityType::new();
+    pub const BANNER: BlockEntityType = BlockEntityType::new();
+    pub const STRUCTURE_BLOCK: BlockEntityType = BlockEntityType::new();
+    pub const END_GATEWAY: BlockEntityType = BlockEntityType::new();
+    pub const COMMAND_BLOCK: BlockEntityType = BlockEntityType::new();
+    pub const SHULKER_BOX: BlockEntityType = BlockEntityType::new();
+    pub const CONDUIT: BlockEntityType = BlockEntityType::new();
+    pub const BARREL: BlockEntityType = BlockEntityType::new();
+    pub const SMOKER: BlockEntityType = BlockEntityType::new();
+    pub const BLAST_FURNACE: BlockEntityType = BlockEntityType::new();
+    pub const LECTERN: BlockEntityType = BlockEntityType::new();
+    pub const BELL: BlockEntityType = BlockEntityType::new();
+    pub const JIGSAW: BlockEntityType = BlockEntityType::new();
+    pub const CAMPFIRE: BlockEntityType = BlockEntityType::new();
+    pub const BEEHIVE: BlockEntityType = BlockEntityType::new();
+    pub const SCULK_SENSOR: BlockEntityType = BlockEntityType::new();
+    pub const CALIBRATED_SCULK_SENSOR: BlockEntityType = BlockEntityType::new();
+    pub const SCULK_CATALYST: BlockEntityType = BlockEntityType::new();
+    pub const SCULK_SHRIEKER: BlockEntityType = BlockEntityType::new();
+    pub const CHISELED_BOOKSHELF: BlockEntityType = BlockEntityType::new();
+    pub const SHELF: BlockEntityType = BlockEntityType::new();
+    pub const BRUSHABLE_BLOCK: BlockEntityType = BlockEntityType::new();
+    pub const DECORATED_POT: BlockEntityType = BlockEntityType::new();
+    pub const CRAFTER: BlockEntityType = BlockEntityType::new();
+    pub const TRIAL_SPAWNER: BlockEntityType = BlockEntityType::new();
+    pub const VAULT: BlockEntityType = BlockEntityType::new();
+    pub const TEST_BLOCK: BlockEntityType = BlockEntityType::new();
+    pub const TEST_INSTANCE_BLOCK: BlockEntityType = BlockEntityType::new();
+    pub const COPPER_GOLEM_STATUE: BlockEntityType = BlockEntityType::new();
+    pub const POTENT_SULFUR: BlockEntityType = BlockEntityType::new();
 }
-pub static FURNACE: BlockEntityTypeData = BlockEntityTypeData;
-pub static CHEST: BlockEntityTypeData = BlockEntityTypeData;
-pub static TRAPPED_CHEST: BlockEntityTypeData = BlockEntityTypeData;
-pub static ENDER_CHEST: BlockEntityTypeData = BlockEntityTypeData;
-pub static JUKEBOX: BlockEntityTypeData = BlockEntityTypeData;
-pub static DISPENSER: BlockEntityTypeData = BlockEntityTypeData;
-pub static DROPPER: BlockEntityTypeData = BlockEntityTypeData;
-pub static SIGN: BlockEntityTypeData = BlockEntityTypeData;
-pub static HANGING_SIGN: BlockEntityTypeData = BlockEntityTypeData;
-pub static MOB_SPAWNER: BlockEntityTypeData = BlockEntityTypeData;
-pub static CREAKING_HEART: BlockEntityTypeData = BlockEntityTypeData;
-pub static PISTON: BlockEntityTypeData = BlockEntityTypeData;
-pub static BREWING_STAND: BlockEntityTypeData = BlockEntityTypeData;
-pub static ENCHANTING_TABLE: BlockEntityTypeData = BlockEntityTypeData;
-pub static END_PORTAL: BlockEntityTypeData = BlockEntityTypeData;
-pub static BEACON: BlockEntityTypeData = BlockEntityTypeData;
-pub static SKULL: BlockEntityTypeData = BlockEntityTypeData;
-pub static DAYLIGHT_DETECTOR: BlockEntityTypeData = BlockEntityTypeData;
-pub static HOPPER: BlockEntityTypeData = BlockEntityTypeData;
-pub static COMPARATOR: BlockEntityTypeData = BlockEntityTypeData;
-pub static BANNER: BlockEntityTypeData = BlockEntityTypeData;
-pub static STRUCTURE_BLOCK: BlockEntityTypeData = BlockEntityTypeData;
-pub static END_GATEWAY: BlockEntityTypeData = BlockEntityTypeData;
-pub static COMMAND_BLOCK: BlockEntityTypeData = BlockEntityTypeData;
-pub static SHULKER_BOX: BlockEntityTypeData = BlockEntityTypeData;
-pub static CONDUIT: BlockEntityTypeData = BlockEntityTypeData;
-pub static BARREL: BlockEntityTypeData = BlockEntityTypeData;
-pub static SMOKER: BlockEntityTypeData = BlockEntityTypeData;
-pub static BLAST_FURNACE: BlockEntityTypeData = BlockEntityTypeData;
-pub static LECTERN: BlockEntityTypeData = BlockEntityTypeData;
-pub static BELL: BlockEntityTypeData = BlockEntityTypeData;
-pub static JIGSAW: BlockEntityTypeData = BlockEntityTypeData;
-pub static CAMPFIRE: BlockEntityTypeData = BlockEntityTypeData;
-pub static BEEHIVE: BlockEntityTypeData = BlockEntityTypeData;
-pub static SCULK_SENSOR: BlockEntityTypeData = BlockEntityTypeData;
-pub static CALIBRATED_SCULK_SENSOR: BlockEntityTypeData = BlockEntityTypeData;
-pub static SCULK_CATALYST: BlockEntityTypeData = BlockEntityTypeData;
-pub static SCULK_SHRIEKER: BlockEntityTypeData = BlockEntityTypeData;
-pub static CHISELED_BOOKSHELF: BlockEntityTypeData = BlockEntityTypeData;
-pub static SHELF: BlockEntityTypeData = BlockEntityTypeData;
-pub static BRUSHABLE_BLOCK: BlockEntityTypeData = BlockEntityTypeData;
-pub static DECORATED_POT: BlockEntityTypeData = BlockEntityTypeData;
-pub static CRAFTER: BlockEntityTypeData = BlockEntityTypeData;
-pub static TRIAL_SPAWNER: BlockEntityTypeData = BlockEntityTypeData;
-pub static VAULT: BlockEntityTypeData = BlockEntityTypeData;
-pub static TEST_BLOCK: BlockEntityTypeData = BlockEntityTypeData;
-pub static TEST_INSTANCE_BLOCK: BlockEntityTypeData = BlockEntityTypeData;
-pub static COPPER_GOLEM_STATUE: BlockEntityTypeData = BlockEntityTypeData;
-pub static POTENT_SULFUR: BlockEntityTypeData = BlockEntityTypeData;
 pub(crate) fn register_all(registry: &mut Registry<BlockEntityType>) {
     let mut register = |key: &'static str, value: BlockEntityType| {
         Registry::register(registry, key.into(), value);
     };
-    register("minecraft:furnace", BlockEntityType::Furnace);
-    register("minecraft:chest", BlockEntityType::Chest);
-    register("minecraft:trapped_chest", BlockEntityType::TrappedChest);
-    register("minecraft:ender_chest", BlockEntityType::EnderChest);
-    register("minecraft:jukebox", BlockEntityType::Jukebox);
-    register("minecraft:dispenser", BlockEntityType::Dispenser);
-    register("minecraft:dropper", BlockEntityType::Dropper);
-    register("minecraft:sign", BlockEntityType::Sign);
-    register("minecraft:hanging_sign", BlockEntityType::HangingSign);
-    register("minecraft:mob_spawner", BlockEntityType::MobSpawner);
-    register("minecraft:creaking_heart", BlockEntityType::CreakingHeart);
-    register("minecraft:piston", BlockEntityType::Piston);
-    register("minecraft:brewing_stand", BlockEntityType::BrewingStand);
-    register(
-        "minecraft:enchanting_table",
-        BlockEntityType::EnchantingTable,
-    );
-    register("minecraft:end_portal", BlockEntityType::EndPortal);
-    register("minecraft:beacon", BlockEntityType::Beacon);
-    register("minecraft:skull", BlockEntityType::Skull);
-    register(
-        "minecraft:daylight_detector",
-        BlockEntityType::DaylightDetector,
-    );
-    register("minecraft:hopper", BlockEntityType::Hopper);
-    register("minecraft:comparator", BlockEntityType::Comparator);
-    register("minecraft:banner", BlockEntityType::Banner);
-    register("minecraft:structure_block", BlockEntityType::StructureBlock);
-    register("minecraft:end_gateway", BlockEntityType::EndGateway);
-    register("minecraft:command_block", BlockEntityType::CommandBlock);
-    register("minecraft:shulker_box", BlockEntityType::ShulkerBox);
-    register("minecraft:conduit", BlockEntityType::Conduit);
-    register("minecraft:barrel", BlockEntityType::Barrel);
-    register("minecraft:smoker", BlockEntityType::Smoker);
-    register("minecraft:blast_furnace", BlockEntityType::BlastFurnace);
-    register("minecraft:lectern", BlockEntityType::Lectern);
-    register("minecraft:bell", BlockEntityType::Bell);
-    register("minecraft:jigsaw", BlockEntityType::Jigsaw);
-    register("minecraft:campfire", BlockEntityType::Campfire);
-    register("minecraft:beehive", BlockEntityType::Beehive);
-    register("minecraft:sculk_sensor", BlockEntityType::SculkSensor);
-    register(
-        "minecraft:calibrated_sculk_sensor",
-        BlockEntityType::CalibratedSculkSensor,
-    );
-    register("minecraft:sculk_catalyst", BlockEntityType::SculkCatalyst);
-    register("minecraft:sculk_shrieker", BlockEntityType::SculkShrieker);
-    register(
-        "minecraft:chiseled_bookshelf",
-        BlockEntityType::ChiseledBookshelf,
-    );
-    register("minecraft:shelf", BlockEntityType::Shelf);
-    register("minecraft:brushable_block", BlockEntityType::BrushableBlock);
-    register("minecraft:decorated_pot", BlockEntityType::DecoratedPot);
-    register("minecraft:crafter", BlockEntityType::Crafter);
-    register("minecraft:trial_spawner", BlockEntityType::TrialSpawner);
-    register("minecraft:vault", BlockEntityType::Vault);
-    register("minecraft:test_block", BlockEntityType::TestBlock);
-    register(
-        "minecraft:test_instance_block",
-        BlockEntityType::TestInstanceBlock,
-    );
-    register(
-        "minecraft:copper_golem_statue",
-        BlockEntityType::CopperGolemStatue,
-    );
-    register("minecraft:potent_sulfur", BlockEntityType::PotentSulfur);
+    register("minecraft:furnace", BlockEntityType::FURNACE);
+    register("minecraft:chest", BlockEntityType::CHEST);
+    register("minecraft:trapped_chest", BlockEntityType::TRAPPED_CHEST);
+    register("minecraft:ender_chest", BlockEntityType::ENDER_CHEST);
+    register("minecraft:jukebox", BlockEntityType::JUKEBOX);
+    register("minecraft:dispenser", BlockEntityType::DISPENSER);
+    register("minecraft:dropper", BlockEntityType::DROPPER);
+    register("minecraft:sign", BlockEntityType::SIGN);
+    register("minecraft:hanging_sign", BlockEntityType::HANGING_SIGN);
+    register("minecraft:mob_spawner", BlockEntityType::MOB_SPAWNER);
+    register("minecraft:creaking_heart", BlockEntityType::CREAKING_HEART);
+    register("minecraft:piston", BlockEntityType::PISTON);
+    register("minecraft:brewing_stand", BlockEntityType::BREWING_STAND);
+    register("minecraft:enchanting_table", BlockEntityType::ENCHANTING_TABLE);
+    register("minecraft:end_portal", BlockEntityType::END_PORTAL);
+    register("minecraft:beacon", BlockEntityType::BEACON);
+    register("minecraft:skull", BlockEntityType::SKULL);
+    register("minecraft:daylight_detector", BlockEntityType::DAYLIGHT_DETECTOR);
+    register("minecraft:hopper", BlockEntityType::HOPPER);
+    register("minecraft:comparator", BlockEntityType::COMPARATOR);
+    register("minecraft:banner", BlockEntityType::BANNER);
+    register("minecraft:structure_block", BlockEntityType::STRUCTURE_BLOCK);
+    register("minecraft:end_gateway", BlockEntityType::END_GATEWAY);
+    register("minecraft:command_block", BlockEntityType::COMMAND_BLOCK);
+    register("minecraft:shulker_box", BlockEntityType::SHULKER_BOX);
+    register("minecraft:conduit", BlockEntityType::CONDUIT);
+    register("minecraft:barrel", BlockEntityType::BARREL);
+    register("minecraft:smoker", BlockEntityType::SMOKER);
+    register("minecraft:blast_furnace", BlockEntityType::BLAST_FURNACE);
+    register("minecraft:lectern", BlockEntityType::LECTERN);
+    register("minecraft:bell", BlockEntityType::BELL);
+    register("minecraft:jigsaw", BlockEntityType::JIGSAW);
+    register("minecraft:campfire", BlockEntityType::CAMPFIRE);
+    register("minecraft:beehive", BlockEntityType::BEEHIVE);
+    register("minecraft:sculk_sensor", BlockEntityType::SCULK_SENSOR);
+    register("minecraft:calibrated_sculk_sensor", BlockEntityType::CALIBRATED_SCULK_SENSOR);
+    register("minecraft:sculk_catalyst", BlockEntityType::SCULK_CATALYST);
+    register("minecraft:sculk_shrieker", BlockEntityType::SCULK_SHRIEKER);
+    register("minecraft:chiseled_bookshelf", BlockEntityType::CHISELED_BOOKSHELF);
+    register("minecraft:shelf", BlockEntityType::SHELF);
+    register("minecraft:brushable_block", BlockEntityType::BRUSHABLE_BLOCK);
+    register("minecraft:decorated_pot", BlockEntityType::DECORATED_POT);
+    register("minecraft:crafter", BlockEntityType::CRAFTER);
+    register("minecraft:trial_spawner", BlockEntityType::TRIAL_SPAWNER);
+    register("minecraft:vault", BlockEntityType::VAULT);
+    register("minecraft:test_block", BlockEntityType::TEST_BLOCK);
+    register("minecraft:test_instance_block", BlockEntityType::TEST_INSTANCE_BLOCK);
+    register("minecraft:copper_golem_statue", BlockEntityType::COPPER_GOLEM_STATUE);
+    register("minecraft:potent_sulfur", BlockEntityType::POTENT_SULFUR);
 }
