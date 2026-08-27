@@ -1,4 +1,4 @@
-# Cerium
+# shulkr
 
 Yet another high-performance Minecraft server library written in Rust.
 
@@ -15,7 +15,7 @@ Yet another high-performance Minecraft server library written in Rust.
 The project is still very experimental so you would need to add it as a git dependency.
 To add it to you project add the following line in your `Cargo.toml`:
 ```
-cerium = { git = "https://github.com/garfxld/cerium.git" }
+shulkr = { git = "https://github.com/garfxld/shulkr.git" }
 ```
 
 You can use one of the examples to quick-start a project.
@@ -23,15 +23,15 @@ You can use one of the examples to quick-start a project.
 
 ## Examples
 
-There are some simple (and maybe not fully functional) examples in the [examples](./crates/cerium/examples/) directory in the `cerium` crate.
+There are some simple (and maybe not fully functional) examples in the [examples](./crates/shulkr/examples/) directory in the `shulkr` crate.
 
 ### List of Examples
 
-- [debug_world.rs](./crates/cerium/examples/debug_world.rs)
-- [flat_world.rs](./crates/cerium/examples/flat_world.rs)
-- [inventory.rs](./crates/cerium/examples/inventory.rs)
-- [npc.rs](./crates/cerium/examples/npc.rs)
-- [text.rs](./crates/cerium/examples/text.rs)
+- [debug_world.rs](./crates/shulkr/examples/debug_world.rs)
+- [flat_world.rs](./crates/shulkr/examples/flat_world.rs)
+- [inventory.rs](./crates/shulkr/examples/inventory.rs)
+- [npc.rs](./crates/shulkr/examples/npc.rs)
+- [text.rs](./crates/shulkr/examples/text.rs)
 
 
 ### Running
@@ -97,7 +97,7 @@ fn main() {
     - [ ] Batching
 - Entity
     - [ ] Entity API
-    - [ ] Entity Metadata ([Issue](https://github.com/garfxld/cerium/issues/1#issue-5050587525))
+    - [ ] Entity Metadata ([Issue](https://github.com/garfxld/shulkr/issues/1#issue-5050587525))
 - Inventory/Item
     - [x] Open Inventory
     - [x] Close Inventory

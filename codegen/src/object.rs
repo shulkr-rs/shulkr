@@ -131,7 +131,7 @@ impl StaticObject {
         let register_variants = self.register_variants();
 
         quote! {
-            use cerium_macros::static_registry;
+            use shulkr_macros::static_registry;
             use crate::registry::Registry;
 
             #[static_registry]

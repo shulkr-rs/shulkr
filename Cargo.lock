@@ -205,68 +205,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "cerium"
-version = "0.1.0"
-dependencies = [
- "aes",
- "anyhow",
- "async-compression",
- "bitfield-struct",
- "bitflags",
- "byteorder",
- "bytes",
- "cerium-macros",
- "cerium-nbt",
- "cfb8",
- "env_logger",
- "flate2",
- "futures",
- "hmac",
- "indexmap",
- "log",
- "num-bigint",
- "parking_lot",
- "paste",
- "pastey",
- "phf",
- "rand",
- "rsa",
- "rsa-der",
- "rust-embed",
- "rustc-hash",
- "serde",
- "serde_json",
- "sha1",
- "sha2",
- "take_mut",
- "thiserror",
- "tokio",
- "ureq",
- "uuid",
- "zstd",
-]
-
-[[package]]
-name = "cerium-macros"
-version = "0.1.0"
-dependencies = [
- "convert_case",
- "proc-macro2",
- "quote",
- "syn",
-]
-
-[[package]]
-name = "cerium-nbt"
-version = "0.1.0"
-dependencies = [
- "bytes",
- "paste",
- "serde",
- "thiserror",
-]
-
-[[package]]
 name = "cfb8"
 version = "0.8.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1626,6 +1564,68 @@ name = "shlex"
 version = "1.3.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "0fda2ff0d084019ba4d7c6f371c95d8fd75ce3524c3cb8fb653a3023f6323e64"
+
+[[package]]
+name = "shulkr"
+version = "0.1.0"
+dependencies = [
+ "aes",
+ "anyhow",
+ "async-compression",
+ "bitfield-struct",
+ "bitflags",
+ "byteorder",
+ "bytes",
+ "cfb8",
+ "env_logger",
+ "flate2",
+ "futures",
+ "hmac",
+ "indexmap",
+ "log",
+ "num-bigint",
+ "parking_lot",
+ "paste",
+ "pastey",
+ "phf",
+ "rand",
+ "rsa",
+ "rsa-der",
+ "rust-embed",
+ "rustc-hash",
+ "serde",
+ "serde_json",
+ "sha1",
+ "sha2",
+ "shulkr-macros",
+ "shulkr-nbt",
+ "take_mut",
+ "thiserror",
+ "tokio",
+ "ureq",
+ "uuid",
+ "zstd",
+]
+
+[[package]]
+name = "shulkr-macros"
+version = "0.1.0"
+dependencies = [
+ "convert_case",
+ "proc-macro2",
+ "quote",
+ "syn",
+]
+
+[[package]]
+name = "shulkr-nbt"
+version = "0.1.0"
+dependencies = [
+ "bytes",
+ "paste",
+ "serde",
+ "thiserror",
+]
 
 [[package]]
 name = "signature"

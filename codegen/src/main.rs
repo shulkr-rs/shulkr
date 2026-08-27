@@ -26,7 +26,7 @@ const HEADER: &str = "// This file was auto-generated. Do not edit it manually.\
 const MAX_WIDTH: usize = 50000;
 
 const ASSETS: &str = "../assets";
-const OUT_DIR: &str = "../crates/cerium/generated";
+const OUT_DIR: &str = "../crates/shulkr/generated";
 
 const DATAPACK_REGISTRIES: &[&str] = &[
     "banner_pattern",

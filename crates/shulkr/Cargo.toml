@@ -1,0 +1,70 @@
+[package]
+name = "shulkr"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+repository.workspace = true
+
+
+[lib]
+doctest = false
+
+
+[features]
+default = ["polar", "anvil", "minimessage"]
+anvil = ["dep:bitfield-struct", "dep:flate2", "dep:byteorder"]
+polar = ["dep:zstd"]
+minimessage = []
+
+
+[dependencies]
+shulkr-nbt = { workspace = true }
+shulkr-macros = { workspace = true }
+
+anyhow = { workspace = true }
+async-compression = { workspace = true }
+bytes = { workspace = true }
+rand = { workspace = true }
+serde = { workspace = true }
+thiserror = { workspace = true }
+tokio = { workspace = true }
+ureq = { workspace = true }
+uuid = { workspace = true }
+paste = { workspace = true }
+rustc-hash = { workspace = true }
+bitflags = { workspace = true }
+indexmap = { workspace = true }
+rust-embed = { workspace = true }
+serde_json = { workspace = true }
+phf = { workspace = true }
+parking_lot = { workspace = true }
+hmac = { workspace = true }
+sha2 = { workspace = true }
+
+# Logging
+log = { workspace = true }
+env_logger = { workspace = true }
+
+# Encryption
+aes = { workspace = true }
+cfb8 = { workspace = true }
+num-bigint = { workspace = true }
+rsa = { workspace = true }
+rsa-der = { workspace = true }
+sha1 = { workspace = true }
+take_mut = { workspace = true }
+futures = { workspace = true }
+pastey = "0.2.1"
+
+zstd = { version = "0.13.2", optional = true }
+bitfield-struct = { version = "0.13.0", optional = true }
+flate2 = { version = "1.1.9", optional = true }
+byteorder = { version = "1.5.0", optional = true }
+
+[[example]]
+name = "anvil"
+required-features = ["anvil"]
+
+[[example]]
+name = "polar"
+required-features = ["polar"]

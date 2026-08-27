@@ -1,0 +1,254 @@
+// This file was auto-generated. Do not edit it manually.
+
+use crate::registry::Registry;
+use shulkr_macros::static_registry;
+
+#[rustfmt::skip]
+#[static_registry]
+impl EnvironmentAttribute {
+    pub const FOG_COLOR: EnvironmentAttribute = EnvironmentAttribute::new("visual/fog_color", AttributeType::RgbColor, color("#000000"));
+    pub const FOG_START_DISTANCE: EnvironmentAttribute = EnvironmentAttribute::new("visual/fog_start_distance", AttributeType::Float, AttributeValue::Float(0f32));
+    pub const FOG_END_DISTANCE: EnvironmentAttribute = EnvironmentAttribute::new("visual/fog_end_distance", AttributeType::Float, AttributeValue::Float(1024f32));
+    pub const SKY_FOG_END_DISTANCE: EnvironmentAttribute = EnvironmentAttribute::new("visual/sky_fog_end_distance", AttributeType::Float, AttributeValue::Float(512f32));
+    pub const CLOUD_FOG_END_DISTANCE: EnvironmentAttribute = EnvironmentAttribute::new("visual/cloud_fog_end_distance", AttributeType::Float, AttributeValue::Float(2048f32));
+    pub const WATER_FOG_COLOR: EnvironmentAttribute = EnvironmentAttribute::new("visual/water_fog_color", AttributeType::RgbColor, color("#050533"));
+    pub const WATER_FOG_START_DISTANCE: EnvironmentAttribute = EnvironmentAttribute::new("visual/water_fog_start_distance", AttributeType::Float, AttributeValue::Float(-8f32));
+    pub const WATER_FOG_END_DISTANCE: EnvironmentAttribute = EnvironmentAttribute::new("visual/water_fog_end_distance", AttributeType::Float, AttributeValue::Float(96f32));
+    pub const SKY_COLOR: EnvironmentAttribute = EnvironmentAttribute::new("visual/sky_color", AttributeType::RgbColor, color("#000000"));
+    pub const SUNRISE_SUNSET_COLOR: EnvironmentAttribute = EnvironmentAttribute::new("visual/sunrise_sunset_color", AttributeType::ArgbColor, color("#00000000"));
+    pub const CLOUD_COLOR: EnvironmentAttribute = EnvironmentAttribute::new("visual/cloud_color", AttributeType::ArgbColor, color("#00000000"));
+    pub const CLOUD_HEIGHT: EnvironmentAttribute = EnvironmentAttribute::new("visual/cloud_height", AttributeType::Float, AttributeValue::Float(192.33f32));
+    pub const SUN_ANGLE: EnvironmentAttribute = EnvironmentAttribute::new("visual/sun_angle", AttributeType::AngleDegrees, AttributeValue::Float(0f32));
+    pub const MOON_ANGLE: EnvironmentAttribute = EnvironmentAttribute::new("visual/moon_angle", AttributeType::AngleDegrees, AttributeValue::Float(0f32));
+    pub const STAR_ANGLE: EnvironmentAttribute = EnvironmentAttribute::new("visual/star_angle", AttributeType::AngleDegrees, AttributeValue::Float(0f32));
+    pub const MOON_PHASE: EnvironmentAttribute = EnvironmentAttribute::new("visual/moon_phase", AttributeType::MoonPhase, AttributeValue::MoonPhase(MoonPhase::FullMoon));
+    pub const STAR_BRIGHTNESS: EnvironmentAttribute = EnvironmentAttribute::new("visual/star_brightness", AttributeType::Float, AttributeValue::Float(0f32));
+    pub const BLOCK_LIGHT_TINT: EnvironmentAttribute = EnvironmentAttribute::new("visual/block_light_tint", AttributeType::RgbColor, color("#ffd88c"));
+    pub const SKY_LIGHT_COLOR: EnvironmentAttribute = EnvironmentAttribute::new("visual/sky_light_color", AttributeType::RgbColor, color("#ffffff"));
+    pub const SKY_LIGHT_FACTOR: EnvironmentAttribute = EnvironmentAttribute::new("visual/sky_light_factor", AttributeType::Float, AttributeValue::Float(1f32));
+    pub const NIGHT_VISION_COLOR: EnvironmentAttribute = EnvironmentAttribute::new("visual/night_vision_color", AttributeType::RgbColor, color("#999999"));
+    pub const AMBIENT_LIGHT_COLOR: EnvironmentAttribute = EnvironmentAttribute::new("visual/ambient_light_color", AttributeType::RgbColor, color("#000000"));
+    pub const DEFAULT_DRIPSTONE_PARTICLE: EnvironmentAttribute = EnvironmentAttribute::new("visual/default_dripstone_particle", AttributeType::Particle, AttributeValue::Particle(Particle { kind: std::borrow::Cow::Borrowed("minecraft:dripping_dripstone_water"), options: std::collections::BTreeMap::new() }));
+    pub const AMBIENT_PARTICLES: EnvironmentAttribute = EnvironmentAttribute::new("visual/ambient_particles", AttributeType::AmbientParticles, AttributeValue::AmbientParticles(Vec::new()));
+    pub const BACKGROUND_MUSIC: EnvironmentAttribute = EnvironmentAttribute::new("audio/background_music", AttributeType::BackgroundMusic, AttributeValue::BackgroundMusic(BackgroundMusic { default_music: None, creative_music: None, underwater_music: None }));
+    pub const MUSIC_VOLUME: EnvironmentAttribute = EnvironmentAttribute::new("audio/music_volume", AttributeType::Float, AttributeValue::Float(1f32));
+    pub const AMBIENT_SOUNDS: EnvironmentAttribute = EnvironmentAttribute::new("audio/ambient_sounds", AttributeType::AmbientSounds, AttributeValue::AmbientSounds(AmbientSounds { sound_loop: None, mood: None, additions: None }));
+    pub const FIREFLY_BUSH_SOUNDS: EnvironmentAttribute = EnvironmentAttribute::new("audio/firefly_bush_sounds", AttributeType::Boolean, AttributeValue::Boolean(false));
+    pub const SKY_LIGHT_LEVEL: EnvironmentAttribute = EnvironmentAttribute::new("gameplay/sky_light_level", AttributeType::Float, AttributeValue::Float(15f32));
+    pub const CAN_START_RAID: EnvironmentAttribute = EnvironmentAttribute::new("gameplay/can_start_raid", AttributeType::Boolean, AttributeValue::Boolean(true));
+    pub const WATER_EVAPORATES: EnvironmentAttribute = EnvironmentAttribute::new("gameplay/water_evaporates", AttributeType::Boolean, AttributeValue::Boolean(false));
+    pub const BED_RULE: EnvironmentAttribute = EnvironmentAttribute::new("gameplay/bed_rule", AttributeType::BedRule, AttributeValue::BedRule(BedRule { can_sleep: BedRuleKind::WhenDark, can_set_spawn: BedRuleKind::Always, explodes: None, error_message: Some(TextComponent::const_translatable("block.minecraft.bed.no_sleep")) }));
+    pub const RESPAWN_ANCHOR_WORKS: EnvironmentAttribute = EnvironmentAttribute::new("gameplay/respawn_anchor_works", AttributeType::Boolean, AttributeValue::Boolean(false));
+    pub const NETHER_PORTAL_SPAWNS_PIGLIN: EnvironmentAttribute = EnvironmentAttribute::new("gameplay/nether_portal_spawns_piglin", AttributeType::Boolean, AttributeValue::Boolean(false));
+    pub const FAST_LAVA: EnvironmentAttribute = EnvironmentAttribute::new("gameplay/fast_lava", AttributeType::Boolean, AttributeValue::Boolean(false));
+    pub const INCREASED_FIRE_BURNOUT: EnvironmentAttribute = EnvironmentAttribute::new("gameplay/increased_fire_burnout", AttributeType::Boolean, AttributeValue::Boolean(false));
+    pub const EYEBLOSSOM_OPEN: EnvironmentAttribute = EnvironmentAttribute::new("gameplay/eyeblossom_open", AttributeType::TriState, AttributeValue::TriState(TriState::Default));
+    pub const TURTLE_EGG_HATCH_CHANCE: EnvironmentAttribute = EnvironmentAttribute::new("gameplay/turtle_egg_hatch_chance", AttributeType::Float, AttributeValue::Float(0.002f32));
+    pub const PIGLINS_ZOMBIFY: EnvironmentAttribute = EnvironmentAttribute::new("gameplay/piglins_zombify", AttributeType::Boolean, AttributeValue::Boolean(true));
+    pub const SNOW_GOLEM_MELTS: EnvironmentAttribute = EnvironmentAttribute::new("gameplay/snow_golem_melts", AttributeType::Boolean, AttributeValue::Boolean(false));
+    pub const CREAKING_ACTIVE: EnvironmentAttribute = EnvironmentAttribute::new("gameplay/creaking_active", AttributeType::Boolean, AttributeValue::Boolean(false));
+    pub const SURFACE_SLIME_SPAWN_CHANCE: EnvironmentAttribute = EnvironmentAttribute::new("gameplay/surface_slime_spawn_chance", AttributeType::Float, AttributeValue::Float(0f32));
+    pub const CAT_WAKING_UP_GIFT_CHANCE: EnvironmentAttribute = EnvironmentAttribute::new("gameplay/cat_waking_up_gift_chance", AttributeType::Float, AttributeValue::Float(0f32));
+    pub const BEES_STAY_IN_HIVE: EnvironmentAttribute = EnvironmentAttribute::new("gameplay/bees_stay_in_hive", AttributeType::Boolean, AttributeValue::Boolean(false));
+    pub const MONSTERS_BURN: EnvironmentAttribute = EnvironmentAttribute::new("gameplay/monsters_burn", AttributeType::Boolean, AttributeValue::Boolean(false));
+    pub const CAN_PILLAGER_PATROL_SPAWN: EnvironmentAttribute = EnvironmentAttribute::new("gameplay/can_pillager_patrol_spawn", AttributeType::Boolean, AttributeValue::Boolean(true));
+    pub const VILLAGER_ACTIVITY: EnvironmentAttribute = EnvironmentAttribute::new("gameplay/villager_activity", AttributeType::Activity, AttributeValue::Activity(Key::const_vanilla("idle")));
+    pub const BABY_VILLAGER_ACTIVITY: EnvironmentAttribute = EnvironmentAttribute::new("gameplay/baby_villager_activity", AttributeType::Activity, AttributeValue::Activity(Key::const_vanilla("idle")));
+}
+pub(crate) fn register_all(registry: &mut Registry<EnvironmentAttribute>) {
+    let mut register = |key: &'static str, value: EnvironmentAttribute| {
+        Registry::register(registry, key.into(), value);
+    };
+    register(
+        "minecraft:visual/fog_color",
+        EnvironmentAttribute::FOG_COLOR,
+    );
+    register(
+        "minecraft:visual/fog_start_distance",
+        EnvironmentAttribute::FOG_START_DISTANCE,
+    );
+    register(
+        "minecraft:visual/fog_end_distance",
+        EnvironmentAttribute::FOG_END_DISTANCE,
+    );
+    register(
+        "minecraft:visual/sky_fog_end_distance",
+        EnvironmentAttribute::SKY_FOG_END_DISTANCE,
+    );
+    register(
+        "minecraft:visual/cloud_fog_end_distance",
+        EnvironmentAttribute::CLOUD_FOG_END_DISTANCE,
+    );
+    register(
+        "minecraft:visual/water_fog_color",
+        EnvironmentAttribute::WATER_FOG_COLOR,
+    );
+    register(
+        "minecraft:visual/water_fog_start_distance",
+        EnvironmentAttribute::WATER_FOG_START_DISTANCE,
+    );
+    register(
+        "minecraft:visual/water_fog_end_distance",
+        EnvironmentAttribute::WATER_FOG_END_DISTANCE,
+    );
+    register(
+        "minecraft:visual/sky_color",
+        EnvironmentAttribute::SKY_COLOR,
+    );
+    register(
+        "minecraft:visual/sunrise_sunset_color",
+        EnvironmentAttribute::SUNRISE_SUNSET_COLOR,
+    );
+    register(
+        "minecraft:visual/cloud_color",
+        EnvironmentAttribute::CLOUD_COLOR,
+    );
+    register(
+        "minecraft:visual/cloud_height",
+        EnvironmentAttribute::CLOUD_HEIGHT,
+    );
+    register(
+        "minecraft:visual/sun_angle",
+        EnvironmentAttribute::SUN_ANGLE,
+    );
+    register(
+        "minecraft:visual/moon_angle",
+        EnvironmentAttribute::MOON_ANGLE,
+    );
+    register(
+        "minecraft:visual/star_angle",
+        EnvironmentAttribute::STAR_ANGLE,
+    );
+    register(
+        "minecraft:visual/moon_phase",
+        EnvironmentAttribute::MOON_PHASE,
+    );
+    register(
+        "minecraft:visual/star_brightness",
+        EnvironmentAttribute::STAR_BRIGHTNESS,
+    );
+    register(
+        "minecraft:visual/block_light_tint",
+        EnvironmentAttribute::BLOCK_LIGHT_TINT,
+    );
+    register(
+        "minecraft:visual/sky_light_color",
+        EnvironmentAttribute::SKY_LIGHT_COLOR,
+    );
+    register(
+        "minecraft:visual/sky_light_factor",
+        EnvironmentAttribute::SKY_LIGHT_FACTOR,
+    );
+    register(
+        "minecraft:visual/night_vision_color",
+        EnvironmentAttribute::NIGHT_VISION_COLOR,
+    );
+    register(
+        "minecraft:visual/ambient_light_color",
+        EnvironmentAttribute::AMBIENT_LIGHT_COLOR,
+    );
+    register(
+        "minecraft:visual/default_dripstone_particle",
+        EnvironmentAttribute::DEFAULT_DRIPSTONE_PARTICLE,
+    );
+    register(
+        "minecraft:visual/ambient_particles",
+        EnvironmentAttribute::AMBIENT_PARTICLES,
+    );
+    register(
+        "minecraft:audio/background_music",
+        EnvironmentAttribute::BACKGROUND_MUSIC,
+    );
+    register(
+        "minecraft:audio/music_volume",
+        EnvironmentAttribute::MUSIC_VOLUME,
+    );
+    register(
+        "minecraft:audio/ambient_sounds",
+        EnvironmentAttribute::AMBIENT_SOUNDS,
+    );
+    register(
+        "minecraft:audio/firefly_bush_sounds",
+        EnvironmentAttribute::FIREFLY_BUSH_SOUNDS,
+    );
+    register(
+        "minecraft:gameplay/sky_light_level",
+        EnvironmentAttribute::SKY_LIGHT_LEVEL,
+    );
+    register(
+        "minecraft:gameplay/can_start_raid",
+        EnvironmentAttribute::CAN_START_RAID,
+    );
+    register(
+        "minecraft:gameplay/water_evaporates",
+        EnvironmentAttribute::WATER_EVAPORATES,
+    );
+    register(
+        "minecraft:gameplay/bed_rule",
+        EnvironmentAttribute::BED_RULE,
+    );
+    register(
+        "minecraft:gameplay/respawn_anchor_works",
+        EnvironmentAttribute::RESPAWN_ANCHOR_WORKS,
+    );
+    register(
+        "minecraft:gameplay/nether_portal_spawns_piglin",
+        EnvironmentAttribute::NETHER_PORTAL_SPAWNS_PIGLIN,
+    );
+    register(
+        "minecraft:gameplay/fast_lava",
+        EnvironmentAttribute::FAST_LAVA,
+    );
+    register(
+        "minecraft:gameplay/increased_fire_burnout",
+        EnvironmentAttribute::INCREASED_FIRE_BURNOUT,
+    );
+    register(
+        "minecraft:gameplay/eyeblossom_open",
+        EnvironmentAttribute::EYEBLOSSOM_OPEN,
+    );
+    register(
+        "minecraft:gameplay/turtle_egg_hatch_chance",
+        EnvironmentAttribute::TURTLE_EGG_HATCH_CHANCE,
+    );
+    register(
+        "minecraft:gameplay/piglins_zombify",
+        EnvironmentAttribute::PIGLINS_ZOMBIFY,
+    );
+    register(
+        "minecraft:gameplay/snow_golem_melts",
+        EnvironmentAttribute::SNOW_GOLEM_MELTS,
+    );
+    register(
+        "minecraft:gameplay/creaking_active",
+        EnvironmentAttribute::CREAKING_ACTIVE,
+    );
+    register(
+        "minecraft:gameplay/surface_slime_spawn_chance",
+        EnvironmentAttribute::SURFACE_SLIME_SPAWN_CHANCE,
+    );
+    register(
+        "minecraft:gameplay/cat_waking_up_gift_chance",
+        EnvironmentAttribute::CAT_WAKING_UP_GIFT_CHANCE,
+    );
+    register(
+        "minecraft:gameplay/bees_stay_in_hive",
+        EnvironmentAttribute::BEES_STAY_IN_HIVE,
+    );
+    register(
+        "minecraft:gameplay/monsters_burn",
+        EnvironmentAttribute::MONSTERS_BURN,
+    );
+    register(
+        "minecraft:gameplay/can_pillager_patrol_spawn",
+        EnvironmentAttribute::CAN_PILLAGER_PATROL_SPAWN,
+    );
+    register(
+        "minecraft:gameplay/villager_activity",
+        EnvironmentAttribute::VILLAGER_ACTIVITY,
+    );
+    register(
+        "minecraft:gameplay/baby_villager_activity",
+        EnvironmentAttribute::BABY_VILLAGER_ACTIVITY,
+    );
+}

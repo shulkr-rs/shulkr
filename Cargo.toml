@@ -1,14 +1,14 @@
 [workspace]
 members = [
-    "crates/cerium",
-    "crates/cerium-macros",
-    "crates/cerium-nbt",
+    "crates/shulkr",
+    "crates/shulkr-macros",
+    "crates/shulkr-nbt",
     "codegen",
 ]
 default-members = [
-    "crates/cerium",
-    "crates/cerium-macros",
-    "crates/cerium-nbt",
+    "crates/shulkr",
+    "crates/shulkr-macros",
+    "crates/shulkr-nbt",
 ]
 resolver = "2"
 
@@ -16,11 +16,11 @@ resolver = "2"
 version = "0.1.0"
 edition = "2024"
 license = "Apache-2.0"
-repository = "https://github.com/garfxld/cerium"
+repository = "https://github.com/garfxld/shulkr"
 
 [workspace.dependencies]
-cerium-nbt = { path = "crates/cerium-nbt" }
-cerium-macros = { path = "crates/cerium-macros" }
+shulkr-nbt = { path = "crates/shulkr-nbt" }
+shulkr-macros = { path = "crates/shulkr-macros" }
 anyhow = "1.0"
 tokio = { version = "1.46.0", features = ["macros", "rt-multi-thread", "net", "time", "sync", "io-util"], default-features = false }
 bytes = "1.10.1"
