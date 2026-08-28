@@ -135,11 +135,18 @@ impl Connection {
                 }
             }; // reader (MutexGuard) dropped here
 
+            let state = this.state();
             if let Err(e) = this
                 .handle_packet(packet.id(), &mut Cursor::new(packet.data()))
                 .await
             {
-                log::error!("Failed to handle packet: {}", e);
+                log::error!(
+                    "Failed to handle packet 0x{:02X} (state: {:?}, {} bytes): {}",
+                    packet.id(),
+                    state,
+                    packet.data().len(),
+                    e,
+                );
                 break;
             }
         }

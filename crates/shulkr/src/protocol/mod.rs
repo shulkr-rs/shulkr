@@ -35,12 +35,9 @@ impl ProtocolState {
     }
 }
 
-pub trait DataType
-where
-    Self: Sized,
-{
-    fn decode<R: PacketRead>(r: &mut R) -> Result<Self, DecodeError>;
-    fn encode<W: PacketWrite>(w: &mut W, this: &Self) -> Result<(), EncodeError>;
+pub trait DataType<T = Self> {
+    fn decode<R: PacketRead>(r: &mut R) -> Result<T, DecodeError>;
+    fn encode<W: PacketWrite>(w: &mut W, this: &T) -> Result<(), EncodeError>;
 }
 
 impl<T: DataType> Encode for T {

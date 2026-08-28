@@ -1,6 +1,6 @@
 use std::{io::Cursor, sync::Arc};
 
-use crate::entity::{EntityLike as _, MAX_VIEW_DISTANCE, Player};
+use crate::entity::{EntityLike as _, GameMode, MAX_VIEW_DISTANCE, Player};
 use crate::event::player::PlayerSpawnEvent;
 use crate::protocol::packet::CommandsPacket;
 use crate::util::{Position, TeleportFlags, Viewable};
@@ -118,7 +118,7 @@ fn handle_acknowledge_finish_config(
         dimension_type: registries.dimension_type.get_id(&dimension).unwrap_or(0) as i32,
         dimension_name: dimension.into(),
         hashed_seed: 93522819,
-        game_mode: 0,
+        game_mode: GameMode::Survival,
         previous_game_mode: -1,
         is_debug: false,
         is_flat: false,

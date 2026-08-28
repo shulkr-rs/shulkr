@@ -1,3 +1,5 @@
+use shulkr_macros::Enumeration;
+
 use crate::{
     protocol::{
         decode::{Decode, DecodeError, PacketRead},
@@ -21,16 +23,20 @@ impl ClientPacket for PlayerActionPacket {}
 impl Decode for PlayerActionPacket {
     #[rustfmt::skip]
     fn decode<R: PacketRead>(r: &mut R) -> Result<Self, DecodeError> {
+        let status = PlayerDiggingState::try_from(r.read_varint()?)?;
+        let position = r.read_position()?;
+        let face = BlockFace::try_from(i32::from(r.read_u8()?))?;
+
         Ok(Self {
-            status:   PlayerDiggingState::try_from(r.read_varint()?).unwrap(),
-            position: r.read_position()?,
-            face:     BlockFace::try_from(r.read_u8()? as i32).unwrap(),
+            status,
+            position,
+            face,
             sequence: r.read_varint()?,
         })
     }
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Enumeration)]
 pub enum PlayerDiggingState {
     StartDigging,
     CancelledDigging,
@@ -39,35 +45,4 @@ pub enum PlayerDiggingState {
     DropItem,
     ItemUpdated,
     SwapItemInHand,
-}
-
-impl TryFrom<i32> for PlayerDiggingState {
-    type Error = ();
-
-    fn try_from(value: i32) -> Result<Self, Self::Error> {
-        Ok(match value {
-            0 => Self::StartDigging,
-            1 => Self::CancelledDigging,
-            2 => Self::FinishedDigging,
-            3 => Self::DropItemStack,
-            4 => Self::DropItem,
-            5 => Self::ItemUpdated,
-            6 => Self::SwapItemInHand,
-            _ => return Err(()),
-        })
-    }
-}
-
-impl From<PlayerDiggingState> for i32 {
-    fn from(val: PlayerDiggingState) -> Self {
-        match val {
-            PlayerDiggingState::StartDigging => 0,
-            PlayerDiggingState::CancelledDigging => 1,
-            PlayerDiggingState::FinishedDigging => 2,
-            PlayerDiggingState::DropItemStack => 3,
-            PlayerDiggingState::DropItem => 4,
-            PlayerDiggingState::ItemUpdated => 5,
-            PlayerDiggingState::SwapItemInHand => 6,
-        }
-    }
 }

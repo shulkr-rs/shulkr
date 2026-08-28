@@ -10,6 +10,7 @@ use bitfield_struct::bitfield;
 use byteorder::{BigEndian, ReadBytesExt as _};
 use bytes::Buf as _;
 use flate2::bufread::{GzDecoder, ZlibDecoder};
+use shulkr_macros::Enumeration;
 use shulkr_nbt::{COMPOUND_ID, Nbt, NbtCompound, NbtTag};
 use std::{
     collections::HashMap,
@@ -149,17 +150,17 @@ impl Region {
         };
 
         decompress_buf.clear();
-        let mut nbt: &[u8] = match Compression::from_u8(compression) {
-            Some(Compression::Gzip) => {
+        let mut nbt: &[u8] = match Compression::try_from(i32::from(compression)) {
+            Ok(Compression::Gzip) => {
                 GzDecoder::new(data.as_slice()).read_to_end(decompress_buf)?;
                 decompress_buf
             }
-            Some(Compression::Zlib) => {
+            Ok(Compression::Zlib) => {
                 ZlibDecoder::new(data.as_slice()).read_to_end(decompress_buf)?;
                 decompress_buf
             }
-            Some(Compression::None) => data.as_slice(),
-            None => return Err(RegionError::InvalidCompressionScheme(compression)),
+            Ok(Compression::None) => data.as_slice(),
+            Err(_) => return Err(RegionError::InvalidCompressionScheme(compression)),
         };
 
         if nbt.remaining() < 3 || nbt.get_u8() != COMPOUND_ID {
@@ -185,24 +186,13 @@ pub struct RawChunk {
     pub timestamp: u32,
 }
 
-#[derive(Copy, Clone, Debug, PartialEq, Eq, Hash)]
+#[derive(Enumeration)]
 #[repr(u8)]
 #[non_exhaustive]
 pub enum Compression {
     Gzip = 1,
     Zlib = 2,
     None = 3,
-}
-
-impl Compression {
-    fn from_u8(value: u8) -> Option<Compression> {
-        match value {
-            1 => Some(Compression::Gzip),
-            2 => Some(Compression::Zlib),
-            3 => Some(Compression::None),
-            _ => None,
-        }
-    }
 }
 
 #[bitfield(u32)]

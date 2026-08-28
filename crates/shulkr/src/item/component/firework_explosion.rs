@@ -6,6 +6,7 @@ use crate::{
     },
     text::Rgb,
 };
+use shulkr_macros::Enumeration;
 
 pub struct FireworkExplosion {
     pub shape: ExplosionShape,
@@ -18,8 +19,7 @@ pub struct FireworkExplosion {
 impl DataType for FireworkExplosion {
     fn decode<R: PacketRead>(r: &mut R) -> Result<Self, DecodeError> {
         Ok(Self {
-            shape: ExplosionShape::try_from(r.read_varint()?)
-                .map_err(|_| DecodeError::Decode("Invalid ExplosionShape"))?,
+            shape: ExplosionShape::try_from(r.read_varint()?)?,
             colors: r.read_array(|r| r.read_varint().map(|v| Rgb::of(v as u32)))?,
             fade_colors: r.read_array(|r| r.read_varint().map(|v| Rgb::of(v as u32)))?,
             has_trail: r.read_bool()?,
@@ -37,26 +37,11 @@ impl DataType for FireworkExplosion {
     }
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
+#[derive(Enumeration)]
 pub enum ExplosionShape {
     SmallBall,
     LargeBall,
     Star,
     Creeper,
     Burst,
-}
-
-impl TryFrom<i32> for ExplosionShape {
-    type Error = ();
-
-    fn try_from(value: i32) -> Result<Self, Self::Error> {
-        match value {
-            0 => Ok(Self::SmallBall),
-            1 => Ok(Self::LargeBall),
-            2 => Ok(Self::Star),
-            3 => Ok(Self::Creeper),
-            4 => Ok(Self::Burst),
-            _ => Err(()),
-        }
-    }
 }

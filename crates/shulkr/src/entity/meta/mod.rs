@@ -10,9 +10,9 @@ use crate::auth::PlayerModel;
 use crate::auth::ProfileKind;
 use crate::auth::Property;
 use crate::auth::ResolvableProfile;
-use crate::entity::Hand;
-use crate::item::DataType2;
+use crate::entity::MainHand;
 use crate::item::VarInt;
+use crate::protocol::DataType;
 
 use crate::protocol::decode::Decode as _;
 use crate::protocol::decode::DecodeError;
@@ -327,19 +327,19 @@ macro_rules! define_types {
 
 macro_rules! decode {
     ($reader:expr, $typ:ty) => {
-        Arc::new(<$typ as DataType2<$typ>>::decode($reader)?)
+        Arc::new(<$typ as DataType>::decode($reader)?)
     };
     ($reader:expr, $typ:ty, $ser:ty) => {
-        Arc::new(<$ser as DataType2<$typ>>::decode($reader)?)
+        Arc::new(<$ser as DataType<$typ>>::decode($reader)?)
     };
 }
 
 macro_rules! encode {
     ($writer:expr, $value:expr, $typ:ty) => {
-        <$typ as DataType2<$typ>>::encode($writer, $value)?
+        <$typ as DataType>::encode($writer, $value)?
     };
     ($writer:expr, $value:expr, $typ:ty, $ser:ty) => {
-        <$ser as DataType2<$typ>>::encode($writer, $value)?
+        <$ser as DataType<$typ>>::encode($writer, $value)?
     };
 }
 
@@ -361,13 +361,12 @@ define_types! {
     const WEATHERING_COPPER_STATE: ValueType<WeatheringCopperState> = ValueType::new(33);
 
     const RESOLVABLE_PROFILE: ValueType<ResolvableProfile> = ValueType::new(41);
-    const HUMANOID_ARM: ValueType<Hand> = ValueType::new(42);
+    const HUMANOID_ARM: ValueType<MainHand> = ValueType::new(42);
 }
 
-impl DataType2<Self> for ResolvableProfile {
+impl DataType for ResolvableProfile {
     fn decode<R: PacketRead>(r: &mut R) -> Result<Self, DecodeError> {
-        let kind = ProfileKind::try_from(r.read_varint()?)
-            .map_err(|_| DecodeError::Decode("Invalid ProfileKind"))?;
+        let kind = ProfileKind::try_from(r.read_varint()?)?;
 
         Ok(Self {
             kind,
@@ -389,8 +388,7 @@ impl DataType2<Self> for ResolvableProfile {
             model: r
                 .read_option(R::read_varint)?
                 .map(PlayerModel::try_from)
-                .transpose()
-                .map_err(|_| DecodeError::Decode("Invalid PlayerModel"))?,
+                .transpose()?,
         })
     }
 
@@ -416,17 +414,7 @@ impl DataType2<Self> for ResolvableProfile {
     }
 }
 
-impl DataType2<Hand> for Hand {
-    fn decode<R: PacketRead>(r: &mut R) -> Result<Hand, DecodeError> {
-        Hand::try_from(r.read_varint()?).map_err(|_| DecodeError::Decode("Invalid Hand"))
-    }
-
-    fn encode<W: PacketWrite>(w: &mut W, this: &Hand) -> Result<(), EncodeError> {
-        w.write_varint(*this as i32)
-    }
-}
-
-impl DataType2<u8> for u8 {
+impl DataType for u8 {
     fn decode<R: PacketRead>(r: &mut R) -> Result<u8, DecodeError> {
         r.read_u8()
     }
@@ -435,7 +423,7 @@ impl DataType2<u8> for u8 {
     }
 }
 
-impl DataType2<BlockPosition> for BlockPosition {
+impl DataType for BlockPosition {
     fn decode<R: PacketRead>(r: &mut R) -> Result<BlockPosition, DecodeError> {
         r.read_position()
     }
@@ -445,7 +433,7 @@ impl DataType2<BlockPosition> for BlockPosition {
     }
 }
 
-impl DataType2<Uuid> for Uuid {
+impl DataType for Uuid {
     fn decode<R: PacketRead>(r: &mut R) -> Result<Uuid, DecodeError> {
         r.read_uuid()
     }
@@ -455,9 +443,9 @@ impl DataType2<Uuid> for Uuid {
     }
 }
 
-impl<T> DataType2<Option<T>> for Option<T>
+impl<T> DataType<Option<T>> for Option<T>
 where
-    T: DataType2<T>,
+    T: DataType,
 {
     fn decode<R: PacketRead>(r: &mut R) -> Result<Option<T>, DecodeError> {
         if r.read_bool()? {
@@ -476,7 +464,7 @@ where
     }
 }
 
-impl DataType2<Option<i32>> for Option<VarInt> {
+impl DataType<Option<i32>> for Option<VarInt> {
     fn decode<R: PacketRead>(r: &mut R) -> Result<Option<i32>, DecodeError> {
         Ok(match r.read_varint()? {
             0 => None,
@@ -486,15 +474,5 @@ impl DataType2<Option<i32>> for Option<VarInt> {
 
     fn encode<W: PacketWrite>(w: &mut W, this: &Option<i32>) -> Result<(), EncodeError> {
         w.write_varint(this.map_or(0, |value| value + 1))
-    }
-}
-
-impl DataType2<EntityPose> for EntityPose {
-    fn decode<R: PacketRead>(r: &mut R) -> Result<EntityPose, DecodeError> {
-        EntityPose::try_from(r.read_varint()?).map_err(|_| todo!())
-    }
-
-    fn encode<W: PacketWrite>(w: &mut W, this: &EntityPose) -> Result<(), EncodeError> {
-        w.write_varint(*this as i32)
     }
 }

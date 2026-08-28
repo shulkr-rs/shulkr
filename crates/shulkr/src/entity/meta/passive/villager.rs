@@ -1,11 +1,12 @@
+use shulkr_macros::{DataType, Enumeration};
+
 use crate::{
     entity::meta::{
         MetaAccessor, MetadataHolder,
         refs::villager::{DATA, DATA_FINALIZED},
     },
-    item::DataType2,
+    protocol::DataType,
     protocol::{
-        DataType,
         decode::{DecodeError, PacketRead},
         encode::{EncodeError, PacketWrite},
     },
@@ -39,7 +40,7 @@ impl MetaAccessor for VillagerMeta {
     }
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Enumeration, DataType)]
 pub enum VillagerVariant {
     Desert,
     Jungle,
@@ -48,35 +49,6 @@ pub enum VillagerVariant {
     Snow,
     Swamp,
     Taiga,
-}
-
-impl TryFrom<i32> for VillagerVariant {
-    type Error = ();
-
-    fn try_from(value: i32) -> Result<Self, Self::Error> {
-        Ok(match value {
-            0 => Self::Desert,
-            1 => Self::Jungle,
-            2 => Self::Plains,
-            3 => Self::Savanna,
-            4 => Self::Snow,
-            5 => Self::Swamp,
-            6 => Self::Taiga,
-            _ => return Err(()),
-        })
-    }
-}
-
-impl DataType for VillagerVariant {
-    fn decode<R: PacketRead>(r: &mut R) -> Result<Self, DecodeError> {
-        VillagerVariant::try_from(r.read_varint()?)
-            .map_err(|_| DecodeError::Decode("Invalid VillagerVariant"))
-    }
-
-    fn encode<W: PacketWrite>(w: &mut W, this: &Self) -> Result<(), EncodeError> {
-        w.write_varint(*this as i32)?;
-        Ok(())
-    }
 }
 
 #[derive(Clone, Copy)]
@@ -102,11 +74,10 @@ impl VillagerData {
     }
 }
 
-impl DataType2<VillagerData> for VillagerData {
+impl DataType for VillagerData {
     fn decode<R: PacketRead>(r: &mut R) -> Result<VillagerData, DecodeError> {
         Ok(Self {
-            ty: VillagerVariant::try_from(r.read_varint()?)
-                .map_err(|_| DecodeError::Decode("Invalid VillagerVariant"))?,
+            ty: VillagerVariant::try_from(r.read_varint()?)?,
             profession: r.read_varint()?,
             level: r.read_varint()?,
         })

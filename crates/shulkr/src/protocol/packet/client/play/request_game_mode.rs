@@ -17,7 +17,7 @@ impl ClientPacket for PlayerRequestGameModePacket {}
 impl Decode for PlayerRequestGameModePacket {
     fn decode<R: PacketRead>(r: &mut R) -> Result<Self, DecodeError> {
         Ok(Self {
-            game_mode: GameMode::try_from(r.read_varint()?).unwrap(),
+            game_mode: GameMode::try_from(r.read_varint()?)?,
         })
     }
 }

@@ -27,10 +27,15 @@ impl ClientPacket for UseItemOnPacket {}
 impl Decode for UseItemOnPacket {
     #[rustfmt::skip]
     fn decode<R: PacketRead>(r: &mut R) -> Result<Self, DecodeError> {
+        let hand = Hand::decode(r)?;
+        let position = r.read_position()?;
+
+        let face = BlockFace::try_from(r.read_varint()?)?;
+
         Ok(Self {
-            hand:             Hand::decode(r)?,
-            position:         r.read_position()?,
-            face:             BlockFace::try_from(r.read_varint()?).unwrap(),
+            hand,
+            position,
+            face,
             cursor_x:         r.read_f32()?,
             cursor_y:         r.read_f32()?,
             cursor_z:         r.read_f32()?,

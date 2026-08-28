@@ -258,10 +258,10 @@ pub mod interaction {
 
 #[rustfmt::skip]
 pub mod avatar {
-    use crate::entity::Hand;
+    use crate::entity::MainHand;
     use super::*;
 
-    pub const MAIN_HAND: MetadataRef<Hand>                  = MetadataRef::new(15, ValueType::HUMANOID_ARM, Hand::OffHand);
+    pub const MAIN_HAND: MetadataRef<MainHand>              = MetadataRef::new(15, ValueType::HUMANOID_ARM, MainHand::Right);
 
     pub const AVATAR_FLAGS: MetadataRef<u8>                 = MetadataRef::new(16, ValueType::BYTE, 0);
 

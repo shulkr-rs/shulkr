@@ -1,13 +1,8 @@
-use crate::{
-    entity::meta::{
-        MetaAccessor, MetadataHolder,
-        refs::llama::{STRENGTH, VARIANT},
-    },
-    protocol::{
-        DataType,
-        decode::{DecodeError, PacketRead},
-        encode::{EncodeError, PacketWrite},
-    },
+use shulkr_macros::{DataType, Enumeration};
+
+use crate::entity::meta::{
+    MetaAccessor, MetadataHolder,
+    refs::llama::{STRENGTH, VARIANT},
 };
 
 pub struct LlamaMeta {
@@ -38,36 +33,10 @@ impl MetaAccessor for LlamaMeta {
     }
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Enumeration, DataType)]
 pub enum LlamaVariant {
     Creamy,
     White,
     Brown,
     Gray,
-}
-
-impl TryFrom<i32> for LlamaVariant {
-    type Error = ();
-
-    fn try_from(value: i32) -> Result<Self, Self::Error> {
-        Ok(match value {
-            0 => Self::Creamy,
-            1 => Self::White,
-            2 => Self::Brown,
-            3 => Self::Gray,
-            _ => return Err(()),
-        })
-    }
-}
-
-impl DataType for LlamaVariant {
-    fn decode<R: PacketRead>(r: &mut R) -> Result<Self, DecodeError> {
-        LlamaVariant::try_from(r.read_varint()?)
-            .map_err(|_| DecodeError::Decode("Invalid LlamaVariant"))
-    }
-
-    fn encode<W: PacketWrite>(w: &mut W, this: &Self) -> Result<(), EncodeError> {
-        w.write_varint(*this as i32)?;
-        Ok(())
-    }
 }

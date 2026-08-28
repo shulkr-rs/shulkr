@@ -182,19 +182,19 @@ use crate::protocol::DataType;
 
 macro_rules! decode {
     ($reader:expr, $typ:ty) => {
-        Ok(Arc::new(<$typ as DataType2<$typ>>::decode($reader)?))
+        Ok(Arc::new(<$typ as DataType>::decode($reader)?))
     };
     ($reader:expr, $typ:ty, $ser:ty) => {
-        Ok(Arc::new(<$ser as DataType2<$typ>>::decode($reader)?))
+        Ok(Arc::new(<$ser as DataType<$typ>>::decode($reader)?))
     };
 }
 
 macro_rules! encode {
     ($writer:expr, $value:expr, $typ:ty) => {
-        <$typ as DataType2<$typ>>::encode($writer, $value)?
+        <$typ as DataType>::encode($writer, $value)?
     };
     ($writer:expr, $value:expr, $typ:ty, $ser:ty) => {
-        <$ser as DataType2<$typ>>::encode($writer, $value)?
+        <$ser as DataType<$typ>>::encode($writer, $value)?
     };
 }
 
@@ -300,30 +300,13 @@ define_components! {
 
 pub struct VarInt;
 
-impl DataType2<i32> for VarInt {
+impl DataType<i32> for VarInt {
     fn decode<R: PacketRead>(r: &mut R) -> Result<i32, DecodeError> {
         r.read_varint()
     }
 
     fn encode<W: PacketWrite>(w: &mut W, this: &i32) -> Result<(), EncodeError> {
         w.write_varint(*this)
-    }
-}
-
-pub trait DataType2<T> {
-    fn decode<R: PacketRead>(r: &mut R) -> Result<T, DecodeError>;
-    fn encode<W: PacketWrite>(w: &mut W, this: &T) -> Result<(), EncodeError>;
-}
-
-impl<D> DataType2<D> for D
-where
-    D: DataType,
-{
-    fn decode<R: PacketRead>(r: &mut R) -> Result<D, DecodeError> {
-        <D as DataType>::decode(r)
-    }
-    fn encode<W: PacketWrite>(w: &mut W, this: &D) -> Result<(), EncodeError> {
-        <D as DataType>::encode(w, this)
     }
 }
 

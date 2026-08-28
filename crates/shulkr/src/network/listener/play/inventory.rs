@@ -2,7 +2,7 @@ use crate::{
     entity::{GameMode, Player},
     event::{
         Cancellable,
-        inventory::{ClickAction, InventoryClickEvent},
+        inventory::{ClickAction, CreativeInventoryActionEvent, InventoryClickEvent},
     },
     inventory::{
         DragAction, DragState, HOTBAR_SLOTS, HOTBAR_START, Inventory, MAIN_START, OFFHAND_SLOT,
@@ -10,8 +10,9 @@ use crate::{
     },
     item::ItemStack,
     protocol::packet::{
-        ClickContainerPacket, SetContainerSlotPacket, SetCursorItemPacket,
-        client::CloseContainerPacket,
+        ClickContainerPacket, SetContainerSlotPacket, SetCreativeModeSlotPacket,
+        SetCursorItemPacket,
+        client::{CloseContainerPacket, play::SetHeldItemPacket},
     },
 };
 
@@ -589,6 +590,59 @@ pub fn handle_click_container(player: Player, packet: ClickContainerPacket) {
 pub fn handle_close_container(player: Player, packet: CloseContainerPacket) {
     let _ = packet;
     player.close_inventory();
+}
+
+pub(crate) fn handle_set_held_item(player: Player, packet: SetHeldItemPacket) {
+    player.0.update_held_slot(packet.slot as u8);
+}
+
+pub(crate) fn handle_set_creative_mode_slot(player: Player, packet: SetCreativeModeSlotPacket) {
+    if player.game_mode() != GameMode::Creative {
+        return;
+    }
+
+    let item_stack = ItemStack::from(packet.clicked_item);
+    let previous_item = player.inventory().get_item_stack(packet.slot as i32);
+
+    let mut event = CreativeInventoryActionEvent {
+        player: player.clone(),
+        slot: packet.slot,
+        clicked_item: item_stack,
+        cancelled: false,
+    };
+    player.server().events().fire(&mut event);
+
+    if event.is_cancelled() {
+        if let Some(previous_item) = previous_item {
+            player.send_packet(&SetContainerSlotPacket {
+                window_id: 0,
+                state_id: player.inventory().next_state(),
+                slot: packet.slot,
+                slot_data: previous_item.into(),
+            });
+        }
+        return;
+    }
+
+    let item_stack = event.clicked_item;
+
+    if packet.slot == -1 {
+        return;
+    }
+
+    if !(1..=OFFHAND_SLOT).contains(&(packet.slot as i32)) {
+        return;
+    }
+
+    let inventory = player.inventory();
+    inventory.set_item_stack(packet.slot as i32, item_stack.clone());
+
+    player.send_packet(&SetContainerSlotPacket {
+        window_id: 0,
+        state_id: player.inventory().next_state(),
+        slot: packet.slot,
+        slot_data: item_stack.into(),
+    });
 }
 
 #[cfg(test)]

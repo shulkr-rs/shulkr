@@ -1,30 +1,22 @@
 use std::io::Cursor;
 
 use crate::{
-    entity::{EntityAnimation, EntityLike as _, EntityType, GameMode, Hand, Player},
-    event::{
-        Cancellable,
-        inventory::CreativeInventoryActionEvent,
-        player::{
-            CommandResultEvent, PlayerInputEvent, PlayerPickBlockEvent, PlayerPickEntityEvent,
-            PlayerRequestGameModeEvent, PlayerStartSneakingEvent, PlayerStopSneakingEvent,
-        },
+    entity::{GameMode, Player},
+    event::player::{
+        CommandResultEvent, PlayerInputEvent, PlayerRequestGameModeEvent, PlayerStartSneakingEvent,
+        PlayerStopSneakingEvent,
     },
-    inventory::OFFHAND_SLOT,
-    item::ItemStack,
     protocol::{
         decode::{Decode as _, DecodeError},
         packet::{
-            AcknowledgeBlockChangePacket, ChangeRecipeBookSettingsPacket, ChatCommandPacket,
-            ChatMessagePacket, ChunkBatchReceivedPacket, ClickContainerPacket, ClientInfoPacket,
-            ClientTickEndPacket, ConfirmTeleportationPacket, EntityAnimationPacket, InteractPacket,
-            PickItemFromBlockPacket, PickItemFromEntityPacket, PlayerActionPacket, PlayerCommand,
-            PlayerCommandPacket, PlayerDiggingState, PlayerInputFlags, PlayerInputPacket,
-            PlayerLoadedPacket, PlayerMovementFlagsPacket, PlayerPositionAndRotationPacket,
-            PlayerPositionPacket, PlayerRequestGameModePacket, PlayerRotationPacket,
-            PlayerSessionPacket, SeenAdvancementsPacket, SetBlockDestroyStagePacket,
-            SetContainerSlotPacket, SetCreativeModeSlotPacket, SwingArmPacket, UseItemOnPacket,
-            UseItemPacket,
+            AttackPacket, ChangeRecipeBookSettingsPacket, ChatCommandPacket, ChatMessagePacket,
+            ChunkBatchReceivedPacket, ClickContainerPacket, ClientInfoPacket, ClientTickEndPacket,
+            ConfirmTeleportationPacket, InteractPacket, PickItemFromBlockPacket,
+            PickItemFromEntityPacket, PlayerActionPacket, PlayerCommand, PlayerCommandPacket,
+            PlayerInputFlags, PlayerInputPacket, PlayerLoadedPacket, PlayerMovementFlagsPacket,
+            PlayerPositionAndRotationPacket, PlayerPositionPacket, PlayerRequestGameModePacket,
+            PlayerRotationPacket, PlayerSessionPacket, SeenAdvancementsPacket,
+            SetCreativeModeSlotPacket, SwingArmPacket, UseItemOnPacket, UseItemPacket,
             client::{
                 self,
                 play::{
@@ -34,18 +26,21 @@ use crate::{
             },
         },
     },
-    registry::Id,
-    util::{BlockPosition, Position, Viewable},
 };
 
+mod interaction;
 mod inventory;
+mod movement;
 
+use interaction::*;
 use inventory::*;
+use movement::*;
 
 #[rustfmt::skip]
 pub fn handle_packet(player: Player, id: i32, data: &mut Cursor<&[u8]>) -> Result<(), DecodeError> {
     match id {
         0x00 => handle_confirm_teleportation(player, ConfirmTeleportationPacket::decode(data)?),
+        0x01 => handle_attack(player, AttackPacket::decode(data)?),
         0x05 => handle_request_game_mode(player, PlayerRequestGameModePacket::decode(data)?),
         0x07 => handle_chat_command(player, ChatCommandPacket::decode(data)?),
         0x09 => handle_chat_message(player, ChatMessagePacket::decode(data)?),
@@ -80,10 +75,6 @@ pub fn handle_packet(player: Player, id: i32, data: &mut Cursor<&[u8]>) -> Resul
         _ => return Err(DecodeError::UnkownPacket(id)),
     };
     Ok(())
-}
-
-fn handle_confirm_teleportation(_player: Player, _packet: ConfirmTeleportationPacket) {
-    log::warn!("todo: handle_confirm_teleportation");
 }
 
 fn handle_request_game_mode(player: Player, packet: PlayerRequestGameModePacket) {
@@ -149,72 +140,6 @@ fn handle_keep_alive(_player: Player, _packet: KeepAlivePacket) {
     log::warn!("todo: handle_keep_alive");
 }
 
-// ===== Position & Movement ======
-
-fn handle_player_position(player: Player, packet: PlayerPositionPacket) {
-    let new_position = Position::new(
-        packet.x,
-        packet.feet_y,
-        packet.z,
-        player.position().yaw(),
-        player.position().pitch(),
-    );
-    handle_movement(player, new_position, packet.flags & 1 != 0);
-}
-
-fn handle_player_position_and_rotation(player: Player, packet: PlayerPositionAndRotationPacket) {
-    let new_position = Position::new(packet.x, packet.feet_y, packet.z, packet.yaw, packet.pitch);
-    handle_movement(player, new_position, packet.flags & 1 != 0);
-}
-
-fn handle_player_rotation(player: Player, packet: PlayerRotationPacket) {
-    let new_position = Position::new(
-        player.position().x(),
-        player.position().y(),
-        player.position().z(),
-        packet.yaw,
-        packet.pitch,
-    );
-    handle_movement(player, new_position, packet.flags & 1 != 0);
-}
-
-fn handle_movement(player: Player, new_position: Position, on_ground: bool) {
-    let old_position = player.position();
-
-    if new_position == old_position {
-        return;
-    }
-
-    player.refresh_position(new_position);
-    player.set_on_ground(on_ground);
-}
-
-fn handle_interact(_player: Player, _packet: InteractPacket) {
-    log::warn!("todo: handle_interact");
-}
-
-fn handle_player_movement_flags(_player: Player, _packet: PlayerMovementFlagsPacket) {
-    log::warn!("todo: handle_player_movement_flags");
-}
-
-fn handle_pick_item_from_block(player: Player, packet: PickItemFromBlockPacket) {
-    let server = player.server();
-    server.events().fire(&mut PlayerPickBlockEvent {
-        player: player.clone(),
-        position: BlockPosition::from_long(packet.position),
-        include_data: packet.include_data,
-    });
-}
-
-fn handle_pick_item_from_entity(player: Player, packet: PickItemFromEntityPacket) {
-    let server = player.server();
-    server.events().fire(&mut PlayerPickEntityEvent {
-        player: player.clone(),
-        entity_type: EntityType::from_id(packet.entity_id as Id).expect("Invalid EntityType"),
-        include_data: packet.include_data,
-    });
-}
-
 fn handle_ping_request(_player: Player, _packet: PingRequestPacket) {
     log::warn!("todo: handle_ping_request");
 }
@@ -226,38 +151,6 @@ fn handle_player_abilities(player: Player, packet: PlayerAbilitiesPacket) {
         let flying = (packet.flags & 0x02) != 0;
         player.set_flying(flying);
     }
-}
-
-fn handle_player_action(player: Player, packet: PlayerActionPacket) {
-    let world = player.world();
-    let status = packet.status;
-    let position = packet.position;
-    let face = packet.face;
-
-    match status {
-        PlayerDiggingState::StartDigging => {
-            if player.game_mode() == GameMode::Creative {
-                // intant break the block
-                world.break_block(player.clone(), position, face);
-            }
-        }
-        PlayerDiggingState::CancelledDigging => {}
-        PlayerDiggingState::FinishedDigging => {
-            world.break_block(player.clone(), position, face);
-        }
-        PlayerDiggingState::DropItemStack => {}
-        PlayerDiggingState::DropItem => {}
-        PlayerDiggingState::ItemUpdated => {}
-        PlayerDiggingState::SwapItemInHand => {}
-    }
-
-    let packet = SetBlockDestroyStagePacket {
-        entitiy_id: player.id(),
-        location: position,
-        destroy_stage: status as u8,
-    };
-    player.send_packet(&packet);
-    player.broadcast_packet(&packet);
 }
 
 fn handle_player_command(player: Player, packet: PlayerCommandPacket) {
@@ -303,87 +196,3 @@ fn hande_change_recipe_book_settings(_player: Player, _packet: ChangeRecipeBookS
 }
 
 fn handle_seen_advancements(_player: Player, _packet: SeenAdvancementsPacket) {}
-
-fn handle_set_held_item(player: Player, packet: SetHeldItemPacket) {
-    player.0.update_held_slot(packet.slot as u8);
-}
-
-fn handle_set_creative_mode_slot(player: Player, packet: SetCreativeModeSlotPacket) {
-    if player.game_mode() != GameMode::Creative {
-        return;
-    }
-
-    let item_stack = ItemStack::from(packet.clicked_item);
-    let previous_item = player.inventory().get_item_stack(packet.slot as i32);
-
-    let mut event = CreativeInventoryActionEvent {
-        player: player.clone(),
-        slot: packet.slot,
-        clicked_item: item_stack,
-        cancelled: false,
-    };
-    player.server().events().fire(&mut event);
-
-    if event.is_cancelled() {
-        if let Some(previous_item) = previous_item {
-            player.send_packet(&SetContainerSlotPacket {
-                window_id: 0,
-                state_id: player.inventory().next_state(),
-                slot: packet.slot,
-                slot_data: previous_item.into(),
-            });
-        }
-        return;
-    }
-
-    let item_stack = event.clicked_item;
-
-    if packet.slot == -1 {
-        return;
-    }
-
-    if !(1..=OFFHAND_SLOT).contains(&(packet.slot as i32)) {
-        return;
-    }
-
-    let inventory = player.inventory();
-    inventory.set_item_stack(packet.slot as i32, item_stack.clone());
-
-    player.send_packet(&SetContainerSlotPacket {
-        window_id: 0,
-        state_id: player.inventory().next_state(),
-        slot: packet.slot,
-        slot_data: item_stack.into(),
-    });
-}
-
-fn handle_swing_arm(player: Player, packet: SwingArmPacket) {
-    player.broadcast_packet(&EntityAnimationPacket {
-        entity_id: player.id(),
-        animation: if packet.hand == Hand::MainHand {
-            EntityAnimation::SwingMainArm
-        } else {
-            EntityAnimation::SwingOffhand
-        },
-    });
-}
-
-fn handle_use_item_on(player: Player, packet: UseItemOnPacket) {
-    let world = player.world();
-    let position = packet.position;
-
-    let Some(placed_block) = player.get_item_in_hand(packet.hand) else {
-        return;
-    };
-
-    let Some(block) = placed_block.material().data().block else {
-        return;
-    };
-
-    world.place_block(player.clone(), position, packet.face, block.default_state());
-    player.send_packet(&AcknowledgeBlockChangePacket {
-        sequence_id: packet.sequence,
-    });
-}
-
-fn handle_use_item(_player: Player, _packet: UseItemPacket) {}

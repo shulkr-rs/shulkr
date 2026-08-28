@@ -1,3 +1,5 @@
+use shulkr_macros::Enumeration;
+
 use crate::protocol::{
     decode::{Decode, DecodeError, PacketRead},
     packet::{ClientPacket, Packet},
@@ -15,15 +17,16 @@ impl ClientPacket for PlayerCommandPacket {}
 
 impl Decode for PlayerCommandPacket {
     fn decode<R: PacketRead>(r: &mut R) -> Result<Self, DecodeError> {
+        let entity_id = r.read_varint()?;
         Ok(Self {
-            entity_id: r.read_varint()?,
-            action_id: PlayerCommand::try_from(r.read_varint()?).unwrap(),
+            entity_id,
+            action_id: PlayerCommand::try_from(r.read_varint()?)?,
             jump_boost: r.read_varint()?,
         })
     }
 }
 
-#[derive(Debug, Clone)]
+#[derive(Enumeration)]
 pub enum PlayerCommand {
     LeaveBed,
     StartSprinting,
@@ -32,22 +35,4 @@ pub enum PlayerCommand {
     StopJumpWithHorse,
     OpenVehicleInventory,
     StartFlyingWithElytra,
-}
-
-impl TryFrom<i32> for PlayerCommand {
-    type Error = ();
-
-    fn try_from(value: i32) -> Result<Self, Self::Error> {
-        let this = match value {
-            0 => Self::LeaveBed,
-            1 => Self::StartSprinting,
-            2 => Self::StopSprinting,
-            3 => Self::StartJumpWithHorse,
-            4 => Self::StopJumpWithHorse,
-            5 => Self::OpenVehicleInventory,
-            6 => Self::StartFlyingWithElytra,
-            _ => return Err(()),
-        };
-        Ok(this)
-    }
 }

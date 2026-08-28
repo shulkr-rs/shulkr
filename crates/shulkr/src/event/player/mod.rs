@@ -1,5 +1,6 @@
 #![allow(unused)]
 
+mod attack;
 mod command;
 mod config;
 mod drop;
@@ -10,6 +11,7 @@ mod pick;
 mod sneak;
 mod spawn;
 
+pub use attack::PlayerAttackEvent;
 pub use command::CommandResultEvent;
 pub use config::PlayerConfigEvent;
 pub use gamemode::PlayerRequestGameModeEvent;

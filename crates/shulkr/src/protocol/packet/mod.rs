@@ -41,6 +41,7 @@ pub mod client {
     }
 
     pub mod play {
+        mod attack;
         mod change_recipe_book_settings;
         mod chat_command;
         mod chat_message;
@@ -73,6 +74,7 @@ pub mod client {
         mod use_item;
         mod use_item_on;
 
+        pub use attack::AttackPacket;
         pub use change_recipe_book_settings::ChangeRecipeBookSettingsPacket;
         pub use chat_command::ChatCommandPacket;
         pub use chat_message::ChatMessagePacket;

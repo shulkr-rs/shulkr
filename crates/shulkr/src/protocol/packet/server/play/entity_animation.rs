@@ -18,7 +18,7 @@ impl ServerPacket for EntityAnimationPacket {}
 impl Encode for EntityAnimationPacket {
     fn encode<W: PacketWrite>(w: &mut W, this: &Self) -> Result<(), EncodeError> {
         w.write_varint(this.entity_id)?;
-        w.write_u8(this.animation.id() as u8)?;
+        w.write_u8(this.animation as u8)?;
         Ok(())
     }
 }

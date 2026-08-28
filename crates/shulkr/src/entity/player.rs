@@ -739,7 +739,7 @@ impl PlayerData {
     }
 
     fn get_item_in_hand(&self, hand: Hand) -> Option<ItemStack> {
-        self.get_equipment(if hand == Hand::MainHand {
+        self.get_equipment(if hand == Hand::Main {
             EquipmentSlot::MainHand
         } else {
             EquipmentSlot::OffHand
@@ -1115,7 +1115,7 @@ impl PlayerData {
             dimension_type,
             dimension_name: dimension.into(),
             hashed_seed: 93522819,
-            game_mode: self.game_mode().into(),
+            game_mode: self.game_mode(),
             previous_game_mode: -1,
             is_debug: false,
             is_flat: false,

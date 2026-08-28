@@ -1,5 +1,5 @@
 use crate::entity::{
-    Hand,
+    MainHand,
     meta::{
         MetaAccessor, MetadataHolder,
         refs::avatar::{
@@ -14,11 +14,11 @@ pub struct AvatarMeta {
 }
 
 impl AvatarMeta {
-    pub fn get_main_hand(&self) -> Hand {
+    pub fn get_main_hand(&self) -> MainHand {
         self.holder.get(MAIN_HAND)
     }
 
-    pub fn set_main_hand(&self, value: Hand) {
+    pub fn set_main_hand(&self, value: MainHand) {
         self.holder.set(MAIN_HAND, value);
     }
 

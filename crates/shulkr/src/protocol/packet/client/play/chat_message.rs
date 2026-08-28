@@ -23,9 +23,9 @@ impl Decode for ChatMessagePacket {
             message: r.read_string_limited::<256>()?,
             timestamp: r.read_i64()?,
             salt: r.read_i64()?,
-            signature: r.read_option(|r| r.read_boxed_slice())?,
+            signature: r.read_option(|r| r.read_bytes(256).map(Into::into))?,
             message_count: r.read_varint()?,
-            acknowledged: r.read_bytes(20)?, // Fixed BitSet(20)
+            acknowledged: r.read_bytes(3)?,
             checksum: r.read_u8()?,
         })
     }

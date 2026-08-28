@@ -1,13 +1,8 @@
-use crate::{
-    entity::meta::{
-        MetaAccessor, MetadataHolder,
-        refs::axolotl::{PLAYING_DEAD, SPAWNED_FROM_BUCKET, VARIANT},
-    },
-    protocol::{
-        DataType,
-        decode::{DecodeError, PacketRead},
-        encode::{EncodeError, PacketWrite},
-    },
+use shulkr_macros::{DataType, Enumeration};
+
+use crate::entity::meta::{
+    MetaAccessor, MetadataHolder,
+    refs::axolotl::{PLAYING_DEAD, SPAWNED_FROM_BUCKET, VARIANT},
 };
 
 pub struct AxolotlMeta {
@@ -46,38 +41,11 @@ impl MetaAccessor for AxolotlMeta {
     }
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Enumeration, DataType)]
 pub enum AxolotlVariant {
     Lucy,
     Wild,
     Gold,
     Cyan,
     Blue,
-}
-
-impl TryFrom<i32> for AxolotlVariant {
-    type Error = ();
-
-    fn try_from(value: i32) -> Result<Self, Self::Error> {
-        Ok(match value {
-            0 => Self::Lucy,
-            1 => Self::Wild,
-            2 => Self::Gold,
-            3 => Self::Cyan,
-            4 => Self::Blue,
-            _ => return Err(()),
-        })
-    }
-}
-
-impl DataType for AxolotlVariant {
-    fn decode<R: PacketRead>(r: &mut R) -> Result<Self, DecodeError> {
-        AxolotlVariant::try_from(r.read_varint()?)
-            .map_err(|_| DecodeError::Decode("Invalid AxolotlVariant"))
-    }
-
-    fn encode<W: PacketWrite>(w: &mut W, this: &Self) -> Result<(), EncodeError> {
-        w.write_varint(*this as i32)?;
-        Ok(())
-    }
 }

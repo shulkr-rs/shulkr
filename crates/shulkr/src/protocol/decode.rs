@@ -5,7 +5,7 @@ use uuid::Uuid;
 
 use crate::{
     text::TextComponent,
-    util::{BlockPosition, Key},
+    util::{BlockPosition, InvalidEnumVariant, Key},
 };
 use shulkr_nbt::Nbt;
 
@@ -26,6 +26,8 @@ pub enum DecodeError {
     NotEnoughBytes(usize, usize),
     #[error("Unknown Packet: {0}")]
     UnkownPacket(i32),
+    #[error(transparent)]
+    InvalidEnumVariant(#[from] InvalidEnumVariant),
 }
 
 type Result<T> = core::result::Result<T, DecodeError>;

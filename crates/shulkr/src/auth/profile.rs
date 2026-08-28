@@ -1,4 +1,5 @@
 use serde::{Deserialize, Serialize};
+use shulkr_macros::Enumeration;
 use uuid::Uuid;
 
 use crate::util::{Either, Key};
@@ -83,22 +84,10 @@ impl ResolvableProfile {
     }
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Enumeration)]
 pub enum ProfileKind {
     Partial,
     Complete,
-}
-
-impl TryFrom<i32> for ProfileKind {
-    type Error = ();
-
-    fn try_from(value: i32) -> Result<Self, Self::Error> {
-        Ok(match value {
-            0 => Self::Partial,
-            1 => Self::Complete,
-            _ => return Err(()),
-        })
-    }
 }
 
 #[derive(Debug, Clone)]
@@ -108,20 +97,8 @@ pub struct PartialProfile {
     pub properties: Vec<Property>,
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Enumeration)]
 pub enum PlayerModel {
     Wide,
     Slim,
-}
-
-impl TryFrom<i32> for PlayerModel {
-    type Error = ();
-
-    fn try_from(value: i32) -> Result<Self, Self::Error> {
-        Ok(match value {
-            0 => Self::Wide,
-            1 => Self::Slim,
-            _ => return Err(()),
-        })
-    }
 }
