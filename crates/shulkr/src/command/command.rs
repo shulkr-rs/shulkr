@@ -70,14 +70,14 @@ impl Command {
                 .subcommands
                 .iter()
                 .find(|command| command.matches_name(head))
-            {
-                let matches = subcommand.parse_tokens(tail)?;
-                return Ok(CommandMatches::new(
-                    self.name.clone(),
-                    HashMap::default(),
-                    Some(matches),
-                ));
-            }
+        {
+            let matches = subcommand.parse_tokens(tail)?;
+            return Ok(CommandMatches::new(
+                self.name.clone(),
+                HashMap::default(),
+                Some(matches),
+            ));
+        }
 
         let mut args = HashMap::default();
         let mut cursor = 0;

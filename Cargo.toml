@@ -18,7 +18,7 @@ resolver = "2"
 version = "0.1.1"
 edition = "2024"
 license = "Apache-2.0"
-repository = "https://github.com/garfxld/shulkr"
+repository = "https://github.com/shulkr-rs/shulkr"
 description = "Yet another library for building Minecraft servers in Rust."
 
 [workspace.dependencies]

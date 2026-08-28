@@ -53,14 +53,18 @@ impl TicketStorage {
         let old_loading_level = Self::ticket_level_in(existing, false, self.max_level);
         existing.push(ticket);
 
-        if ticket.ticket_type.does_simulate() && ticket.level < old_simulation_level
-            && let Some(listener) = &mut self.simulation_listener {
-                listener(pos, ticket.level, true);
-            }
-        if ticket.ticket_type.does_load() && ticket.level < old_loading_level
-            && let Some(listener) = &mut self.loading_listener {
-                listener(pos, ticket.level, true);
-            }
+        if ticket.ticket_type.does_simulate()
+            && ticket.level < old_simulation_level
+            && let Some(listener) = &mut self.simulation_listener
+        {
+            listener(pos, ticket.level, true);
+        }
+        if ticket.ticket_type.does_load()
+            && ticket.level < old_loading_level
+            && let Some(listener) = &mut self.loading_listener
+        {
+            listener(pos, ticket.level, true);
+        }
 
         true
     }

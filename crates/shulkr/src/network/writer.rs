@@ -77,9 +77,7 @@ where
             // WITHOUT compression
 
             self.write_varint(data_len).await?;
-            self.write_all(data)
-                .await
-                .map_err(EncodeError::StdIo)?;
+            self.write_all(data).await.map_err(EncodeError::StdIo)?;
         } else {
             // WITH compression
 
@@ -89,14 +87,8 @@ where
                 let mut compressed = Vec::new();
 
                 let mut deflator = ZlibEncoder::with_quality(&mut compressed, Level::Default);
-                deflator
-                    .write_all(data)
-                    .await
-                    .map_err(EncodeError::StdIo)?;
-                deflator
-                    .shutdown()
-                    .await
-                    .map_err(EncodeError::StdIo)?;
+                deflator.write_all(data).await.map_err(EncodeError::StdIo)?;
+                deflator.shutdown().await.map_err(EncodeError::StdIo)?;
 
                 // len of data_len + compressed_len
                 self.write_varint(Self::varint_size(data_len) + compressed.len() as i32)
@@ -116,9 +108,7 @@ where
                 // data_len (0 to indicate uncompressed)
                 self.write_varint(0).await?;
 
-                self.write_all(data)
-                    .await
-                    .map_err(EncodeError::StdIo)?;
+                self.write_all(data).await.map_err(EncodeError::StdIo)?;
             }
         }
 

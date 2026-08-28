@@ -31,10 +31,9 @@ impl DataType for PotDecorations {
     }
 
     fn encode<W: PacketWrite>(w: &mut W, this: &Self) -> Result<(), EncodeError> {
-        w.write_array(
-            &[this.back, this.left, this.right, this.front],
-            |w, v| w.write_varint(Id::from(*v) as i32),
-        )?;
+        w.write_array(&[this.back, this.left, this.right, this.front], |w, v| {
+            w.write_varint(Id::from(*v) as i32)
+        })?;
         Ok(())
     }
 }

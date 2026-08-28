@@ -14,7 +14,7 @@ Yet another high-performance Minecraft server library written in Rust.
 
 Add shulkr with `cargo add shulkr` to your project, or add the following to your `Cargo.toml`:
 ```
-shulkr = "0.1.0"
+shulkr = "0.1.1"
 ```
 
 You can use one of the examples to quick-start a project.

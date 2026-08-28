@@ -117,11 +117,12 @@ impl Parser {
             match c {
                 '\\' => {
                     if let Some(&next) = self.chars.get(self.pos)
-                        && (next == '<' || next == '\\') {
-                            self.buffer.push(next);
-                            self.pos += 1;
-                            continue;
-                        }
+                        && (next == '<' || next == '\\')
+                    {
+                        self.buffer.push(next);
+                        self.pos += 1;
+                        continue;
+                    }
                     self.buffer.push('\\');
                 }
                 '<' => self.read_tag(),
@@ -309,10 +310,11 @@ impl Parser {
         }
 
         if name == "object"
-            && let [atlas, sprite, ..] = args.as_slice() {
-                self.emit_object(atlas, sprite);
-                return;
-            }
+            && let [atlas, sprite, ..] = args.as_slice()
+        {
+            self.emit_object(atlas, sprite);
+            return;
+        }
 
         if name == "gradient" {
             self.flush();
@@ -373,9 +375,10 @@ fn resolve(name: &str, args: &[&str]) -> Option<TextFormat> {
 fn parse_color(name: &str) -> Option<Rgb> {
     if let Some(hex) = name.strip_prefix('#') {
         if hex.len() == 6
-            && let Ok(v) = u32::from_str_radix(hex, 16) {
-                return Some(Rgb::of(v));
-            }
+            && let Ok(v) = u32::from_str_radix(hex, 16)
+        {
+            return Some(Rgb::of(v));
+        }
         return None;
     }
 
@@ -393,11 +396,12 @@ fn parse_shadow(value: &str) -> Option<Rgba> {
     }
 
     if let Some(hex) = value.strip_prefix('#')
-        && hex.len() == 8 {
-            let rgba = u32::from_str_radix(hex, 16).ok()?;
-            let packed = rgba.rotate_right(8);
-            return Some(Rgba::of(packed));
-        }
+        && hex.len() == 8
+    {
+        let rgba = u32::from_str_radix(hex, 16).ok()?;
+        let packed = rgba.rotate_right(8);
+        return Some(Rgba::of(packed));
+    }
 
     parse_color(value).map(Rgba::from)
 }

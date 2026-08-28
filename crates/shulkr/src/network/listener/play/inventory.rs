@@ -388,18 +388,22 @@ pub(crate) fn drag_click(
         }
         1 => {
             if let Some(state) = drag.as_mut()
-                && state.action == action && slot != -1 && !state.slots.contains(&(slot as i16)) {
-                    let target = window.get(slot);
-                    if target.is_empty() || carried.can_stack_with(&target) {
-                        state.slots.push(slot as i16);
-                    }
+                && state.action == action
+                && slot != -1
+                && !state.slots.contains(&(slot as i16))
+            {
+                let target = window.get(slot);
+                if target.is_empty() || carried.can_stack_with(&target) {
+                    state.slots.push(slot as i16);
                 }
+            }
         }
         2 => {
             if let Some(state) = drag.as_ref()
-                && state.action == action {
-                    end_drag(window, state, carried, creative);
-                }
+                && state.action == action
+            {
+                end_drag(window, state, carried, creative);
+            }
             *drag = None;
         }
         _ => {}
