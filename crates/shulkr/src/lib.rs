@@ -8,6 +8,7 @@ pub mod item;
 pub mod protocol;
 pub mod registry;
 pub mod scoreboard;
+pub mod server_ping;
 pub mod text;
 pub mod tickable;
 pub mod util;
@@ -19,7 +20,5 @@ pub mod version;
 
 mod network;
 mod server;
-mod server_ping;
 
 pub use server::Server;
-pub use server_ping::*;

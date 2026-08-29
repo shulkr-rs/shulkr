@@ -33,7 +33,7 @@ fn main() {
         .events()
         .subscribe(move |event: &mut PlayerConfigEvent| {
             event.set_world(world.clone());
-            event.set_position((0.5, 71., 0.5));
+            event.set_position([0.5, 71., 0.5]);
         })
         .subscribe(move |event: &mut PlayerSpawnEvent| {
             event.get_player().set_game_mode(GameMode::Creative);

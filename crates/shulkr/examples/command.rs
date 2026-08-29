@@ -10,7 +10,7 @@ fn main() {
 
     for bz in 0..16 {
         for bx in 0..16 {
-            world.set_block(bx, 70, bz, Block::GRASS_BLOCK);
+            world.set_block([bx, 70, bz], Block::GRASS_BLOCK);
         }
     }
 
@@ -20,7 +20,7 @@ fn main() {
         .events()
         .subscribe(move |event: &mut PlayerConfigEvent| {
             event.set_world(world.clone());
-            event.set_position((0.5, 75.0, 0.5));
+            event.set_position([0.5, 75.0, 0.5]);
         })
         .subscribe(|event: &mut CommandResultEvent| {
             let Some(matches) = event.matches() else {

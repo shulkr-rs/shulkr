@@ -155,8 +155,8 @@ fn handle_player_abilities(player: Player, packet: PlayerAbilitiesPacket) {
 
 fn handle_player_command(player: Player, packet: PlayerCommandPacket) {
     match packet.action_id {
-        PlayerCommand::StartSprinting => player.0.set_sprinting(true),
-        PlayerCommand::StopSprinting => player.0.set_sprinting(false),
+        PlayerCommand::StartSprinting => player.set_sprinting(true),
+        PlayerCommand::StopSprinting => player.set_sprinting(false),
         _ => todo!(),
     }
 }
@@ -173,7 +173,7 @@ fn handle_player_input(player: Player, packet: PlayerInputPacket) {
     });
 
     if sneaking != was_sneaking {
-        player.0.set_sneaking(sneaking);
+        player.set_sneaking(sneaking);
 
         if sneaking {
             server.events().fire(&mut PlayerStartSneakingEvent {

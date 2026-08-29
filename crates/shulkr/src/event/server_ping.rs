@@ -1,4 +1,4 @@
-use crate::{PingResponse, event::Event};
+use crate::{event::Event, server_ping::PingResponse};
 
 pub struct ServerListPingEvent {
     pub(crate) response: PingResponse,

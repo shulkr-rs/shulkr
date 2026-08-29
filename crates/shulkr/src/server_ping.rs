@@ -21,6 +21,9 @@ impl PingResponse {
     ///
     /// # Example
     /// ```
+    /// use shulkr::server_ping::{PingResponse, Version};
+    ///
+    /// let version = Version::new(776, "26.2");
     /// let response = PingResponse::builder(version)
     ///     .with_max_players(100)
     ///     .with_online_players(5)

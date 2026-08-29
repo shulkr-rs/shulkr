@@ -7,7 +7,7 @@ mod hash_map;
 mod invalid_enum_variant;
 mod key;
 mod pose;
-mod position;
+mod vec3;
 mod viewable;
 mod world_pos;
 
@@ -20,6 +20,6 @@ pub use hash_map::*;
 pub use invalid_enum_variant::*;
 pub use key::*;
 pub use pose::*;
-pub use position::*;
+pub use vec3::*;
 pub use viewable::*;
 pub use world_pos::*;

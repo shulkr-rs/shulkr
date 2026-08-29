@@ -43,6 +43,7 @@ pub(crate) fn handle_player_rotation(player: Player, packet: PlayerRotationPacke
 
 fn handle_movement(player: Player, new_position: Position, on_ground: bool) {
     let old_position = player.position();
+    let new_position = Position::clamp_max(new_position);
 
     if new_position == old_position {
         return;

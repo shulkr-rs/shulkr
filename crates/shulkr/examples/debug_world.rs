@@ -16,14 +16,14 @@ fn main() {
     for (pos, block) in states.iter().enumerate() {
         let bz = ((pos / 168) + 1) as i32;
         let bx = ((pos % 168) + 1) as i32;
-        world.set_block((bz * 2) - 1, 70, (bx * 2) - 1, *block);
+        world.set_block([(bz * 2) - 1, 70, (bx * 2) - 1], *block);
     }
 
     server
         .events()
         .subscribe(move |event: &mut PlayerConfigEvent| {
             event.set_world(world.clone());
-            event.set_position((0.5, 71., 0.5));
+            event.set_position([0.5, 71., 0.5]);
         })
         .subscribe(move |event: &mut PlayerSpawnEvent| {
             let player = event.get_player();

@@ -10,6 +10,7 @@ mod mv;
 mod pick;
 mod sneak;
 mod spawn;
+mod teleport;
 
 pub use attack::PlayerAttackEvent;
 pub use command::CommandResultEvent;
@@ -20,6 +21,7 @@ pub use mv::PlayerMoveEvent;
 pub use pick::{PlayerPickBlockEvent, PlayerPickEntityEvent};
 pub use sneak::{PlayerStartSneakingEvent, PlayerStopSneakingEvent};
 pub use spawn::PlayerSpawnEvent;
+pub use teleport::EntityTeleportEvent;
 
 use crate::{entity::Player, event::Event};
 

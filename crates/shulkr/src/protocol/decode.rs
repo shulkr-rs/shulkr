@@ -167,7 +167,7 @@ impl<R: Buf> PacketRead for R {
         let y = (val << 52) >> 52;
         let z = (val << 26) >> 38;
 
-        Ok(BlockPosition::new(x, y, z))
+        Ok(BlockPosition::new(x as i32, y as i32, z as i32))
     }
 
     fn read_option<T, F>(&mut self, f: F) -> Result<Option<T>>

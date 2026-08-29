@@ -14,12 +14,12 @@ fn main() {
 
     for bz in 0..16 {
         for bx in 0..16 {
-            world.set_block(bx, 70, bz, Block::GRASS_BLOCK);
+            world.set_block([bx, 70, bz], Block::GRASS_BLOCK);
         }
     }
 
     let entity = Entity::new(EntityType::PLAYER);
-    entity.set_position((8, 71, 8, 0 as f32, 0 as f32));
+    entity.set_position([8, 71, 8]);
 
     world.spawn_entity(entity.clone());
 
@@ -27,7 +27,7 @@ fn main() {
         .events()
         .subscribe(move |event: &mut PlayerConfigEvent| {
             event.set_world(world.clone());
-            event.set_position((0.5, 71.0, 0.5));
+            event.set_position([0.5, 71.0, 0.5]);
         })
         .subscribe(move |event: &mut PlayerSpawnEvent| {
             let player = event.get_player();

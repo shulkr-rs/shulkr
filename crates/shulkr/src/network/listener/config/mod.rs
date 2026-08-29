@@ -3,7 +3,7 @@ use std::{io::Cursor, sync::Arc};
 use crate::entity::{EntityLike as _, GameMode, MAX_VIEW_DISTANCE, Player};
 use crate::event::player::PlayerSpawnEvent;
 use crate::protocol::packet::CommandsPacket;
-use crate::util::{Position, TeleportFlags, Viewable};
+use crate::util::{TeleportFlags, Velocity, Viewable};
 use crate::world::{DimensionType, chunk::Chunk};
 use crate::{event::player::PlayerConfigEvent, network::client::Connection};
 use crate::{
@@ -89,13 +89,13 @@ fn handle_acknowledge_finish_config(
     client.server().events().fire(&mut event);
 
     if let Some(world) = event.world {
-        player.0.set_world(world);
+        player.set_world(world);
     } else {
         todo!("no world set");
     }
 
     let position = if let Some(position) = event.position {
-        player.0.set_position(position);
+        player.set_position(position);
         position
     } else {
         todo!("no position set");
@@ -129,7 +129,7 @@ fn handle_acknowledge_finish_config(
         enforces_secure_chat: false,
     });
 
-    player.synchronize_position(position, Position::ZERO, TeleportFlags::empty());
+    player.synchronize_position(position, Velocity::ZERO, TeleportFlags::empty());
 
     client.send_packet(&GameEventPacket::START_WAITING_FOR_CHUNKS);
 
@@ -144,7 +144,7 @@ fn handle_acknowledge_finish_config(
 
         // Add player to tab for already playing players.
         for online_player in online_players {
-            online_player.send_packet(&player.0.add_to_list_packet());
+            online_player.send_packet(&player.add_to_list_packet());
             if *online_player != player {
                 player.add_viewer(online_player.clone());
             }

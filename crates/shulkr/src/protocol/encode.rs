@@ -197,8 +197,10 @@ impl<B: BufMut> PacketWrite for B {
     }
 
     fn write_position(&mut self, value: &BlockPosition) -> Result<()> {
-        let encoded =
-            ((value.x() & 0x3FFFFFF) << 38) | ((value.z() & 0x3FFFFFF) << 12) | (value.y() & 0xFFF);
+        let x = value.x() as i64;
+        let y = value.y() as i64;
+        let z = value.z() as i64;
+        let encoded = ((x & 0x3FFFFFF) << 38) | ((z & 0x3FFFFFF) << 12) | (y & 0xFFF);
 
         self.write_i64(encoded)?;
         Ok(())

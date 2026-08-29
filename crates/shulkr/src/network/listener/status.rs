@@ -1,5 +1,5 @@
+use crate::{event::server_ping::ServerListPingEvent, network::client::Connection};
 use crate::{
-    PingResponse, Version,
     protocol::{
         decode::{Decode as _, DecodeError},
         packet::{
@@ -7,9 +7,9 @@ use crate::{
             client::status::PingRequestPacket,
         },
     },
+    server_ping::{PingResponse, Version},
     text::TextComponent,
 };
-use crate::{event::server_ping::ServerListPingEvent, network::client::Connection};
 
 use std::{io::Cursor, sync::Arc};
 

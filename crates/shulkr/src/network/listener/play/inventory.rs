@@ -593,7 +593,7 @@ pub fn handle_close_container(player: Player, packet: CloseContainerPacket) {
 }
 
 pub(crate) fn handle_set_held_item(player: Player, packet: SetHeldItemPacket) {
-    player.0.update_held_slot(packet.slot as u8);
+    player.update_held_slot(packet.slot as u8);
 }
 
 pub(crate) fn handle_set_creative_mode_slot(player: Player, packet: SetCreativeModeSlotPacket) {

@@ -95,23 +95,26 @@ impl World {
         self.0.remove_viewer(chunk_x, chunk_z);
     }
 
-    pub fn get_block(&self, x: i32, y: i32, z: i32) -> BlockState {
-        self.0.get_block(x, y, z)
+    pub fn get_block(&self, position: impl Into<BlockPosition>) -> BlockState {
+        let position = position.into();
+        self.0.get_block(position.x(), position.y(), position.z())
     }
 
-    pub fn set_block<B>(&self, x: i32, y: i32, z: i32, block: B)
-    where
-        B: Into<BlockState>,
-    {
-        self.0.set_block(x, y, z, block)
+    pub fn set_block(&self, position: impl Into<BlockPosition>, block: impl Into<BlockState>) {
+        let position = position.into();
+        self.0
+            .set_block(position.x(), position.y(), position.z(), block)
     }
 
-    pub fn get_biome(&self, x: i32, y: i32, z: i32) -> u16 {
-        self.0.get_biome(x, y, z)
+    pub fn get_biome(&self, position: impl Into<BlockPosition>) -> u16 {
+        let position = position.into();
+        self.0.get_biome(position.x(), position.y(), position.z())
     }
 
-    pub fn set_biome(&self, x: i32, y: i32, z: i32, biome: i32) {
-        self.0.set_biome(x, y, z, biome)
+    pub fn set_biome(&self, position: impl Into<BlockPosition>, biome: i32) {
+        let position = position.into();
+        self.0
+            .set_biome(position.x(), position.y(), position.z(), biome)
     }
 
     pub fn spawn_entity(&self, entity: Entity) {
@@ -122,18 +125,18 @@ impl World {
         self.0.entities()
     }
 
-    pub fn break_block(&self, player: Player, position: BlockPosition, face: BlockFace) {
-        self.0.break_block(player, position, face);
+    pub fn break_block(&self, player: Player, position: impl Into<BlockPosition>, face: BlockFace) {
+        self.0.break_block(player, position.into(), face);
     }
 
     pub fn place_block(
         &self,
         player: Player,
-        position: BlockPosition,
+        position: impl Into<BlockPosition>,
         face: BlockFace,
         block: BlockState,
     ) {
-        self.0.place_block(player, position, face, block);
+        self.0.place_block(player, position.into(), face, block);
     }
 }
 
@@ -289,9 +292,6 @@ mod imp {
                 }
                 let slot = entry.get_mut();
                 slot.viewers = slot.viewers.saturating_sub(1);
-                if slot.viewers == 0 {
-                    entry.remove();
-                }
             }
         }
 
@@ -401,15 +401,7 @@ mod imp {
             let state = state.into();
             let block_id = state.state_id();
 
-            let new_position = match face {
-                BlockFace::Bottom => position.add(0, -1, 0),
-                BlockFace::East => position.add(1, 0, 0),
-                BlockFace::North => position.add(0, 0, -1),
-                BlockFace::South => position.add(0, 0, 1),
-                BlockFace::Top => position.add(0, 1, 0),
-                BlockFace::West => position.add(-1, 0, 0),
-            };
-
+            let new_position = position.relative(face);
             self.set_block(
                 new_position.x() as i32,
                 new_position.y() as i32,
