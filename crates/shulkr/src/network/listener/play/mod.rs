@@ -17,8 +17,8 @@ use crate::{
             PlayerCommand, PlayerCommandPacket, PlayerInputFlags, PlayerInputPacket,
             PlayerLoadedPacket, PlayerMovementFlagsPacket, PlayerPositionAndRotationPacket,
             PlayerPositionPacket, PlayerRequestGameModePacket, PlayerRotationPacket,
-            PlayerSessionPacket, SeenAdvancementsPacket, SetCreativeModeSlotPacket,
-            SwingArmPacket, UseItemOnPacket, UseItemPacket,
+            PlayerSessionPacket, SeenAdvancementsPacket, SetCreativeModeSlotPacket, SwingArmPacket,
+            UseItemOnPacket, UseItemPacket,
             client::{
                 self,
                 play::{
@@ -95,7 +95,7 @@ fn handle_chat_command(player: Player, packet: ChatCommandPacket) {
 
     if let Err(error) = server
         .command_dispatcher()
-        .execute(&packet.command, player.clone())
+        .execute(&packet.command, player.as_command_source())
     {
         player
             .send_message(TextComponent::text(error.message().to_string()).color(NamedColor::Red));
@@ -117,7 +117,7 @@ fn handle_command_suggestion(player: Player, packet: CommandSuggestionPacket) {
 
     let parse = server
         .command_dispatcher()
-        .parse_reader(reader, player.clone());
+        .parse_reader(reader, player.as_command_source());
     let suggestions = server
         .command_dispatcher()
         .completion_suggestions_for(&parse, cursor);

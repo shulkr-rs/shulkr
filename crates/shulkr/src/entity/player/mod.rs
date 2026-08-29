@@ -1,5 +1,6 @@
 use parking_lot::Mutex;
 use std::{
+    any::Any,
     collections::{HashMap, HashSet},
     net::SocketAddr,
     sync::{
@@ -14,6 +15,7 @@ use uuid::Uuid;
 use crate::{
     Server,
     auth::GameProfile,
+    command::CommandSender,
     entity::{
         EntityType, GameMode,
         entity::{Entity, EntityLike},
@@ -114,6 +116,10 @@ impl Player {
 
     pub fn server(&self) -> &Server {
         &self.0.server
+    }
+
+    pub fn as_command_source(&self) -> crate::command::CommandSource {
+        std::sync::Arc::new(self.clone())
     }
 
     pub fn despawn(&self) {
@@ -318,6 +324,22 @@ impl Viewable for Player {
 
     fn viewers(&self) -> &Viewers {
         self.0.entity.viewers()
+    }
+}
+
+impl CommandSender for Player {
+    fn as_any(&self) -> &dyn Any {
+        self
+    }
+}
+
+impl dyn CommandSender {
+    pub fn as_player(&self) -> Result<&Player, crate::command::CommandSyntaxException> {
+        self.downcast_ref::<Player>().ok_or_else(|| {
+            crate::command::CommandSyntaxException::custom(
+                "This command can only be used by a player",
+            )
+        })
     }
 }
 

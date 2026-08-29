@@ -1,8 +1,7 @@
 use shulkr::Server;
 use shulkr::auth::AuthMode;
 use shulkr::command::arguments::{DoubleArg, IntArg, StringArg};
-use shulkr::command::{CommandContext, argument, literal};
-use shulkr::entity::Player;
+use shulkr::command::{CommandContext, CommandSource, argument, literal};
 use shulkr::event::player::PlayerConfigEvent;
 use shulkr::world::{DimensionType, World, block::Block};
 
@@ -18,21 +17,24 @@ fn main() {
 
     let dispatcher = server.command_dispatcher();
 
-    dispatcher.register(literal("whoami").executes(|cx: &CommandContext<Player>| {
-        let player = cx.source();
-        player.send_message(player.name());
-        Ok(1)
-    }));
+    dispatcher.register(
+        literal("whoami").executes(|cx: &CommandContext<CommandSource>| {
+            let player = cx.source().as_player()?;
+            player.send_message(player.name());
+            Ok(1)
+        }),
+    );
 
     let teleport = dispatcher.register(literal("teleport").then(
         argument("x", DoubleArg::new()).then(argument("y", DoubleArg::new()).then(
-            argument("z", DoubleArg::new()).executes(|cx: &CommandContext<Player>| {
+            argument("z", DoubleArg::new()).executes(|cx: &CommandContext<CommandSource>| {
                 let x = cx.get::<DoubleArg>("x")?;
                 let y = cx.get::<DoubleArg>("y")?;
                 let z = cx.get::<DoubleArg>("z")?;
 
-                cx.source()
-                    .send_message(format!("Teleporting to {x} {y} {z}"));
+                let player = cx.source().as_player()?;
+                player.send_message(format!("Teleporting to {x} {y} {z}"));
+                player.teleport_to([x, y, z]);
                 Ok(1)
             }),
         )),
@@ -42,22 +44,28 @@ fn main() {
 
     dispatcher.register(
         literal("give").then(argument("item", StringArg::single_word()).then(
-            argument("count", IntArg::between(1, 64)).executes(|cx: &CommandContext<Player>| {
-                let item = cx.get::<StringArg>("item")?;
-                let count = cx.get::<IntArg>("count")?;
+            argument("count", IntArg::between(1, 64)).executes(
+                |cx: &CommandContext<CommandSource>| {
+                    let item = cx.get::<StringArg>("item")?;
+                    let count = cx.get::<IntArg>("count")?;
 
-                cx.source().send_message(format!("Giving {count}x {item}"));
-                Ok(count)
-            }),
+                    cx.source()
+                        .as_player()?
+                        .send_message(format!("Giving {count}x {item}"));
+                    Ok(count)
+                },
+            ),
         )),
     );
 
     dispatcher.register(
         literal("msg").then(
             argument("target", StringArg::single_word())
-                .suggests(|cx: &CommandContext<Player>, mut builder| {
-                    let names: Vec<String> = cx
-                        .source()
+                .suggests(|cx: &CommandContext<CommandSource>, mut builder| {
+                    let Ok(player) = cx.source().as_player() else {
+                        return builder.build();
+                    };
+                    let names: Vec<String> = player
                         .server()
                         .players()
                         .lock()
@@ -68,11 +76,12 @@ fn main() {
                     builder.build()
                 })
                 .then(argument("message", StringArg::greedy()).executes(
-                    |cx: &CommandContext<Player>| {
+                    |cx: &CommandContext<CommandSource>| {
                         let target = cx.get::<StringArg>("target")?;
                         let message = cx.get::<StringArg>("message")?;
 
                         cx.source()
+                            .as_player()?
                             .send_message(format!("[you -> {target}] {message}"));
                         Ok(1)
                     },
@@ -82,14 +91,18 @@ fn main() {
 
     dispatcher.register(
         literal("op")
-            .requires(|player: &Player| player.name() == "garfxld")
-            .then(
-                argument("count", IntArg::new()).executes(|cx: &CommandContext<Player>| {
+            .requires(|source: &CommandSource| {
+                source
+                    .as_player()
+                    .is_ok_and(|player| player.name() == "garfxld")
+            })
+            .then(argument("count", IntArg::new()).executes(
+                |cx: &CommandContext<CommandSource>| {
                     let count = cx.get::<IntArg>("count")?;
-                    cx.source().send_message(format!("op {count}"));
+                    cx.source().as_player()?.send_message(format!("op {count}"));
                     Ok(1)
-                }),
-            ),
+                },
+            )),
     );
 
     server

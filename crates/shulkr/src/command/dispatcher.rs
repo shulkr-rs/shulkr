@@ -150,7 +150,6 @@ impl<S: Clone> CommandDispatcher<S> {
                     continue;
                 }
 
-                found_command = true;
                 match context.redirect_modifier() {
                     None => next.push(child.copy_for(context.source().clone())),
                     Some(modifier) => match modifier(context) {

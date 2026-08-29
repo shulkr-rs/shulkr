@@ -31,7 +31,7 @@ pub enum CommandErrorKind {
     UnknownCommand,
     UnknownArgument,
     ExpectedArgumentSeparator,
-    
+
     Custom,
 }
 

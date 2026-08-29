@@ -161,7 +161,7 @@ fn handle_acknowledge_finish_config(
 
     client.send_packet(&CommandsPacket::from_dispatcher(
         client.server().command_dispatcher(),
-        &player,
+        &player.as_command_source(),
     ));
 
     client.server().events().fire(&mut PlayerSpawnEvent {

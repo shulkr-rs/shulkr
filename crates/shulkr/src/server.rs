@@ -4,7 +4,7 @@ use tokio::net::ToSocketAddrs;
 
 use crate::{
     auth::{AuthMode, KeyStore},
-    command::CommandDispatcher,
+    command::{CommandDispatcher, CommandSource},
     entity::Player,
     event::Events,
     registry::Registries,
@@ -66,7 +66,7 @@ impl Server {
         &self.players
     }
 
-    pub fn command_dispatcher(&self) -> &Arc<CommandDispatcher<Player>> {
+    pub fn command_dispatcher(&self) -> &Arc<CommandDispatcher<CommandSource>> {
         &self.command_dispatcher
     }
 
@@ -116,7 +116,7 @@ mod imp {
 
     use crate::{
         auth::{AuthMode, KeyStore},
-        command::CommandDispatcher,
+        command::{CommandDispatcher, CommandSource},
         entity::Player,
         event::Events,
         network::client::Connection,
@@ -134,7 +134,7 @@ mod imp {
         pub(super) key_store: Arc<KeyStore>,
         pub(super) events: Events,
         pub(super) players: Arc<Mutex<Vec<Player>>>,
-        pub(super) command_dispatcher: Arc<CommandDispatcher<Player>>,
+        pub(super) command_dispatcher: Arc<CommandDispatcher<CommandSource>>,
         pub(super) brand: Mutex<String>,
     }
 

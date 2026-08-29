@@ -1,5 +1,5 @@
 use crate::command::{
-    builder::{IntoCommandNode, ArgumentBuilder, builder_methods},
+    builder::{ArgumentBuilder, IntoCommandNode, builder_methods},
     tree::{CommandNode, NodeKind},
 };
 

@@ -44,12 +44,12 @@ pub mod client {
         mod attack;
         mod change_recipe_book_settings;
         mod chat_command;
-        mod command_suggestion;
         mod chat_message;
         mod chunk_batch_received;
         mod click_container;
         mod client_tick_end;
         mod close_container;
+        mod command_suggestion;
         mod confirm_teleportation;
         mod interact;
         mod keep_alive;
@@ -78,12 +78,12 @@ pub mod client {
         pub use attack::AttackPacket;
         pub use change_recipe_book_settings::ChangeRecipeBookSettingsPacket;
         pub use chat_command::ChatCommandPacket;
-        pub use command_suggestion::CommandSuggestionPacket;
         pub use chat_message::ChatMessagePacket;
         pub use chunk_batch_received::ChunkBatchReceivedPacket;
         pub use click_container::ClickContainerPacket;
         pub use client_tick_end::ClientTickEndPacket;
         pub use close_container::CloseContainerPacket;
+        pub use command_suggestion::CommandSuggestionPacket;
         pub use confirm_teleportation::ConfirmTeleportationPacket;
         pub use interact::InteractPacket;
         pub use keep_alive::KeepAlivePacket;

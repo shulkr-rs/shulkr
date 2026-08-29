@@ -2,7 +2,7 @@ use std::sync::Arc;
 
 use crate::command::{
     arguments::{AnyArg, Arg},
-    builder::{IntoCommandNode, ArgumentBuilder, builder_methods},
+    builder::{ArgumentBuilder, IntoCommandNode, builder_methods},
     context::CommandContext,
     suggestion::{Suggestions, SuggestionsBuilder},
     tree::{CommandNode, NodeKind, SuggestionProvider},

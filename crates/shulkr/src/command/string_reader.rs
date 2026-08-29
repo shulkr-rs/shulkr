@@ -46,7 +46,7 @@ impl StringReader {
     pub fn remaining(&self) -> &str {
         &self.string[self.cursor..]
     }
-    
+
     pub fn can_read_length(&self, length: usize) -> bool {
         self.remaining().chars().count() >= length
     }
