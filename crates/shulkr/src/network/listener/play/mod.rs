@@ -28,7 +28,7 @@ use crate::{
             },
         },
     },
-    text::{NamedColor, TextComponent},
+    text::NamedColor,
 };
 
 mod interaction;
@@ -97,10 +97,9 @@ fn handle_chat_command(player: Player, packet: ChatCommandPacket) {
         .command_dispatcher()
         .execute(&packet.command, player.as_command_source())
     {
-        player
-            .send_message(TextComponent::text(error.message().to_string()).color(NamedColor::Red));
+        player.send_message(error.message().clone().color(NamedColor::Red));
         if let Some(context) = error.context() {
-            player.send_message(TextComponent::text(context).color(NamedColor::Gray));
+            player.send_message(context);
         }
     }
 }

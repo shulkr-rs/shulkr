@@ -3,18 +3,17 @@ use std::{fmt, sync::Arc};
 use crate::command::{
     arguments::AnyArg,
     context::{CommandContext, CommandContextBuilder, ParsedArgument},
-    exceptions::CommandSyntaxException,
+    error::{self, Error},
     string_reader::StringReader,
     suggestion::{StringRange, Suggestions, SuggestionsBuilder},
 };
 
-pub type Command<S> =
-    Arc<dyn Fn(&CommandContext<S>) -> Result<i32, CommandSyntaxException> + Send + Sync>;
+pub type Command<S> = Arc<dyn Fn(&CommandContext<S>) -> Result<i32, Error> + Send + Sync>;
 
 pub type Requirement<S> = Arc<dyn Fn(&S) -> bool + Send + Sync>;
 
 pub type RedirectModifier<S> =
-    Arc<dyn Fn(&CommandContext<S>) -> Result<Vec<S>, CommandSyntaxException> + Send + Sync>;
+    Arc<dyn Fn(&CommandContext<S>) -> Result<Vec<S>, Error> + Send + Sync>;
 
 pub type SuggestionProvider<S> =
     Arc<dyn Fn(&CommandContext<S>, SuggestionsBuilder) -> Suggestions + Send + Sync>;
@@ -137,13 +136,14 @@ impl<S> CommandNode<S> {
         &self,
         reader: &mut StringReader,
         context: &mut CommandContextBuilder<S>,
-    ) -> Result<(), CommandSyntaxException> {
+    ) -> Result<(), Error> {
         match &self.kind {
             NodeKind::Root => Ok(()),
             NodeKind::Literal { literal } => {
                 let start = reader.cursor();
                 if !reader.remaining().starts_with(literal.as_str()) {
-                    return Err(CommandSyntaxException::literal_incorrect(literal)
+                    return Err(error::LITERAL_INCORRECT
+                        .create([error::arg(literal.clone())])
                         .with_context(reader.string(), start));
                 }
                 let end = start + literal.len();
@@ -152,7 +152,8 @@ impl<S> CommandNode<S> {
                     None | Some(' ') => Ok(()),
                     Some(_) => {
                         reader.set_cursor(start);
-                        Err(CommandSyntaxException::literal_incorrect(literal)
+                        Err(error::LITERAL_INCORRECT
+                            .create([error::arg(literal.clone())])
                             .with_context(reader.string(), start))
                     }
                 }

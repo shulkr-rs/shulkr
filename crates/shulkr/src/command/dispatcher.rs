@@ -5,7 +5,7 @@ use parking_lot::RwLock;
 use crate::command::{
     builder::LiteralArgumentBuilder,
     context::CommandContextBuilder,
-    exceptions::CommandSyntaxException,
+    error::{self, Error},
     string_reader::StringReader,
     suggestion::{StringRange, Suggestions, SuggestionsBuilder},
     tree::CommandNode,
@@ -16,7 +16,7 @@ pub const ARGUMENT_SEPARATOR: char = ' ';
 pub struct ParseResults<S> {
     context: CommandContextBuilder<S>,
     reader: StringReader,
-    exceptions: Vec<(Arc<CommandNode<S>>, CommandSyntaxException)>,
+    errors: Vec<(Arc<CommandNode<S>>, Error)>,
 }
 
 impl<S> ParseResults<S> {
@@ -24,8 +24,8 @@ impl<S> ParseResults<S> {
         &self.reader
     }
 
-    pub fn exceptions(&self) -> impl Iterator<Item = &CommandSyntaxException> {
-        self.exceptions.iter().map(|(_, e)| e)
+    pub fn errors(&self) -> impl Iterator<Item = &Error> {
+        self.errors.iter().map(|(_, e)| e)
     }
 }
 
@@ -99,17 +99,13 @@ impl<S: Clone> CommandDispatcher<S> {
         parse_nodes(&root, reader, context)
     }
 
-    pub fn execute(
-        &self,
-        input: impl Into<String>,
-        source: S,
-    ) -> Result<i32, CommandSyntaxException> {
+    pub fn execute(&self, input: impl Into<String>, source: S) -> Result<i32, Error> {
         let input = input.into();
         let parse = self.parse(input, source);
         self.execute_parsed(parse)
     }
 
-    pub fn execute_parsed(&self, parse: ParseResults<S>) -> Result<i32, CommandSyntaxException> {
+    pub fn execute_parsed(&self, parse: ParseResults<S>) -> Result<i32, Error> {
         if parse.reader.can_read() {
             return Err(unparsed_error(&parse));
         }
@@ -168,7 +164,8 @@ impl<S: Clone> CommandDispatcher<S> {
         }
 
         if !found_command {
-            return Err(CommandSyntaxException::unknown_command()
+            return Err(error::DISPATCHER_UNKNOWN_COMMAND
+                .create([])
                 .with_context(&input, parse.reader.cursor()));
         }
 
@@ -215,18 +212,22 @@ impl<S: Clone> CommandDispatcher<S> {
     }
 }
 
-fn unparsed_error<S>(parse: &ParseResults<S>) -> CommandSyntaxException {
+fn unparsed_error<S>(parse: &ParseResults<S>) -> Error {
     let input = parse.reader.string();
     let cursor = parse.reader.cursor();
 
-    if parse.exceptions.len() == 1 {
-        return parse.exceptions[0].1.clone();
+    if parse.errors.len() == 1 {
+        return parse.errors[0].1.clone();
     }
 
     if parse.context.range().is_empty() {
-        CommandSyntaxException::unknown_command().with_context(input, cursor)
+        error::DISPATCHER_UNKNOWN_COMMAND
+            .create([])
+            .with_context(input, cursor)
     } else {
-        CommandSyntaxException::unknown_argument().with_context(input, cursor)
+        error::DISPATCHER_UNKNOWN_ARGUMENT
+            .create([])
+            .with_context(input, cursor)
     }
 }
 
@@ -236,7 +237,7 @@ fn parse_nodes<S: Clone>(
     context_so_far: CommandContextBuilder<S>,
 ) -> ParseResults<S> {
     let source = context_so_far.source().clone();
-    let mut errors: Vec<(Arc<CommandNode<S>>, CommandSyntaxException)> = Vec::new();
+    let mut errors: Vec<(Arc<CommandNode<S>>, Error)> = Vec::new();
     let mut potentials: Vec<ParseResults<S>> = Vec::new();
     let cursor = original_reader.cursor();
 
@@ -253,7 +254,8 @@ fn parse_nodes<S: Clone>(
                 if reader.can_read() && reader.peek() != Some(ARGUMENT_SEPARATOR) {
                     errors.push((
                         child.clone(),
-                        CommandSyntaxException::expected_argument_separator()
+                        error::DISPATCHER_EXPECTED_ARGUMENT_SEPARATOR
+                            .create([])
                             .with_context(reader.string(), reader.cursor()),
                     ));
                     continue;
@@ -280,7 +282,7 @@ fn parse_nodes<S: Clone>(
                 return ParseResults {
                     context,
                     reader: parse.reader,
-                    exceptions: parse.exceptions,
+                    errors: parse.errors,
                 };
             }
 
@@ -289,7 +291,7 @@ fn parse_nodes<S: Clone>(
             potentials.push(ParseResults {
                 context,
                 reader,
-                exceptions: Vec::new(),
+                errors: Vec::new(),
             });
         }
     }
@@ -298,13 +300,13 @@ fn parse_nodes<S: Clone>(
         return ParseResults {
             context: context_so_far,
             reader: original_reader,
-            exceptions: errors,
+            errors,
         };
     }
 
     if potentials.len() > 1 {
         potentials.sort_by(|a, b| {
-            let key = |p: &ParseResults<S>| (p.reader.can_read(), !p.exceptions.is_empty());
+            let key = |p: &ParseResults<S>| (p.reader.can_read(), !p.errors.is_empty());
             key(a).cmp(&key(b))
         });
     }

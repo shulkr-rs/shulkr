@@ -2,7 +2,7 @@ pub mod arguments;
 pub mod builder;
 pub mod context;
 pub mod dispatcher;
-pub mod exceptions;
+pub mod error;
 pub mod source;
 pub mod string_reader;
 pub mod suggestion;
@@ -13,7 +13,7 @@ pub use builder::{
 };
 pub use context::CommandContext;
 pub use dispatcher::{CommandDispatcher, ParseResults};
-pub use exceptions::{CommandErrorKind, CommandSyntaxException};
+pub use error::{Error, ErrorKind};
 pub use source::{CommandSender, CommandSource};
 pub use string_reader::StringReader;
 pub use suggestion::{StringRange, Suggestion, Suggestions, SuggestionsBuilder};

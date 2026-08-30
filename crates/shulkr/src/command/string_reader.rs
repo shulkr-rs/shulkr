@@ -1,4 +1,4 @@
-use crate::command::exceptions::CommandSyntaxException;
+use crate::command::error::{self, Error};
 
 const SYNTAX_ESCAPE: char = '\\';
 const SYNTAX_DOUBLE_QUOTE: char = '"';
@@ -105,62 +105,78 @@ impl StringReader {
         self.string[start..self.cursor].to_string()
     }
 
-    pub fn read_int(&mut self) -> Result<i32, CommandSyntaxException> {
+    pub fn read_int(&mut self) -> Result<i32, Error> {
         let start = self.cursor;
         let text = self.read_number_text();
         if text.is_empty() {
-            return Err(CommandSyntaxException::expected_int().with_context(&self.string, start));
+            return Err(error::READER_EXPECTED_INT
+                .create([])
+                .with_context(&self.string, start));
         }
         match text.parse() {
             Ok(value) => Ok(value),
             Err(_) => {
                 self.cursor = start;
-                Err(CommandSyntaxException::invalid_int(&text).with_context(&self.string, start))
+                Err(error::READER_INVALID_INT
+                    .create([error::arg(text)])
+                    .with_context(&self.string, start))
             }
         }
     }
 
-    pub fn read_long(&mut self) -> Result<i64, CommandSyntaxException> {
+    pub fn read_long(&mut self) -> Result<i64, Error> {
         let start = self.cursor;
         let text = self.read_number_text();
         if text.is_empty() {
-            return Err(CommandSyntaxException::expected_long().with_context(&self.string, start));
+            return Err(error::READER_EXPECTED_LONG
+                .create([])
+                .with_context(&self.string, start));
         }
         match text.parse() {
             Ok(value) => Ok(value),
             Err(_) => {
                 self.cursor = start;
-                Err(CommandSyntaxException::invalid_long(&text).with_context(&self.string, start))
+                Err(error::READER_INVALID_LONG
+                    .create([error::arg(text)])
+                    .with_context(&self.string, start))
             }
         }
     }
 
-    pub fn read_float(&mut self) -> Result<f32, CommandSyntaxException> {
+    pub fn read_float(&mut self) -> Result<f32, Error> {
         let start = self.cursor;
         let text = self.read_number_text();
         if text.is_empty() {
-            return Err(CommandSyntaxException::expected_float().with_context(&self.string, start));
+            return Err(error::READER_EXPECTED_FLOAT
+                .create([])
+                .with_context(&self.string, start));
         }
         match text.parse() {
             Ok(value) => Ok(value),
             Err(_) => {
                 self.cursor = start;
-                Err(CommandSyntaxException::invalid_float(&text).with_context(&self.string, start))
+                Err(error::READER_INVALID_FLOAT
+                    .create([error::arg(text)])
+                    .with_context(&self.string, start))
             }
         }
     }
 
-    pub fn read_double(&mut self) -> Result<f64, CommandSyntaxException> {
+    pub fn read_double(&mut self) -> Result<f64, Error> {
         let start = self.cursor;
         let text = self.read_number_text();
         if text.is_empty() {
-            return Err(CommandSyntaxException::expected_double().with_context(&self.string, start));
+            return Err(error::READER_EXPECTED_DOUBLE
+                .create([])
+                .with_context(&self.string, start));
         }
         match text.parse() {
             Ok(value) => Ok(value),
             Err(_) => {
                 self.cursor = start;
-                Err(CommandSyntaxException::invalid_double(&text).with_context(&self.string, start))
+                Err(error::READER_INVALID_DOUBLE
+                    .create([error::arg(text)])
+                    .with_context(&self.string, start))
             }
         }
     }
@@ -173,19 +189,20 @@ impl StringReader {
         &self.string[start..self.cursor]
     }
 
-    pub fn read_quoted_string(&mut self) -> Result<String, CommandSyntaxException> {
+    pub fn read_quoted_string(&mut self) -> Result<String, Error> {
         let Some(next) = self.peek() else {
             return Ok(String::new());
         };
         if !Self::is_quoted_string_start(next) {
-            return Err(CommandSyntaxException::expected_start_of_quote()
+            return Err(error::READER_EXPECTED_START_OF_QUOTE
+                .create([])
                 .with_context(&self.string, self.cursor));
         }
         self.skip();
         self.read_string_until(next)
     }
 
-    fn read_string_until(&mut self, terminator: char) -> Result<String, CommandSyntaxException> {
+    fn read_string_until(&mut self, terminator: char) -> Result<String, Error> {
         let mut result = String::new();
         let mut escaped = false;
 
@@ -196,7 +213,8 @@ impl StringReader {
                     escaped = false;
                 } else {
                     self.cursor -= c.len_utf8();
-                    return Err(CommandSyntaxException::invalid_escape(c)
+                    return Err(error::READER_INVALID_ESCAPE
+                        .create([error::arg(c)])
                         .with_context(&self.string, self.cursor));
                 }
             } else if c == SYNTAX_ESCAPE {
@@ -208,10 +226,12 @@ impl StringReader {
             }
         }
 
-        Err(CommandSyntaxException::expected_end_of_quote().with_context(&self.string, self.cursor))
+        Err(error::READER_EXPECTED_END_OF_QUOTE
+            .create([])
+            .with_context(&self.string, self.cursor))
     }
 
-    pub fn read_string(&mut self) -> Result<String, CommandSyntaxException> {
+    pub fn read_string(&mut self) -> Result<String, Error> {
         match self.peek() {
             Some(next) if Self::is_quoted_string_start(next) => {
                 self.skip();
@@ -221,25 +241,29 @@ impl StringReader {
         }
     }
 
-    pub fn read_boolean(&mut self) -> Result<bool, CommandSyntaxException> {
+    pub fn read_boolean(&mut self) -> Result<bool, Error> {
         let start = self.cursor;
         let value = self.read_unquoted_string().to_string();
         match value.as_str() {
-            "" => Err(CommandSyntaxException::expected_bool().with_context(&self.string, start)),
+            "" => Err(error::READER_EXPECTED_BOOL
+                .create([])
+                .with_context(&self.string, start)),
             "true" => Ok(true),
             "false" => Ok(false),
             _ => {
                 self.cursor = start;
-                Err(CommandSyntaxException::invalid_bool(&value).with_context(&self.string, start))
+                Err(error::READER_INVALID_BOOL
+                    .create([error::arg(value)])
+                    .with_context(&self.string, start))
             }
         }
     }
 
-    pub fn expect(&mut self, c: char) -> Result<(), CommandSyntaxException> {
+    pub fn expect(&mut self, c: char) -> Result<(), Error> {
         if self.peek() != Some(c) {
-            return Err(
-                CommandSyntaxException::expected_symbol(c).with_context(&self.string, self.cursor)
-            );
+            return Err(error::READER_EXPECTED_SYMBOL
+                .create([error::arg(c)])
+                .with_context(&self.string, self.cursor));
         }
         self.skip();
         Ok(())

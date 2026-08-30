@@ -1,5 +1,9 @@
 use crate::{
-    command::{arguments::Arg, exceptions::CommandSyntaxException, string_reader::StringReader},
+    command::{
+        arguments::Arg,
+        error::{self, Error},
+        string_reader::StringReader,
+    },
     protocol::encode::{EncodeError, PacketWrite},
 };
 
@@ -57,17 +61,19 @@ macro_rules! numeric_argument {
             type Value = $value;
             const ID: i32 = $id;
 
-            fn parse(&self, reader: &mut StringReader) -> Result<$value, CommandSyntaxException> {
+            fn parse(&self, reader: &mut StringReader) -> Result<$value, Error> {
                 let start = reader.cursor();
                 let value = reader.$read()?;
                 if value < self.minimum {
                     reader.set_cursor(start);
-                    return Err(CommandSyntaxException::$too_low(value, self.minimum)
+                    return Err(error::$too_low
+                        .create([error::arg(self.minimum), error::arg(value)])
                         .with_context(reader.string(), start));
                 }
                 if value > self.maximum {
                     reader.set_cursor(start);
-                    return Err(CommandSyntaxException::$too_high(value, self.maximum)
+                    return Err(error::$too_high
+                        .create([error::arg(self.maximum), error::arg(value)])
                         .with_context(reader.string(), start));
                 }
                 Ok(value)
@@ -110,8 +116,8 @@ numeric_argument!(
     1,
     read = read_float,
     write = write_f32,
-    too_low = float_too_low,
-    too_high = float_too_high,
+    too_low = FLOAT_TOO_LOW,
+    too_high = FLOAT_TOO_HIGH,
     examples = ["0", "1.2", ".5", "-1", "-.5", "-1234.56"],
 );
 
@@ -122,8 +128,8 @@ numeric_argument!(
     2,
     read = read_double,
     write = write_f64,
-    too_low = double_too_low,
-    too_high = double_too_high,
+    too_low = DOUBLE_TOO_LOW,
+    too_high = DOUBLE_TOO_HIGH,
     examples = ["0", "1.2", ".5", "-1", "-.5", "-1234.56"],
 );
 
@@ -134,8 +140,8 @@ numeric_argument!(
     3,
     read = read_int,
     write = write_i32,
-    too_low = int_too_low,
-    too_high = int_too_high,
+    too_low = INTEGER_TOO_LOW,
+    too_high = INTEGER_TOO_HIGH,
     examples = ["0", "123", "-123"],
 );
 
@@ -146,7 +152,7 @@ numeric_argument!(
     4,
     read = read_long,
     write = write_i64,
-    too_low = long_too_low,
-    too_high = long_too_high,
+    too_low = LONG_TOO_LOW,
+    too_high = LONG_TOO_HIGH,
     examples = ["0", "123", "-123"],
 );

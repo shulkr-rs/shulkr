@@ -1,5 +1,5 @@
 use crate::{
-    command::{arguments::Arg, exceptions::CommandSyntaxException, string_reader::StringReader},
+    command::{arguments::Arg, error::Error, string_reader::StringReader},
     protocol::encode::{EncodeError, PacketWrite},
 };
 
@@ -91,7 +91,7 @@ impl Arg for StringArg {
     type Value = String;
     const ID: i32 = 5;
 
-    fn parse(&self, reader: &mut StringReader) -> Result<String, CommandSyntaxException> {
+    fn parse(&self, reader: &mut StringReader) -> Result<String, Error> {
         match self.behaviour {
             StringBehaviour::SingleWord => Ok(reader.read_unquoted_string().to_string()),
             StringBehaviour::QuotablePhrase => reader.read_string(),

@@ -333,13 +333,13 @@ impl CommandSender for Player {
     }
 }
 
+static ERROR_NOT_PLAYER: crate::command::ErrorKind =
+    crate::command::ErrorKind::new("permissions.requires.player");
+
 impl dyn CommandSender {
-    pub fn as_player(&self) -> Result<&Player, crate::command::CommandSyntaxException> {
-        self.downcast_ref::<Player>().ok_or_else(|| {
-            crate::command::CommandSyntaxException::custom(
-                "This command can only be used by a player",
-            )
-        })
+    pub fn as_player(&self) -> Result<&Player, crate::command::Error> {
+        self.downcast_ref::<Player>()
+            .ok_or_else(|| ERROR_NOT_PLAYER.create([]))
     }
 }
 

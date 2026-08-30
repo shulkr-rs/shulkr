@@ -68,7 +68,7 @@ macro_rules! builder_methods {
         where
             F: Fn(
                     &$crate::command::context::CommandContext<S>,
-                ) -> Result<i32, $crate::command::exceptions::CommandSyntaxException>
+                ) -> Result<i32, $crate::command::error::Error>
                 + Send
                 + Sync
                 + 'static,
@@ -100,7 +100,7 @@ macro_rules! builder_methods {
         where
             F: Fn(
                     &$crate::command::context::CommandContext<S>,
-                ) -> Result<Vec<S>, $crate::command::exceptions::CommandSyntaxException>
+                ) -> Result<Vec<S>, $crate::command::error::Error>
                 + Send
                 + Sync
                 + 'static,
@@ -118,7 +118,7 @@ macro_rules! builder_methods {
         where
             F: Fn(
                     &$crate::command::context::CommandContext<S>,
-                ) -> Result<Vec<S>, $crate::command::exceptions::CommandSyntaxException>
+                ) -> Result<Vec<S>, $crate::command::error::Error>
                 + Send
                 + Sync
                 + 'static,

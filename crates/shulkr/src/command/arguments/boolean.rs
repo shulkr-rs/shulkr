@@ -1,6 +1,6 @@
 use crate::command::{
     arguments::Arg,
-    exceptions::CommandSyntaxException,
+    error::Error,
     string_reader::StringReader,
     suggestion::{Suggestions, SuggestionsBuilder},
 };
@@ -18,7 +18,7 @@ impl Arg for BoolArg {
     type Value = bool;
     const ID: i32 = 0;
 
-    fn parse(&self, reader: &mut StringReader) -> Result<bool, CommandSyntaxException> {
+    fn parse(&self, reader: &mut StringReader) -> Result<bool, Error> {
         reader.read_boolean()
     }
 

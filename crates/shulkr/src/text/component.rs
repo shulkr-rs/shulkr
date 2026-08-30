@@ -273,6 +273,22 @@ impl TextComponent {
         self.extend(children.into_iter().map(|c| c.into()));
         self
     }
+
+    pub fn plain_text(&self) -> String {
+        let mut text = match &self.content {
+            TextContent::Text { text } => text.to_string(),
+            TextContent::Translatable {
+                translate,
+                fallback,
+                ..
+            } => fallback.as_deref().unwrap_or(translate).to_string(),
+            _ => format!("{:?}", self.content),
+        };
+        for child in &self.children {
+            text.push_str(&child.plain_text());
+        }
+        text
+    }
 }
 
 impl<S> From<S> for TextComponent

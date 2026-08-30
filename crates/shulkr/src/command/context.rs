@@ -3,7 +3,7 @@ use std::{any::Any, sync::Arc};
 use crate::{
     command::{
         arguments::Arg,
-        exceptions::CommandSyntaxException,
+        error::Error,
         suggestion::StringRange,
         tree::{Command, CommandNode, RedirectModifier},
     },
@@ -123,22 +123,16 @@ impl<S> CommandContext<S> {
         self.arguments.contains_key(name)
     }
 
-    pub fn get<T: Arg>(&self, name: &str) -> Result<T::Value, CommandSyntaxException> {
+    pub fn get<T: Arg>(&self, name: &str) -> Result<T::Value, Error> {
         let parsed = self.arguments.get(name).ok_or_else(|| {
-            CommandSyntaxException::custom(format!(
-                "No such argument '{name}' exists on this command"
-            ))
+            Error::custom(format!("No such argument '{name}' exists on this command"))
         })?;
 
         parsed
             .result
             .downcast_ref::<T::Value>()
             .cloned()
-            .ok_or_else(|| {
-                CommandSyntaxException::custom(format!(
-                    "Argument '{name}' is not of the requested type"
-                ))
-            })
+            .ok_or_else(|| Error::custom(format!("Argument '{name}' is not of the requested type")))
     }
 
     pub fn get_raw(&self, name: &str) -> Option<&str> {
