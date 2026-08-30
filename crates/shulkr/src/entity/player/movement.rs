@@ -200,7 +200,7 @@ impl Player {
         };
         self.server().events().fire(event);
 
-        self.0.entity.set_position(position.clone());
+        self.0.entity.set_position(position);
         self.synchronize_position(position, velocity, TeleportFlags::empty());
     }
 }

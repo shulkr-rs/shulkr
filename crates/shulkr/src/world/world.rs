@@ -361,15 +361,11 @@ mod imp {
             //     return;
             // };
 
-            let block = self.get_block(
-                position.x() as i32,
-                position.y() as i32,
-                position.z() as i32,
-            );
+            let block = self.get_block(position.x(), position.y(), position.z());
             self.set_block(
-                position.x() as i32,
-                position.y() as i32,
-                position.z() as i32,
+                position.x(),
+                position.y(),
+                position.z(),
                 Block::AIR.default_state(),
             );
 
@@ -402,12 +398,7 @@ mod imp {
             let block_id = state.state_id();
 
             let new_position = position.relative(face);
-            self.set_block(
-                new_position.x() as i32,
-                new_position.y() as i32,
-                new_position.z() as i32,
-                state,
-            );
+            self.set_block(new_position.x(), new_position.y(), new_position.z(), state);
 
             // todo: should be only sent to players that are viewing the block/chunk
             for player in player.server().players().lock().clone() {

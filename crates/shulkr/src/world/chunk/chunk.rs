@@ -77,8 +77,8 @@ impl Chunk {
 
     pub fn to_chunk_pos(position: impl Into<BlockPosition>) -> (i32, i32) {
         let position = position.into();
-        let chunk_x = position.x().div_euclid(16) as i32;
-        let chunk_z = position.z().div_euclid(16) as i32;
+        let chunk_x = position.x().div_euclid(16);
+        let chunk_z = position.z().div_euclid(16);
         (chunk_x, chunk_z)
     }
 
