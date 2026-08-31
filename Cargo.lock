@@ -237,7 +237,7 @@ checksum = "0c9ea0ac24bc397ab3c98583a3c9ba74fa56b09a4449bbe172b9b1ddb016027a"
 
 [[package]]
 name = "codegen"
-version = "0.1.1"
+version = "0.1.2"
 dependencies = [
  "convert_case",
  "indexmap",
@@ -1458,9 +1458,9 @@ dependencies = [
 
 [[package]]
 name = "rustls-webpki"
-version = "0.103.6"
+version = "0.103.15"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "8572f3c2cb9934231157b45499fc41e1f58c589fdfb81a844ba873265e80f8eb"
+checksum = "f3c3cf1d8b1e7d4927e2d154c3fcb02979afb9939629c62cd9048d4f07b60ac2"
 dependencies = [
  "ring",
  "rustls-pki-types",
@@ -1567,7 +1567,7 @@ checksum = "0fda2ff0d084019ba4d7c6f371c95d8fd75ce3524c3cb8fb653a3023f6323e64"
 
 [[package]]
 name = "shulkr"
-version = "0.1.1"
+version = "0.1.2"
 dependencies = [
  "aes",
  "anyhow",
@@ -1609,7 +1609,7 @@ dependencies = [
 
 [[package]]
 name = "shulkr-data"
-version = "0.1.1"
+version = "0.1.2"
 dependencies = [
  "rust-embed",
  "serde",
@@ -1618,7 +1618,7 @@ dependencies = [
 
 [[package]]
 name = "shulkr-macros"
-version = "0.1.1"
+version = "0.1.2"
 dependencies = [
  "convert_case",
  "proc-macro2",
@@ -1628,7 +1628,7 @@ dependencies = [
 
 [[package]]
 name = "shulkr-nbt"
-version = "0.1.1"
+version = "0.1.2"
 dependencies = [
  "bytes",
  "paste",
