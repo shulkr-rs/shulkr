@@ -1,4 +1,8 @@
 mod profile;
+use openssl::{
+    pkey::{PKey, Private},
+    rsa::{Padding, Rsa},
+};
 pub use profile::*;
 
 #[derive(Debug, Clone, Default, PartialEq, Eq)]
@@ -21,8 +25,8 @@ pub enum AuthError {
 
 #[derive(Debug)]
 pub struct KeyStore {
-    pub private_key: rsa::RsaPrivateKey,
-    pub public_key_der: Box<[u8]>,
+    pub private_key: Rsa<Private>,
+    pub public_key: Box<[u8]>,
 }
 
 impl Default for KeyStore {
@@ -33,27 +37,30 @@ impl Default for KeyStore {
 
 impl KeyStore {
     pub fn new() -> Self {
-        use rsa::{RsaPrivateKey, traits::PublicKeyParts as _};
+        let private_key = Rsa::generate(1024).unwrap();
 
-        let mut rand = rand::thread_rng();
-        let private_key = RsaPrivateKey::new(&mut rand, 1024).unwrap();
-
-        let public_key_der = rsa_der::public_key_to_der(
-            &private_key.n().to_bytes_be(),
-            &private_key.e().to_bytes_be(),
-        )
-        .into_boxed_slice();
+        let public_key = PKey::from_rsa(private_key.clone())
+            .unwrap()
+            .public_key_to_der()
+            .unwrap()
+            .into_boxed_slice();
 
         Self {
             private_key,
-            public_key_der,
+            public_key,
         }
     }
 
     pub fn decrypt(&self, data: &[u8]) -> Result<Vec<u8>, AuthError> {
-        self.private_key
-            .decrypt(rsa::Pkcs1v15Encrypt, data)
-            .map_err(|_| AuthError::DecryptionError)
+        let mut buf = vec![0u8; self.private_key.size() as usize];
+
+        let len = self
+            .private_key
+            .private_decrypt(data, &mut buf, Padding::PKCS1)
+            .map_err(|_| AuthError::DecryptionError)?;
+        buf.truncate(len);
+
+        Ok(buf)
     }
 
     pub fn digest_secret(&self, secret: &[u8]) -> String {
@@ -62,7 +69,7 @@ impl KeyStore {
         num_bigint::BigInt::from_signed_bytes_be(
             &Sha1::new()
                 .chain_update(secret)
-                .chain_update(&self.public_key_der)
+                .chain_update(&self.public_key)
                 .finalize(),
         )
         .to_str_radix(16)

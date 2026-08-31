@@ -4,7 +4,7 @@ use std::{
     task::{Context, Poll},
 };
 
-use aes::cipher::{BlockDecryptMut as _, BlockSizeUser as _, KeyIvInit as _};
+use aes::cipher::{BlockModeDecrypt as _, BlockSizeUser as _, KeyIvInit as _};
 use async_compression::tokio::bufread::ZlibDecoder;
 
 use tokio::io::{AsyncRead, AsyncReadExt, BufReader, ReadBuf};
@@ -120,7 +120,7 @@ where
 
                 if poll.is_ready() {
                     for block in buf.filled_mut()[len..].chunks_mut(Decryptor::block_size()) {
-                        cipher.decrypt_block_mut(block.into());
+                        cipher.decrypt_block(block.try_into().unwrap());
                     }
                 }
                 poll
