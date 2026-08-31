@@ -51,8 +51,7 @@ env_logger = { workspace = true }
 aes = { workspace = true }
 cfb8 = { workspace = true }
 num-bigint = { workspace = true }
-rsa = { workspace = true }
-rsa-der = { workspace = true }
+openssl = { workspace = true }
 sha1 = { workspace = true }
 take_mut = { workspace = true }
 futures = { workspace = true }

@@ -200,7 +200,7 @@ macro_rules! encode {
 
 // See: https://minecraft.wiki/w/Java_Edition_protocol/Slot_data#Structured_components
 define_components! {
-    const CUSTOM_DATA: DataComponent<Nbt>                               = DataComponent::new(0, "minecraft:custom_data");
+    const CUSTOM_DATA: DataComponent<Nbt>                               = DataComponent::new(0i32, "minecraft:custom_data");
     const MAX_STACK_SIZE: DataComponent<i32, VarInt>                    = DataComponent::new(1, "minecraft:max_stack_size");
     const MAX_DAMAGE: DataComponent<i32, VarInt>                        = DataComponent::new(2, "minecraft:max_damage");
     const DAMAGE: DataComponent<i32, VarInt>                            = DataComponent::new(3, "minecraft:damage");

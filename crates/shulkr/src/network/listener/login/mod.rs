@@ -61,7 +61,7 @@ fn login_online(conn: &Connection) {
 
     conn.send_packet(&EncryptionRequestPacket {
         server_id: String::new(),
-        public_key: conn.key_store.public_key_der.clone(),
+        public_key: conn.key_store.public_key.clone(),
         verify_token: Box::new(verify_token),
         should_authenticate: true,
     });

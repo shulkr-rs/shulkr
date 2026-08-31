@@ -4,7 +4,7 @@ use std::{
     task::{Context, Poll},
 };
 
-use aes::cipher::{BlockEncryptMut as _, BlockSizeUser as _, KeyIvInit as _};
+use aes::cipher::{BlockModeEncrypt as _, BlockSizeUser as _, KeyIvInit as _};
 use async_compression::{Level, tokio::write::ZlibEncoder};
 
 use crate::protocol::encode::EncodeError;
@@ -137,7 +137,10 @@ where
 
                 for block in buf.chunks(Encryptor::block_size()) {
                     let mut buf = [0u8];
-                    cipher.encrypt_block_b2b_mut(block.into(), (&mut buf).into());
+                    cipher.encrypt_block_b2b(
+                        block.try_into().unwrap(),
+                        (&mut buf[..]).try_into().unwrap(),
+                    );
 
                     match pin!(&mut this.inner).poll_write(cx, &buf) {
                         Poll::Pending => return Poll::Pending,
