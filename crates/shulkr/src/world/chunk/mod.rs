@@ -6,8 +6,6 @@ mod ticket;
 mod ticket_storage;
 mod view_tracker;
 
-use crate::util::HashMap;
-
 pub use async_dedup::AsyncDedup;
 pub use chunk_section::*;
 pub use chunk_tracker::{ChunkGraph, ChunkGraphSource};
@@ -17,7 +15,7 @@ pub use ticket_storage::TicketStorage;
 pub use view_tracker::ViewTracker;
 
 use crate::{
-    util::{BlockPosition, RwLock},
+    util::{BlockPosition, HashMap, RwLock},
     world::block::{BlockEntity, BlockState},
 };
 use std::sync::Arc;

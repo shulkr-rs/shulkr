@@ -126,9 +126,8 @@ impl TicketStorage {
 #[cfg(test)]
 mod tests {
     use super::{super::ticket::TicketType, *};
-    use std::sync::Arc;
-
     use crate::util::Mutex;
+    use std::sync::Arc;
 
     const MAX_LEVEL: i32 = 34;
 

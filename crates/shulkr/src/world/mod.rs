@@ -10,14 +10,12 @@ pub mod timeline;
 
 mod dimension_type;
 
-use crate::util::HashMap;
-
 pub use dimension_type::*;
 
 use crate::{
     entity::{Entity, Player},
     registry::RegistryKey,
-    util::BlockPosition,
+    util::{BlockPosition, HashMap},
     world::{
         block::{BlockFace, BlockState},
         chunk::Chunk,

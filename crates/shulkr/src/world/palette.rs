@@ -1,6 +1,5 @@
-use std::collections::hash_map::Entry;
-
 use crate::util::HashMap;
+use std::collections::hash_map::Entry;
 
 #[derive(Debug, Clone)]
 pub enum PaletteFormat {

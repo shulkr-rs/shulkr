@@ -1,13 +1,6 @@
-//! Loader for the [Polar](https://github.com/hollow-cube/polar) single-file
-//! world format.
-//!
-//! The whole file is read and decoded up front into owned [`Chunk`]s; pull them
-//! out with [`PolarLoader::load_chunk`] (each chunk is yielded once).
-
-use crate::util::HashMap;
-
 use crate::{
     registry::{Registry, RegistryKey},
+    util::HashMap,
     world::{
         biome::Biome,
         block::{Block, BlockState},
@@ -21,8 +14,6 @@ use thiserror::Error;
 
 const MAGIC: u32 = 0x506F_6C72; // "Polr"
 
-// Supported format revisions. Behaviour differs across a handful of them; see
-// https://github.com/hollow-cube/polar.
 const VERSION_USERDATA_OPT_BLOCK_ENT_NBT: u16 = 2;
 const VERSION_MINESTOM_NBT_READ_BREAK: u16 = 3;
 const VERSION_WORLD_USERDATA: u16 = 4;
