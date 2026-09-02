@@ -1,8 +1,5 @@
-use std::collections::HashMap;
-
+use crate::{text::TextComponent, util::HashMap};
 use serde::{Deserialize, Serialize};
-
-use crate::text::TextComponent;
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct TrimMaterial {

@@ -1,24 +1,7 @@
-use parking_lot::Mutex;
-use std::{
-    collections::{HashMap, HashSet},
-    net::SocketAddr,
-    sync::{
-        Arc,
-        atomic::{AtomicBool, AtomicI32, AtomicU8, Ordering},
-    },
-    time::{Duration, Instant},
-};
-use tokio::sync::Notify;
-use uuid::Uuid;
-
 use crate::{
     Server,
     auth::GameProfile,
-    entity::{
-        EntityType, GameMode,
-        entity::{Entity, EntityLike},
-        entity_status,
-    },
+    entity::{Entity, EntityLike, EntityType, GameMode, entity_status},
     inventory::{Inventory, PlayerInventory},
     network::client::Connection,
     protocol::packet::{
@@ -29,9 +12,19 @@ use crate::{
     },
     text::TextComponent,
     tickable::Tickable,
-    util::{Position, Viewable, Viewers},
+    util::{HashMap, HashSet, Mutex, Position, Viewable, Viewers},
     world::{World, chunk::Chunk},
 };
+use std::{
+    net::SocketAddr,
+    sync::{
+        Arc,
+        atomic::{AtomicBool, AtomicI32, AtomicU8, Ordering},
+    },
+    time::{Duration, Instant},
+};
+use tokio::sync::Notify;
+use uuid::Uuid;
 
 mod abilities;
 mod chunks;
@@ -366,8 +359,8 @@ mod imp {
                 teleport_id: AtomicI32::default(),
                 permission_level: AtomicU8::default(),
                 last_view: Mutex::new(None),
-                tracked_chunks: Mutex::new(HashMap::new()),
-                pending_loads: Mutex::new(HashSet::new()),
+                tracked_chunks: Mutex::new(HashMap::default()),
+                pending_loads: Mutex::new(HashSet::default()),
                 pending_notify: Notify::new(),
                 dispatcher_started: AtomicBool::new(false),
                 abilities: Abilities::new(),

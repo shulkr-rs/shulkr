@@ -1,6 +1,3 @@
-use serde::{Serialize, de::DeserializeOwned};
-use std::fmt::Debug;
-
 use crate::{
     protocol::{
         encode::{Encode, EncodeError, PacketWrite},
@@ -9,7 +6,9 @@ use crate::{
     registry::Registry,
     util::Key,
 };
+use serde::{Serialize, de::DeserializeOwned};
 use shulkr_nbt::{Nbt, to_nbt_compound};
+use std::fmt::Debug;
 
 #[derive(Debug, Clone)]
 pub struct RegistryDataPacket {

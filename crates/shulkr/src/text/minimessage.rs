@@ -1,10 +1,9 @@
-use std::cell::Cell;
-
 use super::{
     color::{NamedColor, Rgb, Rgba},
     component::TextComponent,
     style::{ClickEvent, HoverEvent, TextStyle},
 };
+use std::cell::Cell;
 
 pub struct MiniMessage;
 

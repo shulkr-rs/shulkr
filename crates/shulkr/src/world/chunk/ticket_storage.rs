@@ -1,5 +1,5 @@
 use super::ticket::Ticket;
-use std::collections::HashMap;
+use crate::util::HashMap;
 
 type ChunkLevelListener = Box<dyn FnMut((i32, i32), i32, bool) + Send>;
 
@@ -13,7 +13,7 @@ pub struct TicketStorage {
 impl TicketStorage {
     pub fn new(max_level: i32) -> Self {
         Self {
-            tickets: HashMap::new(),
+            tickets: HashMap::default(),
             max_level,
             loading_listener: None,
             simulation_listener: None,
@@ -125,9 +125,10 @@ impl TicketStorage {
 
 #[cfg(test)]
 mod tests {
-    use super::super::ticket::TicketType;
-    use super::*;
-    use std::sync::{Arc, Mutex};
+    use super::{super::ticket::TicketType, *};
+    use std::sync::Arc;
+
+    use crate::util::Mutex;
 
     const MAX_LEVEL: i32 = 34;
 
@@ -137,7 +138,7 @@ mod tests {
         let log = Arc::new(Mutex::new(Vec::new()));
         let recorder = log.clone();
         let listener = move |pos, level, only_decreased| {
-            recorder.lock().unwrap().push((pos, level, only_decreased));
+            recorder.lock().push((pos, level, only_decreased));
         };
         (listener, log)
     }
@@ -149,16 +150,13 @@ mod tests {
         storage.set_loading_chunk_updated_listener(listener);
 
         storage.add_ticket((0, 0), Ticket::new(TicketType::PLAYER_LOADING, 10));
-        assert_eq!(*log.lock().unwrap(), vec![((0, 0), 10, true)]);
+        assert_eq!(*log.lock(), vec![((0, 0), 10, true)]);
 
         storage.add_ticket((0, 0), Ticket::new(TicketType::PLAYER_LOADING, 20));
-        assert_eq!(log.lock().unwrap().len(), 1);
+        assert_eq!(log.lock().len(), 1);
 
         storage.add_ticket((0, 0), Ticket::new(TicketType::PLAYER_LOADING, 3));
-        assert_eq!(
-            *log.lock().unwrap(),
-            vec![((0, 0), 10, true), ((0, 0), 3, true)]
-        );
+        assert_eq!(*log.lock(), vec![((0, 0), 10, true), ((0, 0), 3, true)]);
     }
 
     #[test]
@@ -171,14 +169,14 @@ mod tests {
         let high = Ticket::new(TicketType::PLAYER_LOADING, 10);
         storage.add_ticket((0, 0), low);
         storage.add_ticket((0, 0), high);
-        log.lock().unwrap().clear();
+        log.lock().clear();
 
         storage.remove_ticket((0, 0), low);
-        assert_eq!(*log.lock().unwrap(), vec![((0, 0), 10, false)]);
+        assert_eq!(*log.lock(), vec![((0, 0), 10, false)]);
 
         storage.remove_ticket((0, 0), high);
         assert_eq!(
-            *log.lock().unwrap(),
+            *log.lock(),
             vec![((0, 0), 10, false), ((0, 0), MAX_LEVEL, false)]
         );
         assert!(storage.get_tickets((0, 0)).is_empty());
@@ -205,7 +203,7 @@ mod tests {
             "same type+level should not be added twice"
         );
         assert_eq!(
-            log.lock().unwrap().len(),
+            log.lock().len(),
             1,
             "re-adding an identical ticket should not re-notify"
         );

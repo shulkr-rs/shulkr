@@ -1,9 +1,8 @@
-use bitflags::bitflags;
-
 use crate::protocol::{
     encode::{Encode, EncodeError, PacketWrite},
     packet::{Packet, ServerPacket},
 };
+use bitflags::bitflags;
 
 #[derive(Debug, Clone)]
 pub struct PlayerAbilitiesPacket {

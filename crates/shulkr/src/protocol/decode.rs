@@ -1,13 +1,12 @@
-use bytes::Buf;
-use std::string::FromUtf8Error;
-use thiserror::Error;
-use uuid::Uuid;
-
 use crate::{
     text::TextComponent,
     util::{BlockPosition, InvalidEnumVariant, Key},
 };
+use bytes::Buf;
 use shulkr_nbt::Nbt;
+use std::string::FromUtf8Error;
+use thiserror::Error;
+use uuid::Uuid;
 
 pub trait Decode
 where

@@ -1,10 +1,11 @@
-use crate::auth::Property;
-use crate::inventory::Slot;
-use crate::item::{AnyDataComponent, ComponentMap, DataComponent};
-use crate::protocol::encode::PacketWrite;
-use crate::protocol::{
-    decode::{Decode, DecodeError, PacketRead},
-    encode::{Encode, EncodeError},
+use crate::{
+    auth::Property,
+    inventory::Slot,
+    item::{AnyDataComponent, ComponentMap, DataComponent},
+    protocol::{
+        decode::{Decode, DecodeError, PacketRead},
+        encode::{Encode, EncodeError, PacketWrite},
+    },
 };
 
 impl Decode for Property {

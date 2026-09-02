@@ -1,13 +1,11 @@
-use std::{fmt::Debug, sync::Arc};
-
-use rustc_hash::FxBuildHasher;
-
 use crate::{
     inventory::Slot,
     item::{ComponentMap, DataComponent, Material},
     registry::Id,
     util::HashMap,
 };
+use rustc_hash::FxBuildHasher;
+use std::{fmt::Debug, sync::Arc};
 
 #[derive(Debug, Clone)]
 pub struct ItemStack {

@@ -1,11 +1,11 @@
-use serde::de::DeserializeSeed;
-use serde::{Deserialize, Deserializer};
-
-use crate::util::{Key, deserialize_color};
-use crate::world::Particle;
-use crate::world::attribute::{
-    AmbientSounds, AttributeValue, BackgroundMusic, BedRule, MoonPhase, TriState,
+use crate::{
+    util::{Key, deserialize_color},
+    world::{
+        Particle,
+        attribute::{AmbientSounds, AttributeValue, BackgroundMusic, BedRule, MoonPhase, TriState},
+    },
 };
+use serde::{Deserialize, Deserializer, de::DeserializeSeed};
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 pub enum AttributeType {

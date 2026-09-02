@@ -1,9 +1,3 @@
-use std::{
-    collections::{HashMap, HashSet},
-    sync::atomic::Ordering,
-    time::Duration,
-};
-
 use super::Player;
 use crate::{
     entity::EntityLike,
@@ -11,8 +5,10 @@ use crate::{
         ChunkBatchFinishedPacket, ChunkBatchStartPacket, ChunkDataAndUpdateLightPacket,
         UnloadChunkPacket,
     },
+    util::{HashMap, HashSet},
     world::chunk::Chunk,
 };
+use std::{sync::atomic::Ordering, time::Duration};
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub(super) enum TrackState {

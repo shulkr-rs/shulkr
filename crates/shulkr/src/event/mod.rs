@@ -1,9 +1,10 @@
-mod events;
-pub use events::Events;
-
 pub mod inventory;
 pub mod player;
 pub mod server_ping;
+
+mod events;
+
+pub use events::Events;
 
 pub trait Event: Send {}
 

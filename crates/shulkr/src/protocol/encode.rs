@@ -1,8 +1,3 @@
-use bytes::BufMut;
-use std::any::TypeId;
-use thiserror::Error;
-use uuid::Uuid;
-
 use crate::{
     protocol::{
         ProtocolState,
@@ -31,7 +26,11 @@ use crate::{
     text::TextComponent,
     util::{BlockPosition, Key},
 };
+use bytes::BufMut;
 use shulkr_nbt::{Nbt, NbtTag};
+use std::any::TypeId;
+use thiserror::Error;
+use uuid::Uuid;
 
 #[derive(Error, Debug)]
 pub enum EncodeError {

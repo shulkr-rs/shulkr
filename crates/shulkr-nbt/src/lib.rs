@@ -1,19 +1,17 @@
-use std::{fmt::Display, ops::Deref};
-
 mod compound;
 mod deserialize;
 mod serialize;
 mod tag;
 
 pub use compound::*;
-use serde::{de, ser};
-pub use tag::*;
-use thiserror::Error;
-
 pub use deserialize::{from_bytes_named, from_bytes_unnamed};
 pub use serialize::{to_bytes_named, to_bytes_unnamed};
+pub use tag::*;
 
 use crate::serialize::WriteExt;
+use serde::{de, ser};
+use std::{fmt::Display, ops::Deref};
+use thiserror::Error;
 
 pub const END_ID: u8 = 0;
 pub const BYTE_ID: u8 = 1;
@@ -108,10 +106,9 @@ pub trait ToNbt {
 
 #[cfg(test)]
 mod tests {
-    use std::io::Cursor;
-
     use super::*;
     use serde::{Deserialize, Serialize};
+    use std::io::Cursor;
 
     #[derive(Serialize, Deserialize, PartialEq, Debug)]
     struct Test {

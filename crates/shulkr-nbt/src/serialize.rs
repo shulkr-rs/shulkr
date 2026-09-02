@@ -1,14 +1,12 @@
-use std::io::Write;
-
-use serde::{
-    Serialize,
-    ser::{self, Impossible},
-};
-
 use crate::{
     BYTE_ARRAY_ID, BYTE_ID, COMPOUND_ID, DOUBLE_ID, END_ID, Error, FLOAT_ID, INT_ARRAY_ID, INT_ID,
     LIST_ID, LONG_ARRAY_ID, LONG_ID, NbtTag, Result, SHORT_ID, STRING_ID,
 };
+use serde::{
+    Serialize,
+    ser::{self, Impossible},
+};
+use std::io::Write;
 
 pub fn to_bytes_unnamed<T: Serialize>(value: &T, w: impl Write) -> Result<()> {
     let mut serializer = Serializer::new(w, None);

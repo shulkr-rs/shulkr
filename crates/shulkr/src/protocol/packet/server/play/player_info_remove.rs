@@ -1,9 +1,8 @@
-use uuid::Uuid;
-
 use crate::protocol::{
     encode::{Encode, EncodeError, PacketWrite},
     packet::{Packet, ServerPacket},
 };
+use uuid::Uuid;
 
 #[derive(Debug, Clone)]
 pub struct PlayerInfoRemovePacket {

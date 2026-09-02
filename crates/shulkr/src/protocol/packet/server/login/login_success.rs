@@ -1,5 +1,3 @@
-use uuid::Uuid;
-
 use crate::{
     auth::{GameProfile, Property},
     protocol::{
@@ -7,6 +5,7 @@ use crate::{
         packet::{Packet, ServerPacket},
     },
 };
+use uuid::Uuid;
 
 #[derive(Debug, Clone)]
 pub struct LoginSuccessPacket {

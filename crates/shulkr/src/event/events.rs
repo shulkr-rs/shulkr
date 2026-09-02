@@ -1,10 +1,8 @@
-use std::{
-    any::{Any, TypeId},
-    collections::HashMap,
-    sync::RwLock,
+use crate::{
+    event::Event,
+    util::{HashMap, RwLock},
 };
-
-use crate::event::Event;
+use std::any::{Any, TypeId};
 
 type Listener = Box<dyn Fn(&mut dyn Any) + Send + Sync>;
 
@@ -21,7 +19,7 @@ impl Default for Events {
 impl Events {
     pub fn new() -> Self {
         Self {
-            listeners: RwLock::new(HashMap::new()),
+            listeners: RwLock::new(HashMap::default()),
         }
     }
 
@@ -31,7 +29,7 @@ impl Events {
         F: Fn(&mut E) + Send + Sync + 'static,
     {
         let type_id = TypeId::of::<E>();
-        let mut listeners = self.listeners.write().unwrap();
+        let mut listeners = self.listeners.write();
         let listeners = listeners.entry(type_id).or_default();
 
         let wrapper = Box::new(move |event: &mut dyn Any| {
@@ -49,7 +47,7 @@ impl Events {
         E: Event + 'static,
     {
         let type_id = TypeId::of::<E>();
-        let listeners = &self.listeners.read().unwrap();
+        let listeners = &self.listeners.read();
         if let Some(listeners) = listeners.get(&type_id) {
             for listener in listeners {
                 listener(event);

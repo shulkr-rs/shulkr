@@ -1,3 +1,21 @@
+pub(crate) mod generated;
+
+mod banner_pattern;
+mod damage_type;
+mod instrument;
+mod jukebox_song;
+mod registries;
+mod registry_key;
+mod tag;
+
+pub use banner_pattern::*;
+pub use damage_type::*;
+pub use instrument::*;
+pub use jukebox_song::*;
+pub use registries::*;
+pub use registry_key::*;
+pub use tag::*;
+
 use crate::{
     entity::{
         EntityType,
@@ -21,23 +39,6 @@ use crate::{
 use indexmap::IndexMap;
 use serde::{Serialize, de::DeserializeOwned};
 use std::sync::LazyLock;
-
-mod banner_pattern;
-mod damage_type;
-pub(crate) mod generated;
-mod instrument;
-mod jukebox_song;
-mod registries;
-mod registry_key;
-mod tag;
-
-pub use banner_pattern::*;
-pub use damage_type::*;
-pub use instrument::*;
-pub use jukebox_song::*;
-pub use registries::*;
-pub use registry_key::*;
-pub use tag::*;
 
 // Use this instead of u16. This makes it possible to swap the underlying type in the future if it is not big enough.
 pub type Id = u16;

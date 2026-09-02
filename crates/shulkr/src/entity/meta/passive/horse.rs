@@ -1,6 +1,5 @@
-use shulkr_macros::{DataType, Enumeration};
-
 use crate::entity::meta::{MetaAccessor, MetadataHolder, refs::horse::VARIANT};
+use shulkr_macros::{DataType, Enumeration};
 
 pub struct HorseMeta {
     holder: MetadataHolder,

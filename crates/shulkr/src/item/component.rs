@@ -1,25 +1,23 @@
-use std::any::Any;
-use std::sync::Arc;
-use std::{any::TypeId, marker::PhantomData};
-
-use crate::entity::meta::{
-    AxolotlVariant, FoxVariant, HorseVariant, LlamaVariant, MooshroomVariant, ParrotVariant,
-    RabbitVariant, TropicalFishPattern, VillagerVariant,
-};
-use crate::protocol::decode::{DecodeError, PacketRead};
-use crate::protocol::encode::{EncodeError, PacketWrite};
-
-use crate::util::HashMap;
 use crate::{
     entity::meta::{
-        CatVariant, ChickenVariant, CowVariant, FrogVariant, PaintingVariant, PigVariant,
-        WolfSoundVariant, WolfVariant,
+        AxolotlVariant, CatVariant, ChickenVariant, CowVariant, FoxVariant, FrogVariant,
+        HorseVariant, LlamaVariant, MooshroomVariant, PaintingVariant, ParrotVariant, PigVariant,
+        RabbitVariant, TropicalFishPattern, VillagerVariant, WolfSoundVariant, WolfVariant,
     },
     item::ItemStack,
+    protocol::{
+        decode::{DecodeError, PacketRead},
+        encode::{EncodeError, PacketWrite},
+    },
     text::TextComponent,
-    util::{DyeColor, Key},
+    util::{DyeColor, HashMap, Key},
 };
 use shulkr_nbt::Nbt;
+use std::{
+    any::{Any, TypeId},
+    marker::PhantomData,
+    sync::Arc,
+};
 
 mod armor_trim;
 mod consumable;

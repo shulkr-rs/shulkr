@@ -1,7 +1,8 @@
+use serde::{
+    Deserializer,
+    de::{Error, Unexpected, Visitor},
+};
 use std::borrow::Cow;
-
-use serde::Deserializer;
-use serde::de::{Error, Unexpected, Visitor};
 
 pub fn rgb_to_hex(value: u32) -> String {
     format!("#{:06x}", value & 0x00ff_ffff)

@@ -1,8 +1,10 @@
-use shulkr::Server;
-use shulkr::auth::AuthMode;
-use shulkr::command::Command;
-use shulkr::event::player::{CommandResultEvent, PlayerConfigEvent, PlayerEvent};
-use shulkr::world::{DimensionType, World, block::Block};
+use shulkr::{
+    Server,
+    auth::AuthMode,
+    command::Command,
+    event::player::{CommandResultEvent, PlayerConfigEvent, PlayerEvent},
+    world::{DimensionType, World, block::Block},
+};
 
 fn main() {
     tracing_subscriber::fmt::init();

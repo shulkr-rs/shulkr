@@ -1,12 +1,12 @@
-use shulkr::Server;
-use shulkr::auth::AuthMode;
-use shulkr::entity::{Entity, EntityLike as _, EntityType, GameMode};
-use shulkr::event::player::{PlayerConfigEvent, PlayerEvent as _, PlayerSpawnEvent};
-use shulkr::protocol::packet::{
-    PlayerAction, PlayerEntry, PlayerInfoFlags, PlayerInfoUpdatePacket,
+use shulkr::{
+    Server,
+    auth::AuthMode,
+    entity::{Entity, EntityLike as _, EntityType, GameMode},
+    event::player::{PlayerConfigEvent, PlayerEvent as _, PlayerSpawnEvent},
+    protocol::packet::{PlayerAction, PlayerEntry, PlayerInfoFlags, PlayerInfoUpdatePacket},
+    util::Viewable,
+    world::{DimensionType, World, block::Block},
 };
-use shulkr::util::Viewable;
-use shulkr::world::{DimensionType, World, block::Block};
 
 fn main() {
     tracing_subscriber::fmt::init();

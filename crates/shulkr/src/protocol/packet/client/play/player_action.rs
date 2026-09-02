@@ -1,5 +1,3 @@
-use shulkr_macros::Enumeration;
-
 use crate::{
     protocol::{
         decode::{Decode, DecodeError, PacketRead},
@@ -8,6 +6,7 @@ use crate::{
     util::BlockPosition,
     world::block::BlockFace,
 };
+use shulkr_macros::Enumeration;
 
 #[derive(Debug, Clone)]
 pub struct PlayerActionPacket {

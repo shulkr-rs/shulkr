@@ -1,5 +1,3 @@
-use shulkr_macros::PropertyEnum;
-
 use crate::{
     util::{Axis, Direction},
     world::block::property::{
@@ -7,6 +5,7 @@ use crate::{
         types::{EnumProperty, PropertyEnum},
     },
 };
+use shulkr_macros::PropertyEnum;
 
 pub struct Properties;
 

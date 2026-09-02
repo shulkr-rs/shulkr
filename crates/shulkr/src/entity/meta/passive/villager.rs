@@ -1,16 +1,15 @@
-use shulkr_macros::{DataType, Enumeration};
-
 use crate::{
     entity::meta::{
         MetaAccessor, MetadataHolder,
         refs::villager::{DATA, DATA_FINALIZED},
     },
-    protocol::DataType,
     protocol::{
+        DataType,
         decode::{DecodeError, PacketRead},
         encode::{EncodeError, PacketWrite},
     },
 };
+use shulkr_macros::{DataType, Enumeration};
 
 pub struct VillagerMeta {
     holder: MetadataHolder,

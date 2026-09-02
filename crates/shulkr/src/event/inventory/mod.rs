@@ -1,16 +1,14 @@
-use crate::{event::player::PlayerEvent, inventory::Inventory};
-
 mod click;
-pub use click::InventoryClickEvent;
-
+mod close;
+mod creative;
 mod open;
+
+pub use click::InventoryClickEvent;
+pub use close::InventoryCloseEvent;
+pub use creative::CreativeInventoryActionEvent;
 pub use open::InventoryOpenEvent;
 
-mod close;
-pub use close::InventoryCloseEvent;
-
-mod creative;
-pub use creative::CreativeInventoryActionEvent;
+use crate::{event::player::PlayerEvent, inventory::Inventory};
 
 pub trait InventoryEvent: PlayerEvent {
     /// Returns the open inventory, or `None` when the click happened in the

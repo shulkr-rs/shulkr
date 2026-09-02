@@ -1,6 +1,5 @@
-use serde::{Deserialize, Serialize};
-
 use crate::util::{deserialize_color, deserialize_optional_color};
+use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct BiomeEffects {

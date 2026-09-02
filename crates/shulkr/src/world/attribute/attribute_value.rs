@@ -1,12 +1,14 @@
-use std::borrow::Cow;
-
-use serde::{Serialize, Serializer};
-
-use crate::util::Key;
-use crate::world::Particle;
-use crate::world::attribute::{
-    AmbientParticle, AmbientSounds, BackgroundMusic, BedRule, MoonPhase, TriState,
+use crate::{
+    util::Key,
+    world::{
+        Particle,
+        attribute::{
+            AmbientParticle, AmbientSounds, BackgroundMusic, BedRule, MoonPhase, TriState,
+        },
+    },
 };
+use serde::{Serialize, Serializer};
+use std::borrow::Cow;
 
 #[derive(Debug, Clone)]
 pub enum AttributeValue {

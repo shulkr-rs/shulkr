@@ -1,13 +1,10 @@
-use std::collections::HashSet;
-
-use serde::Deserialize;
-
 use crate::{
     network::client::Connection,
     protocol::packet::{Tag, TagRegistry},
     registry::{Registries, Registry, RegistryKey},
-    util::{HashMap, Key},
+    util::{HashMap, HashSet, Key},
 };
+use serde::Deserialize;
 
 #[derive(Debug, Deserialize)]
 pub struct TagSection {
@@ -41,7 +38,7 @@ fn load_tags(registry: &str) -> HashMap<String, Vec<String>> {
     let mut result = HashMap::default();
 
     for tag_name in sections.keys() {
-        let mut resolved = HashSet::new();
+        let mut resolved = HashSet::default();
         resolve_tag(tag_name, &sections, &mut resolved);
 
         result.insert(tag_name.clone(), resolved.into_iter().collect());

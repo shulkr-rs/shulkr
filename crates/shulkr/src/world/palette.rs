@@ -1,4 +1,6 @@
-use std::collections::{HashMap, hash_map::Entry};
+use std::collections::hash_map::Entry;
+
+use crate::util::HashMap;
 
 #[derive(Debug, Clone)]
 pub enum PaletteFormat {
@@ -36,7 +38,7 @@ impl Palette {
     }
 
     fn empty(dim: usize, min_bpe: u8, max_bpe: u8, direct_bpe: u8) -> Self {
-        let mut count = HashMap::with_capacity(1);
+        let mut count = HashMap::with_capacity_and_hasher(1, Default::default());
         count.insert(0, (dim * dim * dim) as i32);
 
         Self {

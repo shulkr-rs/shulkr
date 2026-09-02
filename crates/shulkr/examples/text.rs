@@ -1,11 +1,13 @@
-use shulkr::Server;
-use shulkr::auth::AuthMode;
-use shulkr::entity::Player;
-use shulkr::event::player::{PlayerConfigEvent, PlayerEvent, PlayerSpawnEvent};
-use shulkr::scoreboard::objective::Objective;
-use shulkr::text::{HoverEvent, NamedColor, TextComponent};
-use shulkr::util::Viewable;
-use shulkr::world::{DimensionType, World, block::Block};
+use shulkr::{
+    Server,
+    auth::AuthMode,
+    entity::Player,
+    event::player::{PlayerConfigEvent, PlayerEvent, PlayerSpawnEvent},
+    scoreboard::objective::Objective,
+    text::{HoverEvent, NamedColor, TextComponent},
+    util::Viewable,
+    world::{DimensionType, World, block::Block},
+};
 
 fn main() {
     tracing_subscriber::fmt::init();

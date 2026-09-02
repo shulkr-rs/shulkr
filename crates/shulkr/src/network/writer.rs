@@ -1,16 +1,12 @@
+use crate::{auth::Encryptor, protocol::encode::EncodeError};
+use aes::cipher::{BlockModeEncrypt as _, BlockSizeUser as _, KeyIvInit as _};
+use async_compression::{Level, tokio::write::ZlibEncoder};
 use std::{
     io::Error,
     pin::{Pin, pin},
     task::{Context, Poll},
 };
-
-use aes::cipher::{BlockModeEncrypt as _, BlockSizeUser as _, KeyIvInit as _};
-use async_compression::{Level, tokio::write::ZlibEncoder};
-
-use crate::protocol::encode::EncodeError;
 use tokio::io::{AsyncWrite, AsyncWriteExt, BufWriter};
-
-use crate::auth::Encryptor;
 
 pub struct StreamWriter<W>
 where

@@ -1,6 +1,3 @@
-use serde::{Deserialize, Serialize};
-use uuid::Uuid;
-
 use crate::{
     item::ItemStack,
     registry::{Id, Registries},
@@ -10,6 +7,8 @@ use crate::{
     },
     util::Key,
 };
+use serde::{Deserialize, Serialize};
+use uuid::Uuid;
 
 // ===== Style ======
 

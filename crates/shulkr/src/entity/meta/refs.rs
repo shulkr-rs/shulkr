@@ -74,8 +74,8 @@ pub mod axolotl {
 
 #[rustfmt::skip]
 pub mod fox {
-    use uuid::Uuid;
     use super::*;
+    use uuid::Uuid;
 
     pub const VARIANT: MetadataRef<i32>  = MetadataRef::new(18, ValueType::VAR_INT, 0);
     pub const FOX_FLAGS: MetadataRef<u8>        = MetadataRef::new(19, ValueType::BYTE, 0);

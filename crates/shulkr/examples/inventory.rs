@@ -1,10 +1,14 @@
-use shulkr::Server;
-use shulkr::auth::AuthMode;
-use shulkr::event::inventory::InventoryClickEvent;
-use shulkr::event::player::{PlayerConfigEvent, PlayerEvent, PlayerSpawnEvent};
-use shulkr::inventory::{Inventory, InventoryType};
-use shulkr::item::{ItemStack, Material};
-use shulkr::world::{DimensionType, World, block::Block};
+use shulkr::{
+    Server,
+    auth::AuthMode,
+    event::{
+        inventory::InventoryClickEvent,
+        player::{PlayerConfigEvent, PlayerEvent, PlayerSpawnEvent},
+    },
+    inventory::{Inventory, InventoryType},
+    item::{ItemStack, Material},
+    world::{DimensionType, World, block::Block},
+};
 
 fn main() {
     tracing_subscriber::fmt::init();

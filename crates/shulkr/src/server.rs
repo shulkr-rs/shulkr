@@ -1,14 +1,13 @@
-use parking_lot::Mutex;
-use std::sync::{Arc, OnceLock, atomic::Ordering};
-use tokio::net::ToSocketAddrs;
-
 use crate::{
     auth::{AuthMode, KeyStore},
     command::dispatcher::CommandDispatcher,
     entity::Player,
     event::Events,
     registry::Registries,
+    util::Mutex,
 };
+use std::sync::{Arc, OnceLock, atomic::Ordering};
+use tokio::net::ToSocketAddrs;
 
 static CURRENT: OnceLock<Arc<imp::Server>> = OnceLock::new();
 
@@ -100,13 +99,6 @@ pub enum ServerError {
 }
 
 mod imp {
-    use parking_lot::Mutex;
-    use std::sync::{
-        Arc,
-        atomic::{AtomicBool, Ordering},
-    };
-    use tokio::net::{TcpListener, ToSocketAddrs};
-
     use crate::{
         auth::{AuthMode, KeyStore},
         command::dispatcher::CommandDispatcher,
@@ -116,7 +108,13 @@ mod imp {
         registry::Registries,
         server::ServerError,
         tickable::Ticker,
+        util::Mutex,
     };
+    use std::sync::{
+        Arc,
+        atomic::{AtomicBool, Ordering},
+    };
+    use tokio::net::{TcpListener, ToSocketAddrs};
 
     pub struct Server {
         pub(super) runtime: tokio::runtime::Runtime,

@@ -1,5 +1,4 @@
-use crate::object::StaticObjectBuilder;
-use crate::write_wide_file;
+use crate::{object::StaticObjectBuilder, write_wide_file};
 
 pub fn generate() {
     let object = StaticObjectBuilder::new("EntityType")

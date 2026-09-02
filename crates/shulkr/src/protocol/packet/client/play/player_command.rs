@@ -1,9 +1,8 @@
-use shulkr_macros::Enumeration;
-
 use crate::protocol::{
     decode::{Decode, DecodeError, PacketRead},
     packet::{ClientPacket, Packet},
 };
+use shulkr_macros::Enumeration;
 
 #[derive(Debug, Clone)]
 pub struct PlayerCommandPacket {

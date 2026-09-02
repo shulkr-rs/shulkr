@@ -1,8 +1,10 @@
-use crate::protocol::{
-    decode::{Decode, DecodeError, PacketRead},
-    packet::{ClientPacket, Packet},
+use crate::{
+    protocol::{
+        decode::{Decode, DecodeError, PacketRead},
+        packet::{ClientPacket, Packet},
+    },
+    util::Key,
 };
-use crate::util::Key;
 
 #[derive(Debug, Clone)]
 pub struct PluginMessagePacket {

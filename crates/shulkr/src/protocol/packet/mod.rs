@@ -255,12 +255,11 @@ pub mod server {
     pub use status::*;
 }
 
-use std::fmt::Debug;
-
 pub use client::*;
 pub use server::*;
 
 use crate::protocol::{decode::Decode, encode::Encode};
+use std::fmt::Debug;
 
 pub trait Packet
 where

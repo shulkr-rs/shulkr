@@ -1,6 +1,3 @@
-use bitflags::bitflags;
-use uuid::Uuid;
-
 use crate::{
     auth::Property,
     entity::GameMode,
@@ -9,6 +6,8 @@ use crate::{
         packet::{Packet, ServerPacket},
     },
 };
+use bitflags::bitflags;
+use uuid::Uuid;
 
 #[derive(Debug, Clone)]
 pub struct PlayerInfoUpdatePacket {

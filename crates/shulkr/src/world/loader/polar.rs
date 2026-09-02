@@ -4,6 +4,8 @@
 //! The whole file is read and decoded up front into owned [`Chunk`]s; pull them
 //! out with [`PolarLoader::load_chunk`] (each chunk is yielded once).
 
+use crate::util::HashMap;
+
 use crate::{
     registry::{Registry, RegistryKey},
     world::{
@@ -14,7 +16,6 @@ use crate::{
 };
 use bytes::Buf as _;
 use shulkr_nbt::{Nbt, NbtCompound};
-use std::collections::HashMap;
 use std::path::Path;
 use thiserror::Error;
 
@@ -106,8 +107,9 @@ impl PolarLoader {
             return Err(PolarError::Malformed);
         }
 
-        let mut chunks = HashMap::with_capacity(chunk_count as usize);
-        let mut chunk_user_data = HashMap::new();
+        let mut chunks =
+            HashMap::with_capacity_and_hasher(chunk_count as usize, Default::default());
+        let mut chunk_user_data = HashMap::default();
         for _ in 0..chunk_count {
             let (chunk, chunk_data) =
                 read_chunk(&mut body, version, min_section, section_count, &biomes)?;

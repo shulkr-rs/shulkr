@@ -1,5 +1,6 @@
-use crate::{event::server_ping::ServerListPingEvent, network::client::Connection};
 use crate::{
+    event::server_ping::ServerListPingEvent,
+    network::client::Connection,
     protocol::{
         decode::{Decode as _, DecodeError},
         packet::{
@@ -10,7 +11,6 @@ use crate::{
     server_ping::{PingResponse, Version},
     text::TextComponent,
 };
-
 use std::{io::Cursor, sync::Arc};
 
 #[rustfmt::skip]

@@ -1,5 +1,3 @@
-use parking_lot::{Mutex, RwLock};
-
 use crate::{
     entity::Player,
     protocol::packet::{
@@ -8,7 +6,7 @@ use crate::{
     },
     scoreboard::{NumberFormat, RenderType},
     text::TextComponent,
-    util::{HashMap, Viewable, Viewers},
+    util::{HashMap, Mutex, RwLock, Viewable, Viewers},
 };
 
 pub struct Sidebar {

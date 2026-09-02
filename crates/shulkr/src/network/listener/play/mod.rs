@@ -1,5 +1,3 @@
-use std::io::Cursor;
-
 use crate::{
     entity::{GameMode, Player},
     event::player::{
@@ -27,6 +25,7 @@ use crate::{
         },
     },
 };
+use std::io::Cursor;
 
 mod interaction;
 mod inventory;

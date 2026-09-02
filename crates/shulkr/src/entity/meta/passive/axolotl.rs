@@ -1,9 +1,8 @@
-use shulkr_macros::{DataType, Enumeration};
-
 use crate::entity::meta::{
     MetaAccessor, MetadataHolder,
     refs::axolotl::{PLAYING_DEAD, SPAWNED_FROM_BUCKET, VARIANT},
 };
+use shulkr_macros::{DataType, Enumeration};
 
 pub struct AxolotlMeta {
     holder: MetadataHolder,

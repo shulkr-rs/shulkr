@@ -648,11 +648,13 @@ pub(crate) fn handle_set_creative_mode_slot(player: Player, packet: SetCreativeM
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::auth::{AuthMode, GameProfile};
-    use crate::inventory::InventoryType;
-    use crate::item::Material;
-    use crate::network::client::Connection;
-    use crate::protocol::ProtocolState;
+    use crate::{
+        auth::{AuthMode, GameProfile},
+        inventory::InventoryType,
+        item::Material,
+        network::client::Connection,
+        protocol::ProtocolState,
+    };
     use uuid::Uuid;
 
     fn test_server() -> crate::Server {

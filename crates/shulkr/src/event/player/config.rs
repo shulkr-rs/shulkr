@@ -1,8 +1,9 @@
-use crate::entity::Player;
-use crate::util::Position;
-use crate::world::World;
-
-use crate::event::{Event, player::PlayerEvent};
+use crate::{
+    entity::Player,
+    event::{Event, player::PlayerEvent},
+    util::Position,
+    world::World,
+};
 
 pub struct PlayerConfigEvent {
     pub(crate) player: Player,

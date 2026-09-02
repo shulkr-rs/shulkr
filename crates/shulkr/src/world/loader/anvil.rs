@@ -1,5 +1,6 @@
 use crate::{
     registry::{Registry, RegistryKey},
+    util::HashMap,
     world::{
         biome::Biome,
         block::{Block, BlockState},
@@ -13,7 +14,6 @@ use flate2::bufread::{GzDecoder, ZlibDecoder};
 use shulkr_macros::Enumeration;
 use shulkr_nbt::{COMPOUND_ID, Nbt, NbtCompound, NbtTag};
 use std::{
-    collections::HashMap,
     fs::File,
     io::{Read as _, Seek as _, SeekFrom},
     path::{Path, PathBuf},
@@ -37,7 +37,7 @@ impl AnvilLoader {
         Self {
             path,
             min_section: -4,
-            regions: HashMap::new(),
+            regions: HashMap::default(),
             decompress_buf: Vec::new(),
             biomes: crate::registry::load_datapack("minecraft:worldgen/biome"),
         }

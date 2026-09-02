@@ -1,5 +1,3 @@
-use std::sync::atomic::Ordering;
-
 use super::Player;
 use crate::{
     entity::EntityLike,
@@ -11,6 +9,7 @@ use crate::{
     util::{Position, TeleportFlags, Velocity, Viewable},
     world::chunk::Chunk,
 };
+use std::sync::atomic::Ordering;
 
 impl Player {
     pub(crate) fn set_position(&self, position: Position) {

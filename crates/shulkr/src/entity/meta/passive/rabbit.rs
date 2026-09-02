@@ -1,6 +1,5 @@
-use shulkr_macros::{DataType, Enumeration};
-
 use crate::entity::meta::{MetaAccessor, MetadataHolder, refs::rabbit::VARIANT};
+use shulkr_macros::{DataType, Enumeration};
 
 pub struct RabbitMeta {
     holder: MetadataHolder,

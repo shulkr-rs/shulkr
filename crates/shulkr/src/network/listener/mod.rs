@@ -1,7 +1,8 @@
-use crate::network::client::Connection;
-use crate::protocol::{ProtocolState, decode::DecodeError};
-use std::io::Cursor;
-use std::sync::Arc;
+use crate::{
+    network::client::Connection,
+    protocol::{ProtocolState, decode::DecodeError},
+};
+use std::{io::Cursor, sync::Arc};
 
 mod config;
 mod handshake;

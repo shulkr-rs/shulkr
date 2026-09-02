@@ -1,10 +1,9 @@
+use crate::util::Key;
 use std::{
     hash::{Hash, Hasher},
     marker::PhantomData,
     ops::Deref,
 };
-
-use crate::util::Key;
 
 #[derive(Debug)]
 pub struct RegistryKey<T> {

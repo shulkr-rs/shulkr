@@ -1,15 +1,12 @@
+use crate::{auth::Decryptor, protocol::packet::RawPacket};
+use aes::cipher::{BlockModeDecrypt as _, BlockSizeUser as _, KeyIvInit as _};
+use async_compression::tokio::bufread::ZlibDecoder;
 use std::{
     io::{Error, ErrorKind},
     pin::{Pin, pin},
     task::{Context, Poll},
 };
-
-use aes::cipher::{BlockModeDecrypt as _, BlockSizeUser as _, KeyIvInit as _};
-use async_compression::tokio::bufread::ZlibDecoder;
-
 use tokio::io::{AsyncRead, AsyncReadExt, BufReader, ReadBuf};
-
-use crate::{auth::Decryptor, protocol::packet::RawPacket};
 
 pub struct StreamReader<R>
 where

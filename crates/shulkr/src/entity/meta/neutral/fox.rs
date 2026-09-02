@@ -1,6 +1,3 @@
-use shulkr_macros::{DataType, Enumeration};
-use uuid::Uuid;
-
 use crate::entity::meta::{
     MetaAccessor, MetadataHolder,
     refs::fox::{
@@ -8,6 +5,8 @@ use crate::entity::meta::{
         IS_SITTING, IS_SLEEPING, SECOND_UUID, VARIANT,
     },
 };
+use shulkr_macros::{DataType, Enumeration};
+use uuid::Uuid;
 
 pub struct FoxMeta {
     holder: MetadataHolder,

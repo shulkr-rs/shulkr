@@ -1,30 +1,4 @@
-use parking_lot::Mutex;
-use std::{any::Any, marker::PhantomData, sync::Arc};
-use uuid::Uuid;
-
 pub mod refs;
-
-use crate::auth::GameProfile;
-use crate::auth::PartialProfile;
-use crate::auth::PlayerModel;
-use crate::auth::ProfileKind;
-use crate::auth::Property;
-use crate::auth::ResolvableProfile;
-use crate::entity::MainHand;
-use crate::item::VarInt;
-use crate::protocol::DataType;
-
-use crate::protocol::decode::Decode as _;
-use crate::protocol::decode::DecodeError;
-use crate::protocol::decode::PacketRead;
-use crate::protocol::encode::Encode as _;
-use crate::protocol::encode::EncodeError;
-use crate::protocol::encode::PacketWrite;
-use crate::text::TextComponent;
-use crate::util::BlockPosition;
-use crate::util::Either;
-use crate::util::EntityPose;
-use crate::util::HashMap;
 
 mod avatar;
 mod entity;
@@ -113,6 +87,21 @@ pub use passive::*;
 pub use player::*;
 pub use raider::*;
 pub use spellcaster_illager::*;
+
+use crate::{
+    auth::{GameProfile, PartialProfile, PlayerModel, ProfileKind, Property, ResolvableProfile},
+    entity::MainHand,
+    item::VarInt,
+    protocol::{
+        DataType,
+        decode::{Decode as _, DecodeError, PacketRead},
+        encode::{Encode as _, EncodeError, PacketWrite},
+    },
+    text::TextComponent,
+    util::{BlockPosition, Either, EntityPose, HashMap, Mutex},
+};
+use std::{any::Any, marker::PhantomData, sync::Arc};
+use uuid::Uuid;
 
 pub trait MetaAccessor {
     fn new(holder: MetadataHolder) -> Self;

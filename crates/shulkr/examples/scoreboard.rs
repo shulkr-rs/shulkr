@@ -1,16 +1,17 @@
-use std::sync::Arc;
-
-use shulkr::Server;
-use shulkr::auth::AuthMode;
-use shulkr::entity::EntityLike;
-use shulkr::event::player::{
-    PlayerConfigEvent, PlayerEvent as _, PlayerMoveEvent, PlayerSpawnEvent,
+use shulkr::{
+    Server,
+    auth::AuthMode,
+    entity::EntityLike,
+    event::player::{PlayerConfigEvent, PlayerEvent as _, PlayerMoveEvent, PlayerSpawnEvent},
+    scoreboard::{
+        NumberFormat,
+        below_name::BelowName,
+        sidebar::{Sidebar, SidebarLine},
+    },
+    util::{Position, Viewable as _},
+    world::{DimensionType, World, block::Block},
 };
-use shulkr::scoreboard::NumberFormat;
-use shulkr::scoreboard::below_name::BelowName;
-use shulkr::scoreboard::sidebar::{Sidebar, SidebarLine};
-use shulkr::util::{Position, Viewable as _};
-use shulkr::world::{DimensionType, World, block::Block};
+use std::sync::Arc;
 
 fn main() {
     tracing_subscriber::fmt::init();

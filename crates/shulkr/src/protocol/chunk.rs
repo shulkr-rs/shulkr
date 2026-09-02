@@ -1,16 +1,17 @@
+use crate::{
+    protocol::{
+        decode::{Decode, DecodeError, PacketRead},
+        encode::{Encode, EncodeError, PacketWrite},
+        packet::{ChunkData, ChunkDataAndUpdateLightPacket, LightData},
+    },
+    world::{
+        block::{Block, BlockEntity, BlockState},
+        chunk::{Chunk, ChunkSection},
+        heightmap::Heightmap,
+        palette::{Palette, PaletteFormat},
+    },
+};
 use bytes::BytesMut;
-
-use crate::protocol::{
-    decode::{Decode, DecodeError, PacketRead},
-    encode::{Encode, EncodeError, PacketWrite},
-    packet::{ChunkData, ChunkDataAndUpdateLightPacket, LightData},
-};
-use crate::world::{
-    block::{Block, BlockEntity, BlockState},
-    chunk::{Chunk, ChunkSection},
-    heightmap::Heightmap,
-    palette::{Palette, PaletteFormat},
-};
 
 impl Decode for BlockEntity {
     fn decode<R: PacketRead>(r: &mut R) -> Result<Self, DecodeError> {

@@ -1,5 +1,5 @@
+use crate::util::HashMap;
 use indexmap::IndexSet;
-use std::collections::HashMap;
 use std::hash::Hash;
 
 struct LeveledPriorityQueue<Node> {
@@ -78,7 +78,7 @@ impl<Node: Eq + Hash + Copy> GraphState<Node> {
         Self {
             level_count,
             priority_queue: LeveledPriorityQueue::new(level_count as usize),
-            computed_levels: HashMap::new(),
+            computed_levels: HashMap::default(),
             has_work: false,
         }
     }

@@ -1,10 +1,16 @@
-use crate::command::arg::kind::ArgKind;
-use crate::command::{
-    Command, arg::Arg, arg::kind::StringBehaviour, dispatcher::CommandDispatcher,
-};
-use crate::protocol::{
-    encode::{Encode, EncodeError, PacketWrite},
-    packet::{Packet, ServerPacket},
+use crate::{
+    command::{
+        Command,
+        arg::{
+            Arg,
+            kind::{ArgKind, StringBehaviour},
+        },
+        dispatcher::CommandDispatcher,
+    },
+    protocol::{
+        encode::{Encode, EncodeError, PacketWrite},
+        packet::{Packet, ServerPacket},
+    },
 };
 
 const NODE_TYPE_ROOT: u8 = 0x00;

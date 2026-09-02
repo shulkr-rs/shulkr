@@ -1,8 +1,7 @@
-use bitflags::bitflags;
-
 use super::{
     BlockPosition, Point, Velocity, impl_vector3_dot_ops_with_extra, impl_vector3_ops_with_extra,
 };
+use bitflags::bitflags;
 
 #[derive(Debug, Clone, Copy, PartialEq)]
 pub struct Position {

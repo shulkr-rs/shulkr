@@ -1,10 +1,9 @@
-use serde::Serialize;
-use uuid::Uuid;
-
 use crate::{
     entity::{EntityLike, Player},
     text::TextComponent,
 };
+use serde::Serialize;
+use uuid::Uuid;
 
 /// Represents the full response sent during a Minecraft server list ping.
 #[derive(Debug, Serialize)]

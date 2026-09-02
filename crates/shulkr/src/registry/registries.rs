@@ -1,10 +1,9 @@
-use std::path::{Path, PathBuf};
-
-use parking_lot::{RwLock, RwLockReadGuard};
-
-use crate::world::block::BlockEntityType;
-
 use super::*;
+use crate::{
+    util::{RwLock, RwLockReadGuard},
+    world::block::BlockEntityType,
+};
+use std::path::{Path, PathBuf};
 
 pub struct Registries {
     pub cat_variant: Registry<CatVariant>,
@@ -170,7 +169,7 @@ impl Default for Registries {
 
 impl Registries {
     pub const BLOCK: &LazyLock<Registry<Block>> = registry!(
-        crate::world::block::block::register_all,
+        crate::world::block::register_all,
         Block,
         RegistryKeys::BLOCK
     );

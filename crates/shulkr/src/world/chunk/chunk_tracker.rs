@@ -121,7 +121,7 @@ impl<S: ChunkGraphSource> ChunkGraph<S> {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use std::collections::HashMap;
+    use crate::util::HashMap;
 
     struct FixedSource {
         levels: HashMap<(i32, i32), i32>,
@@ -161,7 +161,7 @@ mod tests {
         let mut graph = ChunkGraph::new(
             max_level + 1,
             FixedSource {
-                levels: HashMap::new(),
+                levels: HashMap::default(),
                 source_pos: (0, 0),
                 max_level,
             },
@@ -193,7 +193,7 @@ mod tests {
         let mut graph = ChunkGraph::new(
             max_level + 1,
             FixedSource {
-                levels: HashMap::new(),
+                levels: HashMap::default(),
                 source_pos: (0, 0),
                 max_level,
             },
@@ -225,7 +225,7 @@ mod tests {
         let mut graph = ChunkGraph::new(
             max_level + 1,
             FixedSource {
-                levels: HashMap::new(),
+                levels: HashMap::default(),
                 source_pos: (0, 0),
                 max_level,
             },

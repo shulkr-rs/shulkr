@@ -1,8 +1,7 @@
-use parking_lot::RwLock;
-
 use crate::{
     entity::Player,
     protocol::packet::{Packet, ServerPacket},
+    util::RwLock,
 };
 
 pub trait Viewable {

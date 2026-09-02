@@ -1,9 +1,11 @@
-use serde::de::{DeserializeSeed, MapAccess, Visitor};
-use serde::{Deserialize, Serialize, Serializer};
-
-use crate::util::to_hex_color;
-use crate::world::attribute::attribute_type::ValueSeed;
-use crate::world::attribute::{AttributeType, AttributeValue};
+use crate::{
+    util::to_hex_color,
+    world::attribute::{AttributeType, AttributeValue, attribute_type::ValueSeed},
+};
+use serde::{
+    Deserialize, Serialize, Serializer,
+    de::{DeserializeSeed, MapAccess, Visitor},
+};
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize)]
 #[serde(rename_all = "snake_case")]

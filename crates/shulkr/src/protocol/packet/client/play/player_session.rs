@@ -1,9 +1,8 @@
-use uuid::Uuid;
-
 use crate::protocol::{
     decode::{Decode, DecodeError, PacketRead},
     packet::{ClientPacket, Packet},
 };
+use uuid::Uuid;
 
 #[derive(Debug, Clone)]
 pub struct PlayerSessionPacket {

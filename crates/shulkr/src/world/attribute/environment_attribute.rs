@@ -1,13 +1,16 @@
-use std::borrow::Cow;
-
-use crate::registry::{Id, Registries};
-use crate::text::TextComponent;
-use crate::util::Key;
-use crate::world::Particle;
-use crate::world::attribute::{
-    AmbientSounds, AttributeType, AttributeValue, BackgroundMusic, BedRule, BedRuleKind, MoonPhase,
-    TriState,
+use crate::{
+    registry::{Id, Registries},
+    text::TextComponent,
+    util::Key,
+    world::{
+        Particle,
+        attribute::{
+            AmbientSounds, AttributeType, AttributeValue, BackgroundMusic, BedRule, BedRuleKind,
+            MoonPhase, TriState,
+        },
+    },
 };
+use std::borrow::Cow;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 pub struct EnvironmentAttribute(Id);

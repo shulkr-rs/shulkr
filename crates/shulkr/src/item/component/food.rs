@@ -1,10 +1,9 @@
-use serde::{Deserialize, Serialize};
-
 use crate::protocol::{
     DataType,
     decode::{DecodeError, PacketRead},
     encode::{EncodeError, PacketWrite},
 };
+use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Clone, Copy, Serialize, Deserialize)]
 pub struct Food {

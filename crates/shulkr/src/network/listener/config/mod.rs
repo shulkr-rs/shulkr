@@ -1,22 +1,19 @@
-use std::{io::Cursor, sync::Arc};
-
-use crate::entity::{EntityLike as _, GameMode, MAX_VIEW_DISTANCE, Player};
-use crate::event::player::PlayerSpawnEvent;
-use crate::protocol::packet::CommandsPacket;
-use crate::util::{TeleportFlags, Velocity, Viewable};
-use crate::world::{DimensionType, chunk::Chunk};
-use crate::{event::player::PlayerConfigEvent, network::client::Connection};
 use crate::{
+    entity::{EntityLike as _, GameMode, MAX_VIEW_DISTANCE, Player},
+    event::player::{PlayerConfigEvent, PlayerSpawnEvent},
+    network::client::Connection,
     protocol::{
         ProtocolState,
         decode::{Decode as _, DecodeError},
         packet::{
-            AcknowledgeFinishConfigPacket, ClientInfoPacket, FeatureFlagsPacket,
+            AcknowledgeFinishConfigPacket, ClientInfoPacket, CommandsPacket, FeatureFlagsPacket,
             FinishConfigPacket, GameEventPacket, LoginPacket, SetCenterChunkPacket, client, server,
         },
     },
-    util::Key,
+    util::{Key, TeleportFlags, Velocity, Viewable},
+    world::{DimensionType, chunk::Chunk},
 };
+use std::{io::Cursor, sync::Arc};
 
 mod registries;
 

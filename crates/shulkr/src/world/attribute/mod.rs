@@ -1,12 +1,13 @@
+pub(crate) mod attribute_type;
+pub(crate) mod modifier;
+
 mod ambient_particle;
 mod ambient_sounds;
 mod attribute_map;
-pub(crate) mod attribute_type;
 mod attribute_value;
 mod background_music;
 mod bed_rule;
 mod environment_attribute;
-pub(crate) mod modifier;
 mod moon_phase;
 mod tri_state;
 

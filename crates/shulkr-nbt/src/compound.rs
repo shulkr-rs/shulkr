@@ -1,9 +1,7 @@
-use std::io::Write;
-
+use crate::{END_ID, Error, NbtTag, deserialize::get_nbt_string, serialize::WriteExt};
 use bytes::Buf;
 use serde::Serialize;
-
-use crate::{END_ID, Error, NbtTag, deserialize::get_nbt_string, serialize::WriteExt};
+use std::io::Write;
 
 #[derive(Clone, Debug, PartialEq, PartialOrd)]
 pub struct NbtCompound {

@@ -1,7 +1,6 @@
+use crate::Server;
 use std::time::Duration;
 use tokio::time::{Interval, interval};
-
-use crate::Server;
 
 pub trait Tickable {
     fn tick(&self);

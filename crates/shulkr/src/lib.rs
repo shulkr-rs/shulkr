@@ -1,3 +1,6 @@
+#[rustfmt::skip]
+#[path = "../generated/version.rs"]
+pub mod version;
 pub mod advancement;
 pub mod auth;
 pub mod command;
@@ -13,10 +16,6 @@ pub mod text;
 pub mod tickable;
 pub mod util;
 pub mod world;
-
-#[rustfmt::skip]
-#[path = "../generated/version.rs"]
-pub mod version;
 
 mod network;
 mod server;

@@ -1,5 +1,17 @@
+use crate::{
+    Server,
+    auth::{GameProfile, KeyStore},
+    entity::Player,
+    network::{reader::StreamReader, writer::StreamWriter},
+    protocol::{
+        ProtocolState,
+        encode::{EncodeError, PacketWrite as _, packet_id},
+        packet::{DisconnectPacket, Packet, ServerPacket},
+    },
+    text::TextComponent,
+    util::{Mutex, RwLock},
+};
 use bytes::BytesMut;
-use parking_lot::{Mutex, RwLock};
 use std::{
     io::Cursor,
     net::SocketAddr,
@@ -8,30 +20,15 @@ use std::{
         atomic::{AtomicBool, AtomicI32, Ordering},
     },
 };
-use tokio::sync::mpsc;
 use tokio::{
     net::{
         TcpStream,
         tcp::{OwnedReadHalf, OwnedWriteHalf},
     },
-    sync::mpsc::{Receiver, Sender},
-};
-
-use crate::{
-    Server,
-    auth::GameProfile,
-    protocol::{encode::PacketWrite as _, packet::ServerPacket},
-};
-use crate::{
-    auth::KeyStore,
-    entity::Player,
-    network::{reader::StreamReader, writer::StreamWriter},
-    protocol::{
-        ProtocolState,
-        encode::{EncodeError, packet_id},
-        packet::{DisconnectPacket, Packet},
+    sync::{
+        mpsc,
+        mpsc::{Receiver, Sender},
     },
-    text::TextComponent,
 };
 
 pub const MAX_VIEW_DISTANCE: i32 = 32;

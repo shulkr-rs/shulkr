@@ -1,9 +1,9 @@
-use serde::{Deserialize, Serialize};
+mod effects;
+
+pub use effects::*;
 
 use crate::world::attribute::EnvironmentAttributeMap;
-
-mod effects;
-pub use effects::*;
+use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Biome {

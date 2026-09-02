@@ -1,10 +1,12 @@
 use super::login::DeathLocation;
-use crate::entity::GameMode;
-use crate::protocol::{
-    encode::{Encode, EncodeError, PacketWrite},
-    packet::{Packet, ServerPacket},
+use crate::{
+    entity::GameMode,
+    protocol::{
+        encode::{Encode, EncodeError, PacketWrite},
+        packet::{Packet, ServerPacket},
+    },
+    util::Key,
 };
-use crate::util::Key;
 
 pub const KEEP_ATTRIBUTE_MODIFIERS: u8 = 1;
 pub const KEEP_ENTITY_DATA: u8 = 2;

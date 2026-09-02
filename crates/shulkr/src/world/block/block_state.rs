@@ -1,12 +1,10 @@
-use std::sync::OnceLock;
-
+use super::*;
 use crate::{
     registry::{Id, Registries, Registry},
     util::Key,
     world::block::property::Property,
 };
-
-use super::*;
+use std::sync::OnceLock;
 
 #[derive(Clone, Copy)]
 pub struct BlockState {

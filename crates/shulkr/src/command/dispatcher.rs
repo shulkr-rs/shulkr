@@ -1,6 +1,7 @@
-use parking_lot::RwLock;
-
-use crate::command::{Command, matches::CommandMatches};
+use crate::{
+    command::{Command, matches::CommandMatches},
+    util::RwLock,
+};
 
 pub struct CommandDispatcher {
     pub(crate) commands: RwLock<Vec<Command>>,
