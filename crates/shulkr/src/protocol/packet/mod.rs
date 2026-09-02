@@ -197,6 +197,8 @@ pub mod server {
         mod spawn_entity;
         mod sync_player_position;
         mod system_chat_message;
+        mod ticking_state;
+        mod ticking_step;
         mod unload_chunk;
         mod update_advancements;
         mod update_objectives;
@@ -241,6 +243,8 @@ pub mod server {
         pub use spawn_entity::SpawnEntityPacket;
         pub use sync_player_position::SyncPlayerPositionPacket;
         pub use system_chat_message::SystemChatMessagePacket;
+        pub use ticking_state::TickingStatePacket;
+        pub use ticking_step::TickingStepPacket;
         pub use unload_chunk::UnloadChunkPacket;
         pub use update_advancements::UpdateAdvancementsPacket;
         pub use update_objectives::{UpdateObjectivesAction, UpdateObjectivesPacket};
