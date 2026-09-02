@@ -13,6 +13,8 @@ use shulkr::util::{Position, Viewable as _};
 use shulkr::world::{DimensionType, World, block::Block};
 
 fn main() {
+    tracing_subscriber::fmt::init();
+
     let server = Server::new(AuthMode::Offline);
     let world = World::new(DimensionType::OVERWORLD);
 

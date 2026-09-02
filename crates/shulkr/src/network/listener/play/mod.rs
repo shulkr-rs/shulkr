@@ -106,7 +106,7 @@ fn handle_chat_message(player: Player, packet: ChatMessagePacket) {
 }
 
 fn handle_player_session(_player: Player, _packet: PlayerSessionPacket) {
-    log::warn!("todo: handle_player_session");
+    tracing::warn!("todo: handle_player_session");
 }
 
 fn handle_chunk_batch_received(player: Player, packet: ChunkBatchReceivedPacket) {
@@ -133,15 +133,15 @@ fn handle_client_info(player: Player, packet: ClientInfoPacket) {
 }
 
 fn handle_plugin_message(_player: Player, _packet: client::play::PluginMessagePacket) {
-    log::warn!("todo: handle_plugin_message");
+    tracing::warn!("todo: handle_plugin_message");
 }
 
 fn handle_keep_alive(_player: Player, _packet: KeepAlivePacket) {
-    log::warn!("todo: handle_keep_alive");
+    tracing::warn!("todo: handle_keep_alive");
 }
 
 fn handle_ping_request(_player: Player, _packet: PingRequestPacket) {
-    log::warn!("todo: handle_ping_request");
+    tracing::warn!("todo: handle_ping_request");
 }
 
 fn handle_player_abilities(player: Player, packet: PlayerAbilitiesPacket) {
@@ -188,11 +188,11 @@ fn handle_player_input(player: Player, packet: PlayerInputPacket) {
 }
 
 fn handle_player_loaded(_player: Player, _packet: PlayerLoadedPacket) {
-    log::warn!("todo: handle_player_loaded");
+    tracing::warn!("todo: handle_player_loaded");
 }
 
 fn hande_change_recipe_book_settings(_player: Player, _packet: ChangeRecipeBookSettingsPacket) {
-    log::warn!("todo: hande_change_recipe_book_settings");
+    tracing::warn!("todo: hande_change_recipe_book_settings");
 }
 
 fn handle_seen_advancements(_player: Player, _packet: SeenAdvancementsPacket) {}

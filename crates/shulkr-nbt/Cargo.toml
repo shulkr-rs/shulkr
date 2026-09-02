@@ -9,5 +9,5 @@ description.workspace = true
 [dependencies]
 serde = { workspace = true }
 thiserror = { workspace = true }
-paste = { workspace = true }
+pastey = { workspace = true }
 bytes = { workspace = true }

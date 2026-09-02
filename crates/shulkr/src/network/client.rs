@@ -140,7 +140,7 @@ impl Connection {
                 .handle_packet(packet.id(), &mut Cursor::new(packet.data()))
                 .await
             {
-                log::error!(
+                tracing::error!(
                     "Failed to handle packet 0x{:02X} (state: {:?}, {} bytes): {}",
                     packet.id(),
                     state,
@@ -199,7 +199,7 @@ impl Connection {
 
         // Enqueue packet
         if self.packet_tx.try_send(data).is_err() {
-            log::error!(
+            tracing::error!(
                 "Failed to enqueue packet, closing connection. ({})",
                 std::any::type_name::<P>()
             );
@@ -229,7 +229,7 @@ impl Connection {
         let state = self.state.try_read().unwrap();
 
         let Some(packet_id) = packet_id::<P>(&state) else {
-            log::error!(
+            tracing::error!(
                 "Failed to resolve ID for packet. ({})",
                 std::any::type_name::<P>()
             );
@@ -247,7 +247,7 @@ impl Connection {
         let mut swriter = self.swriter.lock().await;
 
         if let Err(err) = swriter.write_packet(&data).await {
-            log::error!("Failed to send packet: {}", err);
+            tracing::error!("Failed to send packet: {}", err);
             self.close();
         }
     }

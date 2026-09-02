@@ -112,7 +112,7 @@ async fn handle_login_plugin_response(client: Arc<Connection>, packet: LoginPlug
     match parse_velocity_response(&client, packet) {
         Ok(game_profile) => finish_login(client, game_profile).await,
         Err(err) => {
-            log::warn!("Velocity forwarding failed: {err:#}");
+            tracing::warn!("Velocity forwarding failed: {err:#}");
             client.kick("Failed to verify proxy connection.");
         }
     }

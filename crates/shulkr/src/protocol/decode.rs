@@ -90,7 +90,7 @@ pub trait PacketRead {
 
 macro_rules! read_impl {
     ($ty:ty) => {
-        paste::paste! {
+        pastey::paste! {
             fn [<read_ $ty>](&mut self) -> Result<$ty> {
                 self.[<try_get_ $ty>]()
                     .map_err(|e| DecodeError::NotEnoughBytes(e.available, e.requested))

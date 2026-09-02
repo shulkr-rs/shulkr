@@ -33,7 +33,6 @@ thiserror = { workspace = true }
 tokio = { workspace = true }
 ureq = { workspace = true }
 uuid = { workspace = true }
-paste = { workspace = true }
 rustc-hash = { workspace = true }
 bitflags = { workspace = true }
 indexmap = { workspace = true }
@@ -42,12 +41,7 @@ phf = { workspace = true }
 parking_lot = { workspace = true }
 hmac = { workspace = true }
 sha2 = { workspace = true }
-
-# Logging
-log = { workspace = true }
-env_logger = { workspace = true }
-
-# Encryption
+tracing = { workspace = true }
 aes = { workspace = true }
 cfb8 = { workspace = true }
 num-bigint = { workspace = true }
@@ -55,12 +49,15 @@ openssl = { workspace = true }
 sha1 = { workspace = true }
 take_mut = { workspace = true }
 futures = { workspace = true }
-pastey = "0.2.1"
+pastey = { workspace = true }
 
-zstd = { version = "0.13.2", optional = true }
-bitfield-struct = { version = "0.13.0", optional = true }
-flate2 = { version = "1.1.9", optional = true }
-byteorder = { version = "1.5.0", optional = true }
+zstd = { workspace = true, optional = true }
+bitfield-struct = { workspace = true, optional = true }
+flate2 = { workspace = true, optional = true }
+byteorder = { workspace = true, optional = true }
+
+[dev-dependencies]
+tracing-subscriber = { workspace = true }
 
 [[example]]
 name = "anvil"

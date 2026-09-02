@@ -4,6 +4,8 @@ use shulkr::event::player::PlayerConfigEvent;
 use shulkr::world::{DimensionType, World, block::Block};
 
 fn main() {
+    tracing_subscriber::fmt::init();
+
     let server = Server::new(AuthMode::Online);
     let world = World::new(DimensionType::OVERWORLD);
 

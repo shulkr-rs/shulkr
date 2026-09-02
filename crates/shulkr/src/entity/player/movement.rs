@@ -60,7 +60,7 @@ impl Player {
         let on_ground = self.is_on_ground();
         match () {
             _ if distance_x > 8. || distance_y > 8. || distance_z > 8. => {
-                log::warn!("todo: teleport player because he moved more than 8 blocks.")
+                tracing::warn!("todo: teleport player because he moved more than 8 blocks.")
             }
             _ if position_changed && rotation_changed => {
                 self.broadcast_packet(&EntityPositionRotationPacket::new(

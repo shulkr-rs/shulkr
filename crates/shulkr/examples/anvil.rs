@@ -11,6 +11,8 @@ use shulkr::{
 const RADIUS: i32 = 12;
 
 fn main() {
+    tracing_subscriber::fmt::init();
+
     let arg = std::env::args().nth(1).expect("usage: anvil <region-dir>");
 
     let server = Server::new(AuthMode::Online);

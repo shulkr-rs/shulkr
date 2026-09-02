@@ -55,7 +55,7 @@ impl<R: Buf> ReadExt for R {}
 
 macro_rules! unsupported_type {
     ($ty:ty) => {
-        paste::paste! {
+        pastey::paste! {
             fn [<deserialize_ $ty>]<V>(self, _: V) -> Result<V::Value>
             where
                 V: de::Visitor<'de>,

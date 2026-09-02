@@ -7,6 +7,8 @@ use shulkr::event::player::{
 use shulkr::world::{DimensionType, World, block::BlockState};
 
 fn main() {
+    tracing_subscriber::fmt::init();
+
     let server = Server::new(AuthMode::Online);
     let world = World::new(DimensionType::OVERWORLD);
 

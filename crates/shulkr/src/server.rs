@@ -156,11 +156,8 @@ mod imp {
             self: Arc<Self>,
             addr: impl ToSocketAddrs,
         ) -> Result<(), ServerError> {
-            #[cfg(debug_assertions)]
-            let _ = env_logger::try_init();
-
             let listener = TcpListener::bind(addr).await?;
-            log::debug!("Listening on {}", listener.local_addr()?);
+            tracing::debug!("Listening on {}", listener.local_addr()?);
 
             let rt_handle = self.runtime.handle().clone();
             let this = self.clone();

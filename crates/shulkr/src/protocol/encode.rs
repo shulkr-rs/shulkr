@@ -110,7 +110,7 @@ pub trait PacketWrite {
 
 macro_rules! write_impl {
     ($type:ty) => {
-        paste::paste! {
+        pastey::paste! {
             fn [<write_ $type>](&mut self, value: $type) -> Result<()> {
                 Ok(self.[<put_ $type>](value))
             }

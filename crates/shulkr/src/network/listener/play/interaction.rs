@@ -27,7 +27,7 @@ pub(crate) fn handle_attack(player: Player, packet: AttackPacket) {
 }
 
 pub(crate) fn handle_interact(_player: Player, _packet: InteractPacket) {
-    log::warn!("todo: handle_interact");
+    tracing::warn!("todo: handle_interact");
 }
 
 pub(crate) fn handle_pick_item_from_block(player: Player, packet: PickItemFromBlockPacket) {
