@@ -21,7 +21,7 @@ impl ServerPacket for RegistryDataPacket {}
 
 impl Encode for RegistryDataPacket {
     fn encode<W: PacketWrite>(w: &mut W, this: &Self) -> Result<(), EncodeError> {
-        w.write_identifier(&this.registry_id)?;
+        w.write_key(&this.registry_id)?;
         w.write_array(&this.entries, RegistryEntry::encode)?;
         Ok(())
     }
@@ -35,7 +35,7 @@ pub struct RegistryEntry {
 
 impl Encode for RegistryEntry {
     fn encode<W: PacketWrite>(w: &mut W, this: &Self) -> Result<(), EncodeError> {
-        w.write_identifier(&this.entry_id)?;
+        w.write_key(&this.entry_id)?;
         w.write_option(&this.data, |w, v| w.write_nbt(v))?;
         Ok(())
     }

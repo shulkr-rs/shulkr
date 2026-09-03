@@ -97,6 +97,7 @@ use crate::{
         decode::{Decode as _, DecodeError, PacketRead},
         encode::{Encode as _, EncodeError, PacketWrite},
     },
+    registry::RegistryKey,
     text::TextComponent,
     util::{BlockPosition, Either, EntityPose, HashMap, Mutex},
 };
@@ -346,11 +347,24 @@ define_types! {
     const OPTIONAL_VAR_INT: ValueType<Option<i32>, Option<VarInt>> = ValueType::new(19);
     const POSE: ValueType<EntityPose> = ValueType::new(20);
 
+    const PIG_VARIANT: ValueType<RegistryKey<PigVariant>> = ValueType::new(28);
+    const PIG_SOUND_VARIANT: ValueType<RegistryKey<PigSoundVariant>> = ValueType::new(29);
+
     const COPPER_GOLEM_STATE: ValueType<CopperGolemState> = ValueType::new(32);
     const WEATHERING_COPPER_STATE: ValueType<WeatheringCopperState> = ValueType::new(33);
 
     const RESOLVABLE_PROFILE: ValueType<ResolvableProfile> = ValueType::new(41);
     const HUMANOID_ARM: ValueType<MainHand> = ValueType::new(42);
+}
+
+impl<T> DataType for RegistryKey<T> {
+    fn decode<R: PacketRead>(r: &mut R) -> Result<Self, DecodeError> {
+        r.read_key().map(|i| RegistryKey::new(i.to_string()))
+    }
+
+    fn encode<W: PacketWrite>(w: &mut W, this: &Self) -> Result<(), EncodeError> {
+        w.write_key(&this.to_key())
+    }
 }
 
 impl DataType for ResolvableProfile {
@@ -371,9 +385,9 @@ impl DataType for ResolvableProfile {
                     properties: r.read_array(Property::decode)?,
                 }),
             },
-            body: r.read_option(R::read_identifier)?,
-            cape: r.read_option(R::read_identifier)?,
-            elytra: r.read_option(R::read_identifier)?,
+            body: r.read_option(R::read_key)?,
+            cape: r.read_option(R::read_key)?,
+            elytra: r.read_option(R::read_key)?,
             model: r
                 .read_option(R::read_varint)?
                 .map(PlayerModel::try_from)
@@ -395,9 +409,9 @@ impl DataType for ResolvableProfile {
                 w.write_array(&p.properties, Property::encode)?;
             }
         }
-        w.write_option(&this.body(), |w, v| w.write_identifier(v))?;
-        w.write_option(&this.cape(), |w, v| w.write_identifier(v))?;
-        w.write_option(&this.elytra(), |w, v| w.write_identifier(v))?;
+        w.write_option(&this.body(), |w, v| w.write_key(v))?;
+        w.write_option(&this.cape(), |w, v| w.write_key(v))?;
+        w.write_option(&this.elytra(), |w, v| w.write_key(v))?;
         w.write_option(&this.player_model(), |w, v| w.write_varint(**v as i32))?;
         Ok(())
     }

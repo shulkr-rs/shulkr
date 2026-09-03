@@ -39,10 +39,11 @@ impl MetaAccessor for VillagerMeta {
     }
 }
 
-#[derive(Enumeration, DataType)]
+#[derive(Enumeration, DataType, Default)]
 pub enum VillagerVariant {
     Desert,
     Jungle,
+    #[default]
     Plains,
     Savanna,
     Snow,

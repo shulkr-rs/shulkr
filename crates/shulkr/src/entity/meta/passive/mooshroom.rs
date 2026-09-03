@@ -7,7 +7,7 @@ pub struct MooshroomMeta {
 
 impl MooshroomMeta {
     pub fn get_variant(&self) -> MooshroomVariant {
-        MooshroomVariant::try_from(self.holder.get(VARIANT)).unwrap_or(MooshroomVariant::Red)
+        MooshroomVariant::try_from(self.holder.get(VARIANT)).unwrap_or_default()
     }
 
     pub fn set_variant(&self, value: MooshroomVariant) {
@@ -21,8 +21,9 @@ impl MetaAccessor for MooshroomMeta {
     }
 }
 
-#[derive(Enumeration, DataType)]
+#[derive(Enumeration, DataType, Default)]
 pub enum MooshroomVariant {
+    #[default]
     Red,
     Brown,
 }

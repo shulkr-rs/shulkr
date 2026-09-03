@@ -293,3 +293,13 @@ pub mod player {
     pub const LEFT_SHOULDER_ENTITY_DATA: MetadataRef<Option<i32>>  = MetadataRef::new(19, ValueType::OPTIONAL_VAR_INT, None);
     pub const RIGHT_SHOULDER_ENTITY_DATA: MetadataRef<Option<i32>> = MetadataRef::new(20, ValueType::OPTIONAL_VAR_INT, None);
 }
+
+#[rustfmt::skip]
+pub mod pig {
+    use super::*;
+    use crate::{entity::meta::{PigSoundVariant, PigVariant}, registry::RegistryKey};
+
+    pub const BOOST_TIME: MetadataRef<i32>                              = MetadataRef::new(18, ValueType::VAR_INT, 0);
+    pub const VARIANT: MetadataRef<RegistryKey<PigVariant>>             = MetadataRef::new(19, ValueType::PIG_VARIANT, PigVariant::TEMPERATE);
+    pub const SOUND_VARIANT: MetadataRef<RegistryKey<PigSoundVariant>>  = MetadataRef::new(20, ValueType::PIG_SOUND_VARIANT, PigSoundVariant::CLASSIC);
+}

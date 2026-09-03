@@ -124,7 +124,7 @@ fn encode_parser_properties<W: PacketWrite>(w: &mut W, kind: &ArgKind) -> Result
         | ArgKind::ResourceKey { registry }
         | ArgKind::ResourceOrTag { registry }
         | ArgKind::ResourceOrTagKey { registry }
-        | ArgKind::ResourceSelector { registry } => w.write_identifier(registry),
+        | ArgKind::ResourceSelector { registry } => w.write_key(registry),
         ArgKind::Bool | ArgKind::IntRange | ArgKind::FloatRange | ArgKind::GameMode => Ok(()),
     }
 }

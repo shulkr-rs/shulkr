@@ -21,7 +21,7 @@ impl Decode for SeenAdvancementsPacket {
         Ok(Self {
             action,
             tab_id: if action == 0 {
-                Some(r.read_identifier()?)
+                Some(r.read_key()?)
             } else {
                 None
             },

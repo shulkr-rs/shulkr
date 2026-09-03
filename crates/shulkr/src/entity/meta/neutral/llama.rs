@@ -10,7 +10,7 @@ pub struct LlamaMeta {
 
 impl LlamaMeta {
     pub fn get_variant(&self) -> LlamaVariant {
-        LlamaVariant::try_from(self.holder.get(VARIANT)).unwrap_or(LlamaVariant::Creamy)
+        LlamaVariant::try_from(self.holder.get(VARIANT)).unwrap_or_default()
     }
 
     pub fn set_variant(&self, value: LlamaVariant) {
@@ -32,8 +32,9 @@ impl MetaAccessor for LlamaMeta {
     }
 }
 
-#[derive(Enumeration, DataType)]
+#[derive(Enumeration, DataType, Default)]
 pub enum LlamaVariant {
+    #[default]
     Creamy,
     White,
     Brown,

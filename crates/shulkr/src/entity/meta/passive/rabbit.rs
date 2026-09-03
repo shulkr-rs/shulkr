@@ -7,7 +7,7 @@ pub struct RabbitMeta {
 
 impl RabbitMeta {
     pub fn get_variant(&self) -> RabbitVariant {
-        RabbitVariant::try_from(self.holder.get(VARIANT)).unwrap_or(RabbitVariant::Brown)
+        RabbitVariant::try_from(self.holder.get(VARIANT)).unwrap_or_default()
     }
 
     pub fn set_variant(&self, value: RabbitVariant) {
@@ -21,8 +21,9 @@ impl MetaAccessor for RabbitMeta {
     }
 }
 
-#[derive(Enumeration, DataType)]
+#[derive(Enumeration, DataType, Default)]
 pub enum RabbitVariant {
+    #[default]
     Brown,
     White,
     Black,

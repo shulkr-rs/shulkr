@@ -29,9 +29,9 @@ pub struct TagRegistry {
 
 impl Encode for TagRegistry {
     fn encode<W: PacketWrite>(w: &mut W, this: &Self) -> Result<(), EncodeError> {
-        w.write_identifier(&this.registry)?;
+        w.write_key(&this.registry)?;
         w.write_array(&this.tags, |w, tag| {
-            w.write_identifier(&tag.tag_name)?;
+            w.write_key(&tag.tag_name)?;
             w.write_array(&tag.entries, |w, v| w.write_varint(*v))?;
             Ok(())
         })?;

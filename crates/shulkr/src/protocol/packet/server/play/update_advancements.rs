@@ -24,7 +24,7 @@ impl Encode for UpdateAdvancementsPacket {
     fn encode<W: PacketWrite>(w: &mut W, this: &Self) -> Result<(), EncodeError> {
         w.write_bool(this.reset)?;
         AdvancementTree::encode(w, &this.advancements)?;
-        w.write_array(&this.to_remove, PacketWrite::write_identifier)?;
+        w.write_array(&this.to_remove, PacketWrite::write_key)?;
         w.write_array(&this.progress, |_, _| Ok(()))?;
         w.write_bool(this.show_advancements)?;
         Ok(())
@@ -39,7 +39,7 @@ impl Encode for AdvancementTree {
 
 impl Encode for Advancement {
     fn encode<W: PacketWrite>(w: &mut W, this: &Self) -> Result<(), EncodeError> {
-        w.write_option(&this.parent(), |w, v| w.write_identifier(v))?;
+        w.write_option(&this.parent(), |w, v| w.write_key(v))?;
 
         // Advancement Display
         w.write_component(this.title())?;
@@ -48,7 +48,7 @@ impl Encode for Advancement {
         w.write_varint(this.frame() as i32)?;
         w.write_i32(this.flags())?;
         if let Some(background) = this.background() {
-            w.write_identifier(background)?;
+            w.write_key(background)?;
         }
         w.write_f32(this.x())?;
         w.write_f32(this.y())?;

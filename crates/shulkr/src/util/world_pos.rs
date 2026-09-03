@@ -15,13 +15,13 @@ pub struct WorldPos {
 impl DataType for WorldPos {
     fn decode<R: PacketRead>(r: &mut R) -> Result<Self, DecodeError> {
         Ok(Self {
-            dimension: r.read_identifier()?,
+            dimension: r.read_key()?,
             position: r.read_position()?,
         })
     }
 
     fn encode<W: PacketWrite>(w: &mut W, this: &Self) -> Result<(), EncodeError> {
-        w.write_identifier(&this.dimension)?;
+        w.write_key(&this.dimension)?;
         w.write_position(&this.position)?;
         Ok(())
     }

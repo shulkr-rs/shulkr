@@ -7,7 +7,7 @@ pub struct TropicalFishMeta {
 
 impl TropicalFishMeta {
     pub fn get_pattern(&self) -> TropicalFishPattern {
-        TropicalFishPattern::try_from(self.holder.get(VARIANT)).unwrap_or(TropicalFishPattern::Kob)
+        TropicalFishPattern::try_from(self.holder.get(VARIANT)).unwrap_or_default()
     }
 
     pub fn set_pattern(&self, value: TropicalFishPattern) {
@@ -21,8 +21,9 @@ impl MetaAccessor for TropicalFishMeta {
     }
 }
 
-#[derive(Enumeration, DataType)]
+#[derive(Enumeration, DataType, Default)]
 pub enum TropicalFishPattern {
+    #[default]
     Kob,
     Sunstreak,
     Snooper,

@@ -14,7 +14,7 @@ pub struct FoxMeta {
 
 impl FoxMeta {
     pub fn get_variant(&self) -> FoxVariant {
-        FoxVariant::try_from(self.holder.get(VARIANT)).unwrap_or(FoxVariant::Red)
+        FoxVariant::try_from(self.holder.get(VARIANT)).unwrap_or_default()
     }
 
     pub fn set_variant(&self, value: FoxVariant) {
@@ -100,8 +100,9 @@ impl MetaAccessor for FoxMeta {
     }
 }
 
-#[derive(Enumeration, DataType)]
+#[derive(Enumeration, DataType, Default)]
 pub enum FoxVariant {
+    #[default]
     Red,
     Snow,
 }

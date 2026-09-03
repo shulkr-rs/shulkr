@@ -19,7 +19,7 @@ impl ServerPacket for LoginPluginRequestPacket {}
 impl Encode for LoginPluginRequestPacket {
     fn encode<W: PacketWrite>(w: &mut W, this: &Self) -> Result<(), EncodeError> {
         w.write_varint(this.message_id)?;
-        w.write_identifier(&this.channel)?;
+        w.write_key(&this.channel)?;
         w.write_boxed_slice(&this.data)?;
         Ok(())
     }

@@ -362,11 +362,11 @@ impl DataType for Nbt {
 
 impl DataType for Key {
     fn decode<R: PacketRead>(r: &mut R) -> Result<Self, DecodeError> {
-        r.read_identifier()
+        r.read_key()
     }
 
     fn encode<W: PacketWrite>(w: &mut W, this: &Self) -> Result<(), EncodeError> {
-        w.write_identifier(this)
+        w.write_key(this)
     }
 }
 
