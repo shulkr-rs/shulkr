@@ -7,7 +7,7 @@ use crate::{
     util::Key,
 };
 use serde::{Serialize, de::DeserializeOwned};
-use shulkr_nbt::{Nbt, to_nbt_compound};
+use shulkr_nbt::NbtTag;
 use std::fmt::Debug;
 
 #[derive(Debug, Clone)]
@@ -30,13 +30,13 @@ impl Encode for RegistryDataPacket {
 #[derive(Debug, Clone)]
 pub struct RegistryEntry {
     pub entry_id: Key,
-    pub data: Option<Nbt>,
+    pub data: Option<NbtTag>,
 }
 
 impl Encode for RegistryEntry {
     fn encode<W: PacketWrite>(w: &mut W, this: &Self) -> Result<(), EncodeError> {
         w.write_key(&this.entry_id)?;
-        w.write_option(&this.data, |w, v| w.write_nbt(v))?;
+        w.write_option(&this.data, |w, v| w.write_nbt_tag(v))?;
         Ok(())
     }
 }
@@ -53,7 +53,10 @@ where
                 .iter()
                 .map(|(key, v)| RegistryEntry {
                     entry_id: key.clone(),
-                    data: Some(to_nbt_compound(v).unwrap().into()),
+                    // Most registry entries are objects (an NBT compound), but some are
+                    // bare values (e.g. context float/int providers, or lists like
+                    // block transformers), so the root tag type isn't fixed.
+                    data: Some(v.serialize(shulkr_nbt::Serializer).unwrap()),
                 })
                 .collect(),
         }

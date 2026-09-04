@@ -39,6 +39,7 @@ impl EntityType {
     pub const COW: EntityType = EntityType::new();
     pub const CREAKING: EntityType = EntityType::new();
     pub const CREEPER: EntityType = EntityType::new();
+    pub const CUSHION: EntityType = EntityType::new();
     pub const DARK_OAK_BOAT: EntityType = EntityType::new();
     pub const DARK_OAK_CHEST_BOAT: EntityType = EntityType::new();
     pub const DOLPHIN: EntityType = EntityType::new();
@@ -111,6 +112,8 @@ impl EntityType {
     pub const PIGLIN_BRUTE: EntityType = EntityType::new();
     pub const PILLAGER: EntityType = EntityType::new();
     pub const POLAR_BEAR: EntityType = EntityType::new();
+    pub const POPLAR_BOAT: EntityType = EntityType::new();
+    pub const POPLAR_CHEST_BOAT: EntityType = EntityType::new();
     pub const SPLASH_POTION: EntityType = EntityType::new();
     pub const LINGERING_POTION: EntityType = EntityType::new();
     pub const PUFFERFISH: EntityType = EntityType::new();
@@ -202,6 +205,7 @@ pub(crate) fn register_all(registry: &mut Registry<EntityType>) {
     register("minecraft:cow", EntityType::COW);
     register("minecraft:creaking", EntityType::CREAKING);
     register("minecraft:creeper", EntityType::CREEPER);
+    register("minecraft:cushion", EntityType::CUSHION);
     register("minecraft:dark_oak_boat", EntityType::DARK_OAK_BOAT);
     register("minecraft:dark_oak_chest_boat", EntityType::DARK_OAK_CHEST_BOAT);
     register("minecraft:dolphin", EntityType::DOLPHIN);
@@ -274,6 +278,8 @@ pub(crate) fn register_all(registry: &mut Registry<EntityType>) {
     register("minecraft:piglin_brute", EntityType::PIGLIN_BRUTE);
     register("minecraft:pillager", EntityType::PILLAGER);
     register("minecraft:polar_bear", EntityType::POLAR_BEAR);
+    register("minecraft:poplar_boat", EntityType::POPLAR_BOAT);
+    register("minecraft:poplar_chest_boat", EntityType::POPLAR_CHEST_BOAT);
     register("minecraft:splash_potion", EntityType::SPLASH_POTION);
     register("minecraft:lingering_potion", EntityType::LINGERING_POTION);
     register("minecraft:pufferfish", EntityType::PUFFERFISH);

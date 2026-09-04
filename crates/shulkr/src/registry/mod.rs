@@ -1,17 +1,27 @@
 pub(crate) mod generated;
 
 mod banner_pattern;
+mod block_transformer;
+mod context_float_provider;
+mod context_int_provider;
 mod damage_type;
+mod decorated_pot_pattern;
 mod instrument;
 mod jukebox_song;
+mod predicate;
 mod registries;
 mod registry_key;
 mod tag;
 
 pub use banner_pattern::*;
+pub use block_transformer::*;
+pub use context_float_provider::*;
+pub use context_int_provider::*;
 pub use damage_type::*;
+pub use decorated_pot_pattern::*;
 pub use instrument::*;
 pub use jukebox_song::*;
+pub use predicate::*;
 pub use registries::*;
 pub use registry_key::*;
 pub use tag::*;

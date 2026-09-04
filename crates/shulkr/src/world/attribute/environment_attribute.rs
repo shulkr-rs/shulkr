@@ -6,7 +6,7 @@ use crate::{
         Particle,
         attribute::{
             AmbientSounds, AttributeType, AttributeValue, BackgroundMusic, BedRule, BedRuleKind,
-            MoonPhase, TriState,
+            MobSpawnSettings, MoonPhase, TriState,
         },
     },
 };

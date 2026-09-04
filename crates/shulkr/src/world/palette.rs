@@ -1,5 +1,5 @@
 use crate::util::HashMap;
-use std::collections::hash_map::Entry;
+use std::{collections::hash_map::Entry, sync::LazyLock};
 
 #[derive(Debug, Clone)]
 pub enum PaletteFormat {
@@ -25,7 +25,7 @@ pub struct Palette {
 
 impl Palette {
     pub fn blocks() -> Self {
-        Palette::empty(16, 4, 8, 15)
+        Palette::empty(16, 4, 8, Palette::block_direct_bpe())
     }
 
     pub fn biomes() -> Self {
@@ -34,6 +34,18 @@ impl Palette {
 
     pub fn biome_direct_bpe() -> u8 {
         Palette::required_bpe(crate::registry::Registries::biomes().len() as i32).max(1) as u8
+    }
+
+    pub fn block_direct_bpe() -> u8 {
+        static TOTAL_BLOCK_STATES: LazyLock<i32> = LazyLock::new(|| {
+            crate::registry::Registries::BLOCK
+                .values()
+                .iter()
+                .map(|block| block.data().state_count() as i32)
+                .sum()
+        });
+
+        Palette::required_bpe(*TOTAL_BLOCK_STATES).max(1) as u8
     }
 
     fn empty(dim: usize, min_bpe: u8, max_bpe: u8, direct_bpe: u8) -> Self {

@@ -148,7 +148,7 @@ impl Player {
             dimension_name: dimension.into(),
             hashed_seed: 93522819,
             game_mode: self.game_mode(),
-            previous_game_mode: -1,
+            previous_game_mode: None,
             is_debug: false,
             is_flat: false,
             death_location: None,

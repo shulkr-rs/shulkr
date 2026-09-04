@@ -66,11 +66,11 @@ pub mod client {
         mod player_rotation;
         mod player_session;
         mod plugin_message;
+        mod punch;
         mod request_game_mode;
         mod seen_advancements;
         mod set_creative_mode_slot;
         mod set_held_item;
-        mod swing_arm;
         mod use_item;
         mod use_item_on;
 
@@ -99,11 +99,11 @@ pub mod client {
         pub use player_rotation::PlayerRotationPacket;
         pub use player_session::PlayerSessionPacket;
         pub use plugin_message::PluginMessagePacket;
+        pub use punch::PunchPacket;
         pub use request_game_mode::PlayerRequestGameModePacket;
         pub use seen_advancements::SeenAdvancementsPacket;
         pub use set_creative_mode_slot::SetCreativeModeSlotPacket;
         pub use set_held_item::SetHeldItemPacket;
-        pub use swing_arm::SwingArmPacket;
         pub use use_item::UseItemPacket;
         pub use use_item_on::UseItemOnPacket;
     }
@@ -195,6 +195,7 @@ pub mod server {
         mod set_held_item;
         mod set_tablist_header_footer;
         mod spawn_entity;
+        mod swing_animation;
         mod sync_player_position;
         mod system_chat_message;
         mod unload_chunk;
@@ -239,6 +240,7 @@ pub mod server {
         pub use set_held_item::SetHeldItemPacket;
         pub use set_tablist_header_footer::SetTablistHeaderFooterPacket;
         pub use spawn_entity::SpawnEntityPacket;
+        pub use swing_animation::*;
         pub use sync_player_position::SyncPlayerPositionPacket;
         pub use system_chat_message::SystemChatMessagePacket;
         pub use unload_chunk::UnloadChunkPacket;

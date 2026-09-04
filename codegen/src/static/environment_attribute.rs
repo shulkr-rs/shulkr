@@ -73,6 +73,11 @@ fn generate_init(ident: Ident, key: &str, value: Value) -> TokenStream {
                 None => quote! { None },
             };
 
+            let destroy_on_leave = match data.get("destroy_on_leave").and_then(Value::as_bool) {
+                Some(b) => quote! { Some(#b) },
+                None => quote! { None },
+            };
+
             let error_message = match data.get("error_message") {
                 Some(v) if v.as_object().is_some_and(|o| o.len() == 1) => {
                     let translate = v["translate"].as_str().unwrap();
@@ -89,6 +94,7 @@ fn generate_init(ident: Ident, key: &str, value: Value) -> TokenStream {
                     can_sleep: BedRuleKind::#can_sleep,
                     can_set_spawn: BedRuleKind::#can_set_spawn,
                     explodes: #explodes,
+                    destroy_on_leave: #destroy_on_leave,
                     error_message: #error_message,
                 })
             }
@@ -126,6 +132,18 @@ fn generate_init(ident: Ident, key: &str, value: Value) -> TokenStream {
                     additions: None,
                 })
             }
+        }
+        "MobSpawnSettings" => {
+            assert!(
+                data["spawns_by_category"]
+                    .as_object()
+                    .is_some_and(|o| o.is_empty())
+                    && data["spawn_costs"]
+                        .as_object()
+                        .is_some_and(|o| o.is_empty()),
+                "non-empty default MobSpawnSettings isn't supported by codegen yet"
+            );
+            quote! { AttributeValue::MobSpawnSettings(MobSpawnSettings::empty()) }
         }
         other => panic!("unknown environment attribute type `{other}`"),
     };

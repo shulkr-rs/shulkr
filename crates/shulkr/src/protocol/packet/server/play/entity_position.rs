@@ -42,10 +42,10 @@ impl ServerPacket for EntityPositionPacket {}
 impl Encode for EntityPositionPacket {
     fn encode<W: PacketWrite>(w: &mut W, this: &Self) -> Result<(), EncodeError> {
         w.write_varint(this.entity_id)?;
+        w.write_varint(if this.on_ground { 1 } else { 0 })?;
         w.write_i16(this.delta_x)?;
         w.write_i16(this.delta_y)?;
         w.write_i16(this.delta_z)?;
-        w.write_bool(this.on_ground)?;
         Ok(())
     }
 }

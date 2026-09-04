@@ -27,6 +27,11 @@ pub struct Registries {
     pub jukebox_song: Registry<JukeboxSong>,
     pub banner_pattern: Registry<BannerPattern>,
     pub instrument: Registry<Instrument>,
+    pub block_transformer: Registry<Vec<BlockTransformer>>,
+    pub context_float_provider: Registry<ContextFloatProvider>,
+    pub context_int_provider: Registry<ContextIntProvider>,
+    pub decorated_pot_pattern: Registry<DecoratedPotPattern>,
+    pub predicate: Registry<Predicate>,
 }
 
 const FIRST_KEY: Key = Key::const_vanilla("plains");
@@ -229,6 +234,12 @@ impl Registries {
             wolf_variant:               load_datapack("wolf_variant"),
             wolf_sound_variant:         load_datapack("wolf_sound_variant"),
             zombie_nautilus_variant:    load_datapack("zombie_nautilus_variant"),
+
+            block_transformer:          load_datapack("block_transformer"),
+            context_float_provider:     load_datapack("context_float_provider"),
+            context_int_provider:       load_datapack("context_int_provider"),
+            decorated_pot_pattern:      load_datapack("decorated_pot_pattern"),
+            predicate:                  load_datapack("predicate"),
         }
     }
 }

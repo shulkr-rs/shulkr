@@ -37,9 +37,9 @@ impl ServerPacket for EntityRotationPacket {}
 impl Encode for EntityRotationPacket {
     fn encode<W: PacketWrite>(w: &mut W, this: &Self) -> Result<(), EncodeError> {
         w.write_varint(this.entity_id)?;
+        w.write_bool(this.on_ground)?;
         w.write_i8(this.yaw)?;
         w.write_i8(this.pitch)?;
-        w.write_bool(this.on_ground)?;
         Ok(())
     }
 }

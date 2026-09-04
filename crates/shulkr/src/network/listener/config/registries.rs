@@ -93,6 +93,11 @@ pub(super) fn send_registries(c: &Connection, registries: &Registries) {
     c.send_packet(&RegistryDataPacket::from(&registries.jukebox_song));
     c.send_packet(&RegistryDataPacket::from(&registries.banner_pattern));
     c.send_packet(&RegistryDataPacket::from(&registries.instrument));
+    c.send_packet(&RegistryDataPacket::from(&registries.block_transformer));
+    c.send_packet(&RegistryDataPacket::from(&registries.context_float_provider));
+    c.send_packet(&RegistryDataPacket::from(&registries.context_int_provider));
+    c.send_packet(&RegistryDataPacket::from(&registries.decorated_pot_pattern));
+    c.send_packet(&RegistryDataPacket::from(&registries.predicate));
 }
 
 pub(super) fn send_registry_tags(c: &Connection, registries: &Registries) {
