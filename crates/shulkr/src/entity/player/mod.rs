@@ -5,14 +5,15 @@ use crate::{
     inventory::{Inventory, PlayerInventory},
     network::client::Connection,
     protocol::packet::{
-        EntityEventPacket, GameEventPacket, Packet, PlayerAction, PlayerEntry, PlayerInfoFlags,
-        PlayerInfoRemovePacket, PlayerInfoUpdatePacket, RespawnPacket, ServerPacket,
-        SetCenterChunkPacket, SetTablistHeaderFooterPacket, SystemChatMessagePacket,
-        server::play::KeepAlivePacket,
+        EntityEventPacket, EntitySoundEffectPacket, GameEventPacket, Packet, PlayerAction,
+        PlayerEntry, PlayerInfoFlags, PlayerInfoRemovePacket, PlayerInfoUpdatePacket,
+        RespawnPacket, ServerPacket, SetCenterChunkPacket, SetTablistHeaderFooterPacket,
+        SoundEffectPacket, StopSoundPacket, SystemChatMessagePacket, server::play::KeepAlivePacket,
     },
+    sound::{Sound, SoundCategory},
     text::TextComponent,
     tickable::Tickable,
-    util::{HashMap, HashSet, Mutex, Position, Viewable, Viewers},
+    util::{HashMap, HashSet, Key, Mutex, Point, Position, Viewable, Viewers},
     world::{World, chunk::Chunk},
 };
 use std::{
@@ -85,6 +86,40 @@ impl Player {
 
     fn update_game_mode(&self, game_mode: GameMode) {
         *self.0.game_mode.lock() = game_mode;
+    }
+
+    pub fn play_sound_at(&self, position: impl Into<Point>, sound: impl Into<Sound>) {
+        let sound = sound.into();
+
+        self.send_packet(&SoundEffectPacket {
+            sound: sound.event(),
+            category: sound.category(),
+            position: position.into(),
+            volume: sound.volume(),
+            pitch: sound.pitch(),
+            seed: sound.seed_or_random(),
+        });
+    }
+
+    pub fn play_sound(&self, entity: &impl EntityLike, sound: impl Into<Sound>) {
+        let sound = sound.into();
+
+        self.send_packet(&EntitySoundEffectPacket {
+            sound: sound.event(),
+            category: sound.category(),
+            entity_id: entity.id(),
+            volume: sound.volume(),
+            pitch: sound.pitch(),
+            seed: sound.seed_or_random(),
+        });
+    }
+
+    pub fn stop_sound(&self, category: Option<SoundCategory>, sound: Option<Key>) {
+        self.send_packet(&StopSoundPacket { category, sound });
+    }
+
+    pub fn stop_sounds(&self) {
+        self.stop_sound(None, None);
     }
 
     pub fn send_message(&self, message: impl Into<TextComponent>) {

@@ -19,6 +19,7 @@ mod r#static {
     pub mod entity_type;
     pub mod environment_attribute;
     pub mod material;
+    pub mod sound_event;
 }
 pub use r#static::*;
 
@@ -70,6 +71,7 @@ fn main() {
     entity_type::generate();
     environment_attribute::generate();
     material::generate();
+    sound_event::generate();
 }
 
 fn ensure_assets() {

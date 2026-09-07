@@ -26,6 +26,7 @@ use crate::{
         },
     },
     item::{Material, trim_material::TrimMaterial},
+    sound::SoundEvent,
     util::{HashMap, Key},
     world::{
         DimensionType,
@@ -55,6 +56,7 @@ impl RegistryKeys {
     pub const MATERIAL: RegisteredKey<Material>                          = RegistryKey::const_vanilla("material");
     pub const ENTITY_TYPE: RegisteredKey<EntityType>                     = RegistryKey::const_vanilla("entity_type");
     pub const ENVIRONMENT_ATTRIBUTE: RegisteredKey<EnvironmentAttribute> = RegistryKey::const_vanilla("environment_attribute");
+    pub const SOUND_EVENT: RegisteredKey<SoundEvent>                     = RegistryKey::const_vanilla("sound_event");
     pub const BIOME: RegisteredKey<Biome>                                = RegistryKey::const_vanilla("worldgen/biome");
 }
 

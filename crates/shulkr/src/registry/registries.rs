@@ -193,6 +193,11 @@ impl Registries {
         EnvironmentAttribute,
         RegistryKeys::ENVIRONMENT_ATTRIBUTE
     );
+    pub const SOUND_EVENT: &LazyLock<Registry<SoundEvent>> = registry!(
+        crate::sound::register_all,
+        SoundEvent,
+        RegistryKeys::SOUND_EVENT
+    );
     pub const BIOME: &LazyLock<RwLock<Registry<Biome>>> =
         mutable_registry!(register_biomes, Biome, RegistryKeys::BIOME);
 
