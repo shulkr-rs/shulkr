@@ -15,11 +15,8 @@ pub use dimension_type::*;
 use crate::{
     entity::{Entity, Player},
     registry::RegistryKey,
-    util::{BlockPosition, HashMap},
-    world::{
-        block::{BlockFace, BlockState},
-        chunk::Chunk,
-    },
+    util::{BlockPosition, Direction, HashMap},
+    world::{block::BlockState, chunk::Chunk},
 };
 use std::sync::Arc;
 
@@ -137,7 +134,7 @@ impl World {
         self.0.entities()
     }
 
-    pub fn break_block(&self, player: Player, position: impl Into<BlockPosition>, face: BlockFace) {
+    pub fn break_block(&self, player: Player, position: impl Into<BlockPosition>, face: Direction) {
         self.0.break_block(player, position.into(), face);
     }
 
@@ -145,10 +142,9 @@ impl World {
         &self,
         player: Player,
         position: impl Into<BlockPosition>,
-        face: BlockFace,
         block: BlockState,
     ) {
-        self.0.place_block(player, position.into(), face, block);
+        self.0.place_block(player, position.into(), block);
     }
 }
 
@@ -364,7 +360,7 @@ mod imp {
             &self,
             player: Player,
             position: BlockPosition,
-            _face: BlockFace,
+            _face: Direction,
         ) {
             // let (cx, cz) = Chunk::to_chunk_pos(position);
             // let Some(chunk) = self.get_chunk(cx, cz) else {
@@ -397,21 +393,16 @@ mod imp {
             &self,
             player: Player,
             position: BlockPosition,
-            face: BlockFace,
             state: impl Into<BlockState>,
         ) {
             let state = state.into();
             let block_id = state.state_id();
 
-            let new_position = position.relative(face);
-            self.set_block(new_position.x(), new_position.y(), new_position.z(), state);
+            self.set_block(position.x(), position.y(), position.z(), state);
 
             // todo: should be only sent to players that are viewing the block/chunk
             for player in player.server().players().lock().clone() {
-                player.send_packet(&BlockUpdatePacket {
-                    position: new_position,
-                    block_id,
-                });
+                player.send_packet(&BlockUpdatePacket { position, block_id });
             }
         }
     }

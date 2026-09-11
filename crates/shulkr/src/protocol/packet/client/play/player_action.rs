@@ -3,8 +3,7 @@ use crate::{
         decode::{Decode, DecodeError, PacketRead},
         packet::{ClientPacket, Packet},
     },
-    util::BlockPosition,
-    world::block::BlockFace,
+    util::{BlockPosition, Direction},
 };
 use shulkr_macros::Enumeration;
 
@@ -12,7 +11,7 @@ use shulkr_macros::Enumeration;
 pub struct PlayerActionPacket {
     pub status: PlayerDiggingState,
     pub position: BlockPosition,
-    pub face: BlockFace,
+    pub face: Direction,
     pub sequence: i32,
 }
 
@@ -24,7 +23,7 @@ impl Decode for PlayerActionPacket {
     fn decode<R: PacketRead>(r: &mut R) -> Result<Self, DecodeError> {
         let status = PlayerDiggingState::try_from(r.read_varint()?)?;
         let position = r.read_position()?;
-        let face = BlockFace::try_from(i32::from(r.read_u8()?))?;
+        let face = Direction::try_from(i32::from(r.read_u8()?))?;
 
         Ok(Self {
             status,

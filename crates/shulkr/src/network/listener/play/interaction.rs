@@ -8,6 +8,7 @@ use crate::{
     },
     registry::Id,
     util::{BlockPosition, Viewable as _},
+    world::block::placement::{BlockPlaceContext, state_for_placement},
 };
 
 pub(crate) fn handle_attack(player: Player, packet: AttackPacket) {
@@ -98,17 +99,29 @@ pub(crate) fn handle_swing_arm(player: Player, packet: SwingArmPacket) {
 
 pub(crate) fn handle_use_item_on(player: Player, packet: UseItemOnPacket) {
     let world = player.world();
-    let position = packet.position;
 
-    let Some(placed_block) = player.get_item_in_hand(packet.hand) else {
+    let Some(item_stack) = player.get_item_in_hand(packet.hand) else {
         return;
     };
 
-    let Some(block) = placed_block.material().data().block else {
+    let Some(block) = item_stack.material().data().block else {
         return;
     };
 
-    world.place_block(player.clone(), position, packet.face, block.default_state());
+    let cx = BlockPlaceContext::new(
+        Some(player.clone()),
+        world.clone(),
+        packet.hand,
+        item_stack,
+        packet.hit_result,
+    );
+
+    if let Some(state) = state_for_placement(block, &cx)
+        && cx.can_replace(cx.position())
+    {
+        world.place_block(player.clone(), cx.position(), state);
+    }
+
     player.send_packet(&AcknowledgeBlockChangePacket {
         sequence_id: packet.sequence,
     });

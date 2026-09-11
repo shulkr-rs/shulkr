@@ -13,7 +13,7 @@ use crate::{
     sound::{Sound, SoundCategory},
     text::TextComponent,
     tickable::Tickable,
-    util::{HashMap, HashSet, Key, Mutex, Point, Position, Viewable, Viewers},
+    util::{BlockPosition, HashMap, HashSet, Key, Mutex, Position, Viewable, Viewers},
     world::{World, chunk::Chunk},
 };
 use std::{
@@ -88,8 +88,9 @@ impl Player {
         *self.0.game_mode.lock() = game_mode;
     }
 
-    pub fn play_sound_at(&self, position: impl Into<Point>, sound: impl Into<Sound>) {
+    pub fn play_sound_at(&self, position: impl Into<BlockPosition>, sound: impl Into<Sound>) {
         let sound = sound.into();
+        let position = position.into();
 
         self.send_packet(&SoundEffectPacket {
             sound: sound.event(),

@@ -1,5 +1,5 @@
 use super::{Point, Position, Velocity, impl_vector3_ops};
-use crate::world::block::BlockFace;
+use crate::util::Direction;
 
 #[derive(Debug, Clone, Copy, PartialEq)]
 pub struct BlockPosition {
@@ -44,14 +44,14 @@ impl BlockPosition {
         (self.distance_squared(other) as f64).sqrt()
     }
 
-    pub fn relative(&self, face: BlockFace) -> Self {
-        let relative = match face {
-            BlockFace::Bottom => [0, -1, 0],
-            BlockFace::Top => [0, 1, 0],
-            BlockFace::North => [0, 0, -1],
-            BlockFace::South => [0, 0, 1],
-            BlockFace::West => [-1, 0, 0],
-            BlockFace::East => [1, 0, 0],
+    pub fn relative(&self, direction: Direction) -> Self {
+        let relative = match direction {
+            Direction::Down => [0, -1, 0],
+            Direction::Up => [0, 1, 0],
+            Direction::North => [0, 0, -1],
+            Direction::South => [0, 0, 1],
+            Direction::West => [-1, 0, 0],
+            Direction::East => [1, 0, 0],
         };
         *self + relative
     }

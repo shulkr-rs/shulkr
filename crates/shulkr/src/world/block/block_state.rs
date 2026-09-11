@@ -64,15 +64,23 @@ impl BlockState {
         self.state_id = state_id;
     }
 
-    pub fn with<P>(&self, property: P, value: P::Value) -> Option<BlockState>
+    pub fn with<P>(&self, property: P, value: P::Value) -> BlockState
     where
         P: Property,
     {
-        self.set_index(property.name(), property.index_of(&value))
-            .map(|state_id| BlockState {
+        let state_id = self.set_index(property.name(), property.index_of(&value));
+        if let Some(state_id) = state_id {
+            return BlockState {
                 block: self.block,
                 state_id,
-            })
+            };
+        }
+
+        panic!(
+            "Property {} not found on block {}",
+            property.name(),
+            Id::from(self.block)
+        );
     }
 
     #[cfg(any(feature = "anvil", feature = "polar"))]

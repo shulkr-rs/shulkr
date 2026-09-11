@@ -1,7 +1,7 @@
 mod properties;
 mod types;
 
-pub use properties::Properties;
+pub use properties::*;
 pub use std::fmt::Debug;
 pub use types::{BoolProperty, EnumProperty, IntProperty};
 

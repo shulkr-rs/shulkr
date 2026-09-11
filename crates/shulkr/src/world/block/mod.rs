@@ -1,4 +1,6 @@
 pub(crate) mod block_entity;
+pub mod hit_result;
+pub mod placement;
 
 mod block_state;
 mod property;
@@ -12,17 +14,6 @@ use crate::{
     registry::{Id, Registries},
     util::Key,
 };
-use shulkr_macros::Enumeration;
-
-#[derive(Enumeration)]
-pub enum BlockFace {
-    Bottom,
-    Top,
-    North,
-    South,
-    West,
-    East,
-}
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 pub struct Block(Id);
