@@ -120,10 +120,16 @@ pub trait BlockPlacement: Send + Sync {
     fn after_place(&self, state: BlockState, cx: &BlockPlaceContext) {}
 }
 
-pub static REG: LazyLock<BlockPlaceRegistry> = LazyLock::new(|| BlockPlaceRegistry::new());
+pub static REG: LazyLock<BlockPlaceRegistry> = LazyLock::new(BlockPlaceRegistry::new);
 
 pub struct BlockPlaceRegistry {
     placements: RwLock<HashMap<Block, Box<dyn BlockPlacement>>>,
+}
+
+impl Default for BlockPlaceRegistry {
+    fn default() -> Self {
+        Self::new()
+    }
 }
 
 impl BlockPlaceRegistry {

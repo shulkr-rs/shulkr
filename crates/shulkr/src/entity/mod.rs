@@ -18,7 +18,7 @@ use crate::{
     entity::meta::{EntityMeta, MetaAccessor, MetadataHolder},
     protocol::packet::{RemoveEntitiesPacket, SetEntityMetadataPacket, SpawnEntityPacket},
     registry::Id,
-    util::{EntityPose, Mutex, Position, Viewable, Viewers},
+    util::{Aabb, EntityPose, Mutex, Position, Viewable, Viewers},
     world::World,
 };
 use std::sync::{
@@ -295,4 +295,46 @@ pub trait EntityLike {
     fn r#type(&self) -> EntityType;
     fn world(&self) -> World;
     fn position(&self) -> Position;
+}
+
+#[derive(Debug, Clone, Copy)]
+pub struct EntityDimensions {
+    width: f32,
+    height: f32,
+    eye_height: f32,
+}
+
+impl EntityDimensions {
+    pub const fn new(width: f32, height: f32, eye_height: f32) -> Self {
+        Self {
+            width,
+            height,
+            eye_height,
+        }
+    }
+
+    pub const fn width(&self) -> f32 {
+        self.width
+    }
+
+    pub const fn height(&self) -> f32 {
+        self.height
+    }
+
+    pub const fn eye_height(&self) -> f32 {
+        self.eye_height
+    }
+
+    pub const fn aabb(&self, x: f32, y: f32, z: f32) -> Aabb {
+        let half_width = self.width / 2.0;
+
+        Aabb::new(
+            x - half_width,
+            y,
+            z - half_width,
+            x + half_width,
+            y + self.height,
+            z + half_width,
+        )
+    }
 }

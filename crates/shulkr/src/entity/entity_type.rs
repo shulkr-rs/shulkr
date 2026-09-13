@@ -1,3 +1,4 @@
+use super::EntityDimensions;
 use crate::{
     registry::{Id, Registries},
     util::Key,
@@ -8,15 +9,33 @@ pub struct EntityType(Id);
 
 include!("../../generated/entity_types.rs");
 
-pub struct EntityTypeData;
+pub struct EntityTypeData {
+    dimensions: EntityDimensions,
+}
 
 impl EntityTypeData {
-    pub const fn new() -> Self {
-        Self
+    pub const fn new(dimensions: EntityDimensions) -> Self {
+        Self { dimensions }
     }
 }
 
 impl EntityType {
+    pub const fn dimensions(&self) -> EntityDimensions {
+        self.data().dimensions
+    }
+
+    pub const fn width(&self) -> f32 {
+        self.dimensions().width()
+    }
+
+    pub const fn height(&self) -> f32 {
+        self.dimensions().height()
+    }
+
+    pub const fn eye_height(&self) -> f32 {
+        self.dimensions().eye_height()
+    }
+
     pub fn from_id(id: Id) -> Option<EntityType> {
         Self::try_from(id).ok()
     }

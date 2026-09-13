@@ -18,12 +18,12 @@ impl BlockState {
     }
 
     /// Returns the id of the [BlockState].
-    pub fn state_id(&self) -> u16 {
+    pub const fn state_id(&self) -> u16 {
         self.state_id
     }
 
     /// Returns this [BlockState] back into a [`Block`].
-    pub fn as_block(&self) -> Block {
+    pub const fn as_block(&self) -> Block {
         self.block
     }
 
@@ -133,7 +133,49 @@ impl BlockState {
             })
             .collect()
     }
+
+    const fn packed_shapes(&self) -> u64 {
+        self.block.data().shapes[(self.state_id() - self.block.data().min_state_id) as usize]
+    }
+
+    const fn shape(&self, shift: u32) -> &'static VoxelShape {
+        let id = shape_id(self.packed_shapes(), shift);
+        &SHAPE_CACHE[id]
+    }
+
+    pub const fn outline_shape(&self) -> &'static VoxelShape {
+        self.shape(OUTLINE_SHIFT)
+    }
+
+    pub const fn collision_shape(&self) -> &'static VoxelShape {
+        self.shape(COLLISION_SHIFT)
+    }
+
+    pub const fn interaction_shape(&self) -> &'static VoxelShape {
+        self.shape(INTERACTION_SHIFT)
+    }
+
+    pub const fn occlusion_shape(&self) -> &'static VoxelShape {
+        self.shape(OCCLUSION_SHIFT)
+    }
+
+    pub const fn visual_shape(&self) -> &'static VoxelShape {
+        self.shape(VISUAL_SHIFT)
+    }
 }
+
+const fn shape_id(packed: u64, shift: u32) -> usize {
+    ((packed >> shift) & SHAPE_MASK) as usize
+}
+
+const SHAPE_BITS: u32 = 10;
+const SHAPE_MASK: u64 = (1 << SHAPE_BITS) - 1;
+
+const OUTLINE_SHIFT: u32 = 0;
+const COLLISION_SHIFT: u32 = 10;
+const INTERACTION_SHIFT: u32 = 20;
+const OCCLUSION_SHIFT: u32 = 30;
+const VISUAL_SHIFT: u32 = 40;
 
 impl From<Block> for BlockState {
     fn from(block: Block) -> Self {

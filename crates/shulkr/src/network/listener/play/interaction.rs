@@ -116,11 +116,44 @@ pub(crate) fn handle_use_item_on(player: Player, packet: UseItemOnPacket) {
         packet.hit_result,
     );
 
-    if let Some(state) = state_for_placement(block, &cx)
-        && cx.can_replace(cx.position())
-    {
-        world.place_block(player.clone(), cx.position(), state);
+    let Some(state) = state_for_placement(block, &cx) else {
+        return;
+    };
+
+    for entity in world.entities() {
+        let dimensions = entity.r#type().dimensions();
+        let position = entity.position();
+
+        if state.collision_shape().intersects(
+            &dimensions,
+            position.x() as f32,
+            position.y() as f32,
+            position.z() as f32,
+        ) {
+            return;
+        }
     }
+
+    let block_pos = cx.position();
+
+    for player in player.server().players().lock().iter() {
+        if player.game_mode() == GameMode::Spectator {
+            continue;
+        }
+
+        let dimensions = player.r#type().dimensions();
+        let position = player.position();
+
+        let x = position.x() as f32 - block_pos.x() as f32;
+        let y = position.y() as f32 - block_pos.y() as f32;
+        let z = position.z() as f32 - block_pos.z() as f32;
+
+        if state.collision_shape().intersects(&dimensions, x, y, z) {
+            return;
+        }
+    }
+
+    world.place_block(player.clone(), cx.position(), state);
 
     player.send_packet(&AcknowledgeBlockChangePacket {
         sequence_id: packet.sequence,

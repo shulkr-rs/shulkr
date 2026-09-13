@@ -12,7 +12,7 @@ pub use property::{BoolProperty, EnumProperty, IntProperty, Property};
 use self::property::Properties;
 use crate::{
     registry::{Id, Registries},
-    util::Key,
+    util::{Aabb, Key, VoxelShape},
 };
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
@@ -26,6 +26,7 @@ pub struct BlockData {
     pub min_state_id: Id,
     pub properties: &'static [&'static dyn Property],
     pub block_entity: Option<BlockEntityType>,
+    pub shapes: &'static [u64],
 }
 
 impl BlockData {
@@ -34,12 +35,14 @@ impl BlockData {
         min_state_id: Id,
         properties: &'static [&'static dyn Property],
         block_entity: Option<BlockEntityType>,
+        shapes: &'static [u64],
     ) -> Self {
         Self {
             default_state,
             min_state_id,
             properties,
             block_entity,
+            shapes,
         }
     }
 
