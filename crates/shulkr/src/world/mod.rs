@@ -13,10 +13,15 @@ mod dimension_type;
 pub use dimension_type::*;
 
 use crate::{
+    Server,
     entity::{Entity, Player},
+    protocol::packet::{BlockUpdatePacket, WorldEventPacket},
     registry::RegistryKey,
     util::{BlockPosition, Direction, HashMap},
-    world::{block::BlockState, chunk::Chunk},
+    world::{
+        block::{Block, BlockState},
+        chunk::Chunk,
+    },
 };
 use std::sync::Arc;
 
@@ -106,13 +111,47 @@ impl World {
 
     pub fn get_block(&self, position: impl Into<BlockPosition>) -> BlockState {
         let position = position.into();
-        self.0.get_block(position.x(), position.y(), position.z())
+        let [x, y, z] = position.into();
+
+        let cx = x.div_euclid(16);
+        let cz = z.div_euclid(16);
+
+        let chunk = self.get_chunk(cx, cz).unwrap_or_else(|| {
+            panic!("Chunk ({},{}) is not loaded!", cx, cz);
+        });
+
+        BlockState::from_id(chunk.get_block(x, y, z)).unwrap()
     }
 
     pub fn set_block(&self, position: impl Into<BlockPosition>, block: impl Into<BlockState>) {
         let position = position.into();
-        self.0
-            .set_block(position.x(), position.y(), position.z(), block)
+        let [x, y, z] = position.into();
+
+        let cx = x.div_euclid(16);
+        let cz = z.div_euclid(16);
+
+        let chunk = match self.get_chunk(cx, cz) {
+            Some(chunk) => chunk,
+            None => self.load_chunk(cx, cz),
+        };
+
+        let block = block.into();
+        chunk.set_block(x, y, z, &block);
+
+        // todo: should be only sent to players that are viewing the block/chunk
+        for player in Server::current().players().lock().iter() {
+            let Some(world) = player.0.world.lock().clone() else {
+                continue;
+            };
+            if !Arc::ptr_eq(&world.0, &self.0) {
+                continue;
+            }
+
+            player.send_packet(&BlockUpdatePacket {
+                position,
+                block_id: block.state_id(),
+            });
+        }
     }
 
     pub fn get_biome(&self, position: impl Into<BlockPosition>) -> u16 {
@@ -134,28 +173,46 @@ impl World {
         self.0.entities()
     }
 
-    pub fn break_block(&self, player: Player, position: impl Into<BlockPosition>, face: Direction) {
-        self.0.break_block(player, position.into(), face);
+    pub fn break_block(
+        &self,
+        player: Player,
+        position: impl Into<BlockPosition>,
+        _face: Direction,
+    ) {
+        let position = position.into();
+
+        let block = self.get_block(position);
+        let air = Block::AIR.default_state();
+        self.set_block(position, air);
+
+        for p in player.server().players().lock().clone() {
+            if p == player {
+                continue;
+            }
+            p.send_packet(&WorldEventPacket {
+                event: 2001,
+                position,
+                data: block.state_id() as i32,
+                disable_relative_volume: false,
+            });
+        }
     }
 
     pub fn place_block(
         &self,
-        player: Player,
-        position: impl Into<BlockPosition>,
-        block: BlockState,
+        _player: Player,
+        position: BlockPosition,
+        state: impl Into<BlockState>,
     ) {
-        self.0.place_block(player, position.into(), block);
+        let state = state.into();
+
+        self.set_block(position, state);
     }
 }
 
 mod imp {
     use super::*;
-    use crate::{
-        Server,
-        protocol::packet::{BlockUpdatePacket, WorldEventPacket},
-        util::RwLock,
-        world::{block::Block, chunk::AsyncDedup},
-    };
+    use crate::{Server, util::RwLock, world::chunk::AsyncDedup};
     use std::sync::OnceLock;
     use tokio::sync::{Semaphore, watch};
 
@@ -301,31 +358,6 @@ mod imp {
             }
         }
 
-        pub(super) fn get_block(&self, x: i32, y: i32, z: i32) -> BlockState {
-            let cx = x.div_euclid(16);
-            let cz = z.div_euclid(16);
-
-            let chunk = self.get_chunk(cx, cz).unwrap_or_else(|| {
-                panic!("Chunk ({},{}) is not loaded!", cx, cz);
-            });
-
-            BlockState::from_id(chunk.get_block(x, y, z)).unwrap()
-        }
-
-        pub(super) fn set_block<B>(&self, x: i32, y: i32, z: i32, block: B)
-        where
-            B: Into<BlockState>,
-        {
-            let cx = x.div_euclid(16);
-            let cz = z.div_euclid(16);
-
-            let chunk = match self.get_chunk(cx, cz) {
-                Some(chunk) => chunk,
-                None => self.load_chunk(cx, cz),
-            };
-            chunk.set_block(x, y, z, &block.into());
-        }
-
         pub(super) fn get_biome(&self, x: i32, y: i32, z: i32) -> u16 {
             let cx = x.div_euclid(16);
             let cz = z.div_euclid(16);
@@ -354,56 +386,6 @@ mod imp {
 
         pub(super) fn entities(&self) -> Vec<Entity> {
             self.entities.read().iter().cloned().collect()
-        }
-
-        pub(super) fn break_block(
-            &self,
-            player: Player,
-            position: BlockPosition,
-            _face: Direction,
-        ) {
-            // let (cx, cz) = Chunk::to_chunk_pos(position);
-            // let Some(chunk) = self.get_chunk(cx, cz) else {
-            //     return;
-            // };
-
-            let block = self.get_block(position.x(), position.y(), position.z());
-            let air = Block::AIR.default_state();
-            self.set_block(position.x(), position.y(), position.z(), air);
-
-            // todo: should be only sent to players that are viewing the block/chunk
-            for p in player.server().players().lock().clone() {
-                p.send_packet(&BlockUpdatePacket {
-                    position,
-                    block_id: air.state_id(),
-                });
-                if p == player {
-                    continue;
-                }
-                p.send_packet(&WorldEventPacket {
-                    event: 2001,
-                    position,
-                    data: block.state_id() as i32,
-                    disable_relative_volume: false,
-                });
-            }
-        }
-
-        pub(super) fn place_block(
-            &self,
-            player: Player,
-            position: BlockPosition,
-            state: impl Into<BlockState>,
-        ) {
-            let state = state.into();
-            let block_id = state.state_id();
-
-            self.set_block(position.x(), position.y(), position.z(), state);
-
-            // todo: should be only sent to players that are viewing the block/chunk
-            for player in player.server().players().lock().clone() {
-                player.send_packet(&BlockUpdatePacket { position, block_id });
-            }
         }
     }
 }

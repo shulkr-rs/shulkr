@@ -98,3 +98,9 @@ where
         Self::new(x.into(), y.into(), z.into())
     }
 }
+
+impl From<BlockPosition> for [i32; 3] {
+    fn from(position: BlockPosition) -> Self {
+        [position.x, position.y, position.z]
+    }
+}

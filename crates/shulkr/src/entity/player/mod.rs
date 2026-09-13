@@ -17,6 +17,7 @@ use crate::{
     world::{World, chunk::Chunk},
 };
 use std::{
+    hash::Hash,
     net::SocketAddr,
     sync::{
         Arc,
@@ -319,6 +320,14 @@ impl PartialEq for Player {
     }
 }
 
+impl Eq for Player {}
+
+impl Hash for Player {
+    fn hash<H: std::hash::Hasher>(&self, state: &mut H) {
+        self.uuid().hash(state);
+    }
+}
+
 impl Tickable for Player {
     fn tick(&self) {
         self.process_view_changes();
@@ -357,7 +366,7 @@ mod imp {
         pub(super) connection: Arc<Connection>,
         pub(super) game_profile: GameProfile,
         pub(super) entity: Entity,
-        pub(super) world: Mutex<Option<World>>,
+        pub(crate) world: Mutex<Option<World>>,
         pub(super) last_keep_alive: Mutex<Instant>,
         pub(super) game_mode: Mutex<GameMode>,
         pub(crate) chunk_queue: Mutex<ChunkQueue>,
