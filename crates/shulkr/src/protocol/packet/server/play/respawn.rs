@@ -18,7 +18,7 @@ pub struct RespawnPacket {
     pub dimension_name: Key,
     pub hashed_seed: i64,
     pub game_mode: GameMode,
-    pub previous_game_mode: i8,
+    pub previous_game_mode: Option<GameMode>,
     pub is_debug: bool,
     pub is_flat: bool,
     pub death_location: Option<DeathLocation>,
@@ -35,8 +35,8 @@ impl Encode for RespawnPacket {
         w.write_varint(this.dimension_type)?;
         w.write_key(&this.dimension_name)?;
         w.write_i64(this.hashed_seed)?;
-        w.write_u8(this.game_mode as u8)?;
-        w.write_u8(this.previous_game_mode as u8)?;
+        w.write_varint(this.game_mode as i32)?;
+        w.write_varint(this.previous_game_mode.map_or(0, |gm| gm as i32 + 1))?;
         w.write_bool(this.is_debug)?;
         w.write_bool(this.is_flat)?;
         w.write_option(&this.death_location, DeathLocation::encode)?;

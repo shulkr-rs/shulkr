@@ -12,6 +12,7 @@ impl Biome {
     pub const CHERRY_GROVE: RegistryKey<Biome> = RegistryKey::const_vanilla("cherry_grove");
     pub const COLD_OCEAN: RegistryKey<Biome> = RegistryKey::const_vanilla("cold_ocean");
     pub const CRIMSON_FOREST: RegistryKey<Biome> = RegistryKey::const_vanilla("crimson_forest");
+    pub const DAPPLED_FOREST: RegistryKey<Biome> = RegistryKey::const_vanilla("dappled_forest");
     pub const DARK_FOREST: RegistryKey<Biome> = RegistryKey::const_vanilla("dark_forest");
     pub const DEEP_COLD_OCEAN: RegistryKey<Biome> = RegistryKey::const_vanilla("deep_cold_ocean");
     pub const DEEP_DARK: RegistryKey<Biome> = RegistryKey::const_vanilla("deep_dark");

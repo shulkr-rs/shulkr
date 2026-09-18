@@ -1,14 +1,14 @@
 use crate::{
-    entity::{EntityAnimation, EntityLike as _, EntityType, GameMode, Hand, Player},
+    entity::{EntityAnimation, EntityLike as _, EntityType, GameMode, Player},
     event::player::{PlayerAttackEvent, PlayerPickBlockEvent, PlayerPickEntityEvent},
     protocol::packet::{
         AcknowledgeBlockChangePacket, AttackPacket, EntityAnimationPacket, InteractPacket,
         PickItemFromBlockPacket, PickItemFromEntityPacket, PlayerActionPacket, PlayerDiggingState,
-        SetBlockDestroyStagePacket, SwingArmPacket, UseItemOnPacket, UseItemPacket,
+        PunchPacket, SetBlockDestroyStagePacket, UseItemOnPacket, UseItemPacket,
     },
     registry::Id,
     util::{BlockPosition, Viewable as _},
-    world::block::placement::{BlockPlaceContext, state_for_placement},
+    world::block::placement::{BlockPlaceContext, REG, state_for_placement},
 };
 
 pub(crate) fn handle_attack(player: Player, packet: AttackPacket) {
@@ -86,14 +86,10 @@ pub(crate) fn handle_player_action(player: Player, packet: PlayerActionPacket) {
     });
 }
 
-pub(crate) fn handle_swing_arm(player: Player, packet: SwingArmPacket) {
+pub(crate) fn handle_punch(player: Player, _packet: PunchPacket) {
     player.broadcast_packet(&EntityAnimationPacket {
         entity_id: player.id(),
-        animation: if packet.hand == Hand::Main {
-            EntityAnimation::SwingMainArm
-        } else {
-            EntityAnimation::SwingOffhand
-        },
+        animation: EntityAnimation::SwingMainArm,
     });
 }
 
@@ -154,6 +150,7 @@ pub(crate) fn handle_use_item_on(player: Player, packet: UseItemOnPacket) {
     }
 
     world.place_block(player.clone(), cx.position(), state);
+    REG.after_place(block, state, &cx);
 
     player.send_packet(&AcknowledgeBlockChangePacket {
         sequence_id: packet.sequence,

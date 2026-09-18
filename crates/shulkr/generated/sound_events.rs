@@ -498,6 +498,10 @@ impl SoundEvent {
     pub const ITEM_CROSSBOW_QUICK_CHARGE_2: SoundEvent = SoundEvent::new();
     pub const ITEM_CROSSBOW_QUICK_CHARGE_3: SoundEvent = SoundEvent::new();
     pub const ITEM_CROSSBOW_SHOOT: SoundEvent = SoundEvent::new();
+    pub const ENTITY_CUSHION_BREAK: SoundEvent = SoundEvent::new();
+    pub const ENTITY_CUSHION_PLACE: SoundEvent = SoundEvent::new();
+    pub const ENTITY_CUSHION_SIT: SoundEvent = SoundEvent::new();
+    pub const ENTITY_CUSHION_GET_UP: SoundEvent = SoundEvent::new();
     pub const BLOCK_DEADBUSH_IDLE: SoundEvent = SoundEvent::new();
     pub const BLOCK_DECORATED_POT_BREAK: SoundEvent = SoundEvent::new();
     pub const BLOCK_DECORATED_POT_FALL: SoundEvent = SoundEvent::new();
@@ -1974,6 +1978,25 @@ impl SoundEvent {
     pub const ENTITY_SMALL_SULFUR_CUBE_JUMP: SoundEvent = SoundEvent::new();
     pub const ENTITY_SMALL_SULFUR_CUBE_SQUISH: SoundEvent = SoundEvent::new();
     pub const ENTITY_SMALL_SULFUR_CUBE_EAT: SoundEvent = SoundEvent::new();
+    pub const BLOCK_SHELF_MUSHROOM_BREAK: SoundEvent = SoundEvent::new();
+    pub const BLOCK_SHELF_MUSHROOM_FALL: SoundEvent = SoundEvent::new();
+    pub const BLOCK_SHELF_MUSHROOM_PLACE: SoundEvent = SoundEvent::new();
+    pub const BLOCK_SHELF_MUSHROOM_STEP: SoundEvent = SoundEvent::new();
+    pub const BLOCK_SHELF_MUSHROOM_BOUNCE: SoundEvent = SoundEvent::new();
+    pub const BLOCK_POPLAR_LEAVES_BREAK: SoundEvent = SoundEvent::new();
+    pub const BLOCK_POPLAR_LEAVES_HIT: SoundEvent = SoundEvent::new();
+    pub const BLOCK_POPLAR_LEAVES_FALL: SoundEvent = SoundEvent::new();
+    pub const BLOCK_POPLAR_LEAVES_PLACE: SoundEvent = SoundEvent::new();
+    pub const BLOCK_POPLAR_LEAVES_STEP: SoundEvent = SoundEvent::new();
+    pub const BLOCK_POPLAR_LEAVES_AMBIENT: SoundEvent = SoundEvent::new();
+    pub const BLOCK_STRAW_BED_BREAK: SoundEvent = SoundEvent::new();
+    pub const BLOCK_STRAW_BED_BREAK_LEAVE: SoundEvent = SoundEvent::new();
+    pub const BLOCK_STRAW_BED_STEP: SoundEvent = SoundEvent::new();
+    pub const BLOCK_STRAW_BED_PLACE: SoundEvent = SoundEvent::new();
+    pub const BLOCK_STRAW_BED_HIT: SoundEvent = SoundEvent::new();
+    pub const BLOCK_STRAW_BED_FALL: SoundEvent = SoundEvent::new();
+    pub const BLOCK_RED_SHRUB_BREAK: SoundEvent = SoundEvent::new();
+    pub const BLOCK_RED_SHRUB_PLACE: SoundEvent = SoundEvent::new();
 }
 pub(crate) fn register_all(registry: &mut Registry<SoundEvent>) {
     let mut register = |key: &'static str, value: SoundEvent| {
@@ -2471,6 +2494,10 @@ pub(crate) fn register_all(registry: &mut Registry<SoundEvent>) {
     register("minecraft:item.crossbow.quick_charge_2", SoundEvent::ITEM_CROSSBOW_QUICK_CHARGE_2);
     register("minecraft:item.crossbow.quick_charge_3", SoundEvent::ITEM_CROSSBOW_QUICK_CHARGE_3);
     register("minecraft:item.crossbow.shoot", SoundEvent::ITEM_CROSSBOW_SHOOT);
+    register("minecraft:entity.cushion.break", SoundEvent::ENTITY_CUSHION_BREAK);
+    register("minecraft:entity.cushion.place", SoundEvent::ENTITY_CUSHION_PLACE);
+    register("minecraft:entity.cushion.sit", SoundEvent::ENTITY_CUSHION_SIT);
+    register("minecraft:entity.cushion.get_up", SoundEvent::ENTITY_CUSHION_GET_UP);
     register("minecraft:block.deadbush.idle", SoundEvent::BLOCK_DEADBUSH_IDLE);
     register("minecraft:block.decorated_pot.break", SoundEvent::BLOCK_DECORATED_POT_BREAK);
     register("minecraft:block.decorated_pot.fall", SoundEvent::BLOCK_DECORATED_POT_FALL);
@@ -3947,4 +3974,23 @@ pub(crate) fn register_all(registry: &mut Registry<SoundEvent>) {
     register("minecraft:entity.small_sulfur_cube.jump", SoundEvent::ENTITY_SMALL_SULFUR_CUBE_JUMP);
     register("minecraft:entity.small_sulfur_cube.squish", SoundEvent::ENTITY_SMALL_SULFUR_CUBE_SQUISH);
     register("minecraft:entity.small_sulfur_cube.eat", SoundEvent::ENTITY_SMALL_SULFUR_CUBE_EAT);
+    register("minecraft:block.shelf_mushroom.break", SoundEvent::BLOCK_SHELF_MUSHROOM_BREAK);
+    register("minecraft:block.shelf_mushroom.fall", SoundEvent::BLOCK_SHELF_MUSHROOM_FALL);
+    register("minecraft:block.shelf_mushroom.place", SoundEvent::BLOCK_SHELF_MUSHROOM_PLACE);
+    register("minecraft:block.shelf_mushroom.step", SoundEvent::BLOCK_SHELF_MUSHROOM_STEP);
+    register("minecraft:block.shelf_mushroom.bounce", SoundEvent::BLOCK_SHELF_MUSHROOM_BOUNCE);
+    register("minecraft:block.poplar_leaves.break", SoundEvent::BLOCK_POPLAR_LEAVES_BREAK);
+    register("minecraft:block.poplar_leaves.hit", SoundEvent::BLOCK_POPLAR_LEAVES_HIT);
+    register("minecraft:block.poplar_leaves.fall", SoundEvent::BLOCK_POPLAR_LEAVES_FALL);
+    register("minecraft:block.poplar_leaves.place", SoundEvent::BLOCK_POPLAR_LEAVES_PLACE);
+    register("minecraft:block.poplar_leaves.step", SoundEvent::BLOCK_POPLAR_LEAVES_STEP);
+    register("minecraft:block.poplar_leaves.ambient", SoundEvent::BLOCK_POPLAR_LEAVES_AMBIENT);
+    register("minecraft:block.straw_bed.break", SoundEvent::BLOCK_STRAW_BED_BREAK);
+    register("minecraft:block.straw_bed.break_leave", SoundEvent::BLOCK_STRAW_BED_BREAK_LEAVE);
+    register("minecraft:block.straw_bed.step", SoundEvent::BLOCK_STRAW_BED_STEP);
+    register("minecraft:block.straw_bed.place", SoundEvent::BLOCK_STRAW_BED_PLACE);
+    register("minecraft:block.straw_bed.hit", SoundEvent::BLOCK_STRAW_BED_HIT);
+    register("minecraft:block.straw_bed.fall", SoundEvent::BLOCK_STRAW_BED_FALL);
+    register("minecraft:block.red_shrub.break", SoundEvent::BLOCK_RED_SHRUB_BREAK);
+    register("minecraft:block.red_shrub.place", SoundEvent::BLOCK_RED_SHRUB_PLACE);
 }

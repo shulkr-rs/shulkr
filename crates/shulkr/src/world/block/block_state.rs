@@ -189,13 +189,25 @@ pub struct BlockStateTable {
 
 impl BlockStateTable {
     pub fn build(blocks: &Registry<Block>) -> Self {
-        let mut state_to_block = Vec::new();
+        let total = blocks
+            .values()
+            .iter()
+            .map(|block| {
+                let data = block.data();
+                (data.min_state_id + data.state_count()) as usize
+            })
+            .max()
+            .unwrap_or(0);
+
+        let mut state_to_block = vec![0u16; total];
+
         for (index, block) in blocks.values().iter().enumerate() {
-            let state_count = block.data().state_count();
-            for _ in 0..state_count {
-                state_to_block.push(index as u16);
-            }
+            let data = block.data();
+            let start = data.min_state_id as usize;
+            let end = start + data.state_count() as usize;
+            state_to_block[start..end].fill(index as u16);
         }
+
         Self { state_to_block }
     }
 

@@ -1,8 +1,10 @@
+use serde::{Deserialize, Serialize};
 use shulkr_macros::Enumeration;
 
 use crate::util::Axis;
 
-#[derive(Enumeration)]
+#[derive(Enumeration, Serialize, Deserialize)]
+#[serde(rename_all = "snake_case")]
 pub enum Direction {
     Down,
     Up,

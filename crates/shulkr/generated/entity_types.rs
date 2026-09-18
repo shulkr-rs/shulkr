@@ -39,6 +39,7 @@ impl EntityType {
     pub const COW: EntityType = EntityType::new(EntityDimensions::new(0.9, 1.4, 1.3));
     pub const CREAKING: EntityType = EntityType::new(EntityDimensions::new(0.9, 2.7, 2.3));
     pub const CREEPER: EntityType = EntityType::new(EntityDimensions::new(0.6, 1.7, 1.4));
+    pub const CUSHION: EntityType = EntityType::new(EntityDimensions::new(1.0, 0.2, 0.2));
     pub const DARK_OAK_BOAT: EntityType = EntityType::new(EntityDimensions::new(1.4, 0.6, 0.6));
     pub const DARK_OAK_CHEST_BOAT: EntityType = EntityType::new(EntityDimensions::new(1.4, 0.6, 0.6));
     pub const DOLPHIN: EntityType = EntityType::new(EntityDimensions::new(0.9, 0.6, 0.3));
@@ -111,6 +112,8 @@ impl EntityType {
     pub const PIGLIN_BRUTE: EntityType = EntityType::new(EntityDimensions::new(0.6, 1.9, 1.8));
     pub const PILLAGER: EntityType = EntityType::new(EntityDimensions::new(0.6, 1.9, 1.7));
     pub const POLAR_BEAR: EntityType = EntityType::new(EntityDimensions::new(1.4, 1.4, 1.2));
+    pub const POPLAR_BOAT: EntityType = EntityType::new(EntityDimensions::new(1.4, 0.6, 0.6));
+    pub const POPLAR_CHEST_BOAT: EntityType = EntityType::new(EntityDimensions::new(1.4, 0.6, 0.6));
     pub const SPLASH_POTION: EntityType = EntityType::new(EntityDimensions::new(0.2, 0.2, 0.2));
     pub const LINGERING_POTION: EntityType = EntityType::new(EntityDimensions::new(0.2, 0.2, 0.2));
     pub const PUFFERFISH: EntityType = EntityType::new(EntityDimensions::new(0.7, 0.7, 0.5));
@@ -202,6 +205,7 @@ pub(crate) fn register_all(registry: &mut Registry<EntityType>) {
     register("minecraft:cow", EntityType::COW);
     register("minecraft:creaking", EntityType::CREAKING);
     register("minecraft:creeper", EntityType::CREEPER);
+    register("minecraft:cushion", EntityType::CUSHION);
     register("minecraft:dark_oak_boat", EntityType::DARK_OAK_BOAT);
     register("minecraft:dark_oak_chest_boat", EntityType::DARK_OAK_CHEST_BOAT);
     register("minecraft:dolphin", EntityType::DOLPHIN);
@@ -274,6 +278,8 @@ pub(crate) fn register_all(registry: &mut Registry<EntityType>) {
     register("minecraft:piglin_brute", EntityType::PIGLIN_BRUTE);
     register("minecraft:pillager", EntityType::PILLAGER);
     register("minecraft:polar_bear", EntityType::POLAR_BEAR);
+    register("minecraft:poplar_boat", EntityType::POPLAR_BOAT);
+    register("minecraft:poplar_chest_boat", EntityType::POPLAR_CHEST_BOAT);
     register("minecraft:splash_potion", EntityType::SPLASH_POTION);
     register("minecraft:lingering_potion", EntityType::LINGERING_POTION);
     register("minecraft:pufferfish", EntityType::PUFFERFISH);

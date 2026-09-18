@@ -24,6 +24,8 @@ pub enum AttributeModifier {
     Nor,
     Xor,
     Xnor,
+    Append,
+    Overlay,
 }
 
 #[derive(Debug, Clone, Serialize)]
@@ -102,9 +104,28 @@ impl<'de> DeserializeSeed<'de> for EntrySeed {
             | AttributeType::AngleDegrees
             | AttributeType::RgbColor
             | AttributeType::ArgbColor => deserializer.deserialize_any(EntryVisitor(self.0)),
-            _ => Ok(AttributeEntry::of(
-                ValueSeed(self.0).deserialize(deserializer)?,
-            )),
+            _ => {
+                let value = serde_json::Value::deserialize(deserializer)?;
+
+                if let serde_json::Value::Object(ref map) = value
+                    && let (Some(modifier), Some(argument)) =
+                        (map.get("modifier"), map.get("argument"))
+                {
+                    let modifier = AttributeModifier::deserialize(modifier.clone())
+                        .map_err(serde::de::Error::custom)?;
+                    let argument = ArgumentSeed(self.0)
+                        .deserialize(argument.clone())
+                        .map_err(serde::de::Error::custom)?;
+
+                    return Ok(AttributeEntry::new(modifier, argument));
+                }
+
+                Ok(AttributeEntry::of(
+                    ValueSeed(self.0)
+                        .deserialize(value)
+                        .map_err(serde::de::Error::custom)?,
+                ))
+            }
         }
     }
 }
@@ -214,33 +235,55 @@ impl<'de> Visitor<'de> for ArgumentVisitor {
     }
 
     fn visit_map<A: MapAccess<'de>>(self, mut map: A) -> Result<Self::Value, A::Error> {
-        let mut value = None;
-        let mut alpha = None;
-        let mut brightness = None;
-        let mut factor = None;
-
-        while let Some(key) = map.next_key::<String>()? {
-            match key.as_str() {
-                "value" => value = Some(map.next_value::<f32>()?),
-                "alpha" => alpha = Some(map.next_value::<f32>()?),
-                "brightness" => brightness = Some(map.next_value::<f32>()?),
-                "factor" => factor = Some(map.next_value::<f32>()?),
-                _ => {
-                    map.next_value::<serde::de::IgnoredAny>()?;
-                }
-            }
+        let mut entries = serde_json::Map::new();
+        while let Some((key, value)) = map.next_entry::<String, serde_json::Value>()? {
+            entries.insert(key, value);
         }
 
-        if let (Some(brightness), Some(factor)) = (brightness, factor) {
+        if let (Some(brightness), Some(factor)) = (entries.get("brightness"), entries.get("factor"))
+        {
+            let brightness = brightness
+                .as_f64()
+                .ok_or_else(|| serde::de::Error::custom("expected a number for `brightness`"))?
+                as f32;
+            let factor = factor
+                .as_f64()
+                .ok_or_else(|| serde::de::Error::custom("expected a number for `factor`"))?
+                as f32;
+
             return Ok(AttributeArgument::BlendToGray { brightness, factor });
         }
 
-        match value {
-            Some(value) => Ok(AttributeArgument::FloatWithAlpha {
-                value,
-                alpha: alpha.unwrap_or(1.0),
-            }),
-            None => Err(serde::de::Error::missing_field("value")),
+        if let Some(value) = entries.get("value") {
+            let value = value
+                .as_f64()
+                .ok_or_else(|| serde::de::Error::custom("expected a number for `value`"))?
+                as f32;
+            let alpha = entries
+                .get("alpha")
+                .and_then(serde_json::Value::as_f64)
+                .unwrap_or(1.0) as f32;
+
+            return Ok(AttributeArgument::FloatWithAlpha { value, alpha });
         }
+
+        let value = ValueSeed(self.0)
+            .deserialize(serde_json::Value::Object(entries))
+            .map_err(serde::de::Error::custom)?;
+
+        Ok(AttributeArgument::Value(Box::new(value)))
+    }
+
+    fn visit_seq<A: serde::de::SeqAccess<'de>>(self, mut seq: A) -> Result<Self::Value, A::Error> {
+        let mut items = Vec::new();
+        while let Some(item) = seq.next_element::<serde_json::Value>()? {
+            items.push(item);
+        }
+
+        let value = ValueSeed(self.0)
+            .deserialize(serde_json::Value::Array(items))
+            .map_err(serde::de::Error::custom)?;
+
+        Ok(AttributeArgument::Value(Box::new(value)))
     }
 }

@@ -105,9 +105,8 @@ impl BlockPlaceContext {
 }
 
 pub fn state_for_placement(block: Block, cx: &BlockPlaceContext) -> Option<BlockState> {
-    let state = REG.place(block, cx);
-    if state.is_some() {
-        state
+    if REG.is_registered(block) {
+        REG.place(block, cx)
     } else {
         Some(block.default_state())
     }
@@ -170,11 +169,20 @@ impl BlockPlaceRegistry {
         self.placements.write().insert(block, Box::new(placement));
     }
 
+    pub fn is_registered(&self, block: Block) -> bool {
+        self.placements.read().contains_key(&block)
+    }
+
     pub fn place(&self, block: Block, cx: &BlockPlaceContext) -> Option<BlockState> {
         let guard = self.placements.read();
         let placement = guard.get(&block)?;
-        let state = placement.place_block(block, cx)?;
-        placement.after_place(state, cx);
-        Some(state)
+        placement.place_block(block, cx)
+    }
+
+    pub fn after_place(&self, block: Block, state: BlockState, cx: &BlockPlaceContext) {
+        let guard = self.placements.read();
+        if let Some(placement) = guard.get(&block) {
+            placement.after_place(state, cx);
+        }
     }
 }
