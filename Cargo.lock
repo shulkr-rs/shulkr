@@ -167,7 +167,7 @@ checksum = "0c9ea0ac24bc397ab3c98583a3c9ba74fa56b09a4449bbe172b9b1ddb016027a"
 
 [[package]]
 name = "codegen"
-version = "0.1.2"
+version = "0.1.3"
 dependencies = [
  "convert_case",
  "indexmap",
@@ -1265,7 +1265,7 @@ checksum = "0fda2ff0d084019ba4d7c6f371c95d8fd75ce3524c3cb8fb653a3023f6323e64"
 
 [[package]]
 name = "shulkr"
-version = "0.1.2"
+version = "0.1.3"
 dependencies = [
  "aes",
  "anyhow",
@@ -1305,7 +1305,7 @@ dependencies = [
 
 [[package]]
 name = "shulkr-data"
-version = "0.1.2"
+version = "0.1.3"
 dependencies = [
  "rust-embed",
  "serde",
@@ -1314,7 +1314,7 @@ dependencies = [
 
 [[package]]
 name = "shulkr-macros"
-version = "0.1.2"
+version = "0.1.3"
 dependencies = [
  "convert_case",
  "proc-macro2",
@@ -1324,7 +1324,7 @@ dependencies = [
 
 [[package]]
 name = "shulkr-nbt"
-version = "0.1.2"
+version = "0.1.3"
 dependencies = [
  "bytes",
  "pastey",
