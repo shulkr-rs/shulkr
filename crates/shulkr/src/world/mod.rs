@@ -3,6 +3,7 @@ pub mod biome;
 pub mod block;
 pub mod chunk;
 pub mod clock;
+pub mod fluid;
 pub mod heightmap;
 pub mod loader;
 pub mod palette;
@@ -212,7 +213,7 @@ impl World {
 
 mod imp {
     use super::*;
-    use crate::{Server, util::RwLock, world::chunk::AsyncDedup};
+    use crate::{registry::registries, util::RwLock, world::chunk::AsyncDedup};
     use std::sync::OnceLock;
     use tokio::sync::{Semaphore, watch};
 
@@ -243,12 +244,10 @@ mod imp {
             dimension: RegistryKey<DimensionType>,
             generator: Option<Arc<super::ChunkGenerator>>,
         ) -> Self {
-            let server = Server::current();
-            let dimension_type = server
-                .registries()
-                .dimension_type
+            let dimension_type = registries::DIMENSION_TYPE
                 .by_key(&dimension.to_key())
                 .unwrap()
+                .value()
                 .clone();
 
             Self {

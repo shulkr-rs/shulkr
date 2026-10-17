@@ -52,9 +52,8 @@ fn handle_client_info(client: Arc<Connection>, packet: ClientInfoPacket) {
         feature_flags: vec![Key::vanilla("vanilla")],
     });
 
-    let registries = server.registries();
-    registries::send_registries(&client, registries);
-    registries::send_registry_tags(&client, registries);
+    registries::send_registries(&client);
+    registries::send_registry_tags(&client);
 
     client.send_packet(&FinishConfigPacket {});
 }
@@ -100,8 +99,6 @@ fn handle_acknowledge_finish_config(
 
     let dimension = DimensionType::OVERWORLD;
 
-    let registries = client.server().registries();
-
     client.send_packet(&LoginPacket {
         entity_id: player.id(),
         is_hardcore: false,
@@ -112,7 +109,9 @@ fn handle_acknowledge_finish_config(
         reduced_debug_info: false,
         enable_respawn_screen: true,
         do_limited_crafting: false,
-        dimension_type: registries.dimension_type.get_id(&dimension).unwrap_or(0) as i32,
+        dimension_type: crate::registry::registries::DIMENSION_TYPE
+            .get_id(&dimension)
+            .unwrap_or(0) as i32,
         dimension_name: dimension.into(),
         hashed_seed: 93522819,
         game_mode: GameMode::Survival,

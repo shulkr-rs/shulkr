@@ -5,7 +5,7 @@ use crate::{
         packet::{ChunkData, ChunkDataAndUpdateLightPacket, LightData},
     },
     world::{
-        block::{Block, BlockEntity, BlockState},
+        block::BlockEntity,
         chunk::{Chunk, ChunkSection},
         heightmap::Heightmap,
         palette::{Palette, PaletteFormat},
@@ -83,11 +83,18 @@ impl Encode for PaletteFormat {
 }
 
 impl ChunkSection {
-    fn encode<W: PacketWrite>(w: &mut W, this: &Self, fluid_count: i16) -> Result<(), EncodeError> {
-        w.write_i16(this.block_states.count() as i16)?;
-        w.write_i16(fluid_count)?;
-        Palette::encode(w, &this.block_states)?;
-        Palette::encode(w, &this.biomes)?;
+    fn encode<W: PacketWrite>(w: &mut W, this: &mut Self) -> Result<(), EncodeError> {
+        if this.counts_are_stale() {
+            this.recalculate_counts();
+        }
+
+        w.write_i16(this.non_empty_block_count() as i16)?;
+        w.write_i16(this.fluid_count() as i16)?;
+        match this.block_states() {
+            Some(block_states) => Palette::encode(w, block_states)?,
+            None => Palette::encode(w, &Palette::blocks())?,
+        }
+        Palette::encode(w, this.biomes())?;
         Ok(())
     }
 }
@@ -95,25 +102,8 @@ impl ChunkSection {
 impl From<&Chunk> for ChunkDataAndUpdateLightPacket {
     fn from(value: &Chunk) -> Self {
         let mut data = BytesMut::new();
-        for section in value.sections() {
-            let fluid_count = match section.block_states.format {
-                PaletteFormat::SingleValued { value } => {
-                    if is_fluid(value) {
-                        section.block_states.count()
-                    } else {
-                        0
-                    }
-                }
-                _ => section
-                    .block_states
-                    .count
-                    .iter()
-                    .filter(|(id, _)| is_fluid(**id))
-                    .map(|(_, count)| *count)
-                    .sum::<i32>(),
-            };
-
-            ChunkSection::encode(&mut data, &section, fluid_count as i16).unwrap()
+        for mut section in value.sections() {
+            ChunkSection::encode(&mut data, &mut section).unwrap()
         }
 
         let chunk_x = value.x();
@@ -133,9 +123,4 @@ impl From<&Chunk> for ChunkDataAndUpdateLightPacket {
             light,
         }
     }
-}
-
-fn is_fluid(state_id: u16) -> bool {
-    BlockState::from_id(state_id)
-        .is_some_and(|state| matches!(state.as_block(), Block::WATER | Block::LAVA))
 }

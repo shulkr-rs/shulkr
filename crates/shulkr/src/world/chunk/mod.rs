@@ -137,58 +137,20 @@ impl Chunk {
 
     #[cfg(any(feature = "anvil", feature = "polar"))]
     pub(crate) fn fill_block_state_section(&mut self, sect_y: u32, block: u16) {
-        use crate::{
-            util::HashMap,
-            world::palette::{Palette, PaletteFormat},
-        };
+        use crate::world::palette::Palette;
 
-        let dim = 16;
-        let volume = dim * dim * dim;
-
-        let mut count = HashMap::with_capacity_and_hasher(1, Default::default());
-        count.insert(block, volume as i32);
-
-        self.0.write().sections[sect_y as usize].block_states = Palette {
-            dim,
-            min_bpe: 4,
-            max_bpe: 8,
-            direct_bpe: 15,
-
-            bpe: 0,
-            format: PaletteFormat::SingleValued { value: block },
-            values: Vec::new(),
-
-            data: vec![block; volume].into_boxed_slice(),
-            count,
-        };
+        let mut palette = Palette::blocks();
+        palette.fill(block);
+        self.0.write().sections[sect_y as usize].set_block_states(palette);
     }
 
     #[cfg(any(feature = "anvil", feature = "polar"))]
     pub(crate) fn fill_biome_section(&mut self, sect_y: u32, biome: u16) {
-        use crate::{
-            util::HashMap,
-            world::palette::{Palette, PaletteFormat},
-        };
+        use crate::world::palette::Palette;
 
-        let dim = 4;
-        let volume = dim * dim * dim;
-
-        let mut count = HashMap::with_capacity_and_hasher(1, Default::default());
-        count.insert(biome, volume as i32);
-
-        self.0.write().sections[sect_y as usize].biomes = Palette {
-            dim,
-            min_bpe: 1,
-            max_bpe: 3,
-            direct_bpe: Palette::biome_direct_bpe(),
-
-            bpe: 0,
-            format: PaletteFormat::SingleValued { value: biome },
-            values: Vec::new(),
-
-            data: vec![biome; volume].into_boxed_slice(),
-            count,
-        };
+        let mut palette = Palette::biomes();
+        palette.fill(biome);
+        self.0.write().sections[sect_y as usize].set_biomes(palette);
     }
 
     pub fn set_block_entity_data(

@@ -10,6 +10,7 @@ use crate::{
         RespawnPacket, ServerPacket, SetCenterChunkPacket, SetTablistHeaderFooterPacket,
         SoundEffectPacket, StopSoundPacket, SystemChatMessagePacket, server::play::KeepAlivePacket,
     },
+    registry::registries,
     sound::{Sound, SoundCategory},
     text::TextComponent,
     tickable::Tickable,
@@ -172,13 +173,7 @@ impl Player {
         self.set_world(world.clone());
 
         let dimension = world.dimension();
-        let dimension_type = self
-            .0
-            .server
-            .registries()
-            .dimension_type
-            .get_id(&dimension)
-            .unwrap_or(0) as i32;
+        let dimension_type = registries::DIMENSION_TYPE.get_id(&dimension).unwrap_or(0) as i32;
 
         self.send_packet(&RespawnPacket {
             dimension_type,

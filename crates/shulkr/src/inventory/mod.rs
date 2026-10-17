@@ -139,7 +139,7 @@ mod imp {
         fn generate_id() -> i32 {
             static CURRENT_ID: AtomicI32 = AtomicI32::new(1);
             CURRENT_ID
-                .fetch_update(Ordering::Relaxed, Ordering::Relaxed, |i| {
+                .try_update(Ordering::Relaxed, Ordering::Relaxed, |i| {
                     Some(if i + 1 >= 128 { 1 } else { i + 1 })
                 })
                 .unwrap()

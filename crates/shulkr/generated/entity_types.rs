@@ -168,9 +168,9 @@ impl EntityType {
     pub const PLAYER: EntityType = EntityType::new(EntityDimensions::new(0.6, 1.8, 1.6));
     pub const FISHING_BOBBER: EntityType = EntityType::new(EntityDimensions::new(0.2, 0.2, 0.2));
 }
-pub(crate) fn register_all(registry: &mut Registry<EntityType>) {
-    let mut register = |key: &'static str, value: EntityType| {
-        Registry::register(registry, key.into(), value);
+pub(crate) fn register_all(registry: &Registry<EntityType>) {
+    let register = |key: &'static str, value: EntityType| {
+        registry.register(key.into(), value).expect("vanilla registries are filled before freezing");
     };
     register("minecraft:acacia_boat", EntityType::ACACIA_BOAT);
     register("minecraft:acacia_chest_boat", EntityType::ACACIA_CHEST_BOAT);

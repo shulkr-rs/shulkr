@@ -1,5 +1,5 @@
 use crate::{
-    registry::{Id, Registries},
+    registry::{Id, registries},
     text::TextComponent,
     util::Key,
     world::{
@@ -59,7 +59,9 @@ impl EnvironmentAttribute {
     }
 
     pub fn from_key(key: &Key) -> Option<EnvironmentAttribute> {
-        Registries::ENVIRONMENT_ATTRIBUTE.by_key(key).copied()
+        registries::ENVIRONMENT_ATTRIBUTE
+            .by_key(key)
+            .map(|entry| **entry)
     }
 }
 
@@ -75,7 +77,7 @@ impl TryFrom<Id> for EnvironmentAttribute {
 
     #[inline]
     fn try_from(value: Id) -> Result<Self, Self::Error> {
-        if (value as usize) < Registries::ENVIRONMENT_ATTRIBUTE.len() {
+        if (value as usize) < registries::ENVIRONMENT_ATTRIBUTE.len() {
             Ok(EnvironmentAttribute(value))
         } else {
             Err(())

@@ -1665,9 +1665,9 @@ impl Material {
     pub const VAULT: Material = Material::new(Some(Block::VAULT));
     pub const OMINOUS_BOTTLE: Material = Material::new(None);
 }
-pub(crate) fn register_all(registry: &mut Registry<Material>) {
-    let mut register = |key: &'static str, value: Material| {
-        Registry::register(registry, key.into(), value);
+pub(crate) fn register_all(registry: &Registry<Material>) {
+    let register = |key: &'static str, value: Material| {
+        registry.register(key.into(), value).expect("vanilla registries are filled before freezing");
     };
     register("minecraft:air", Material::AIR);
     register("minecraft:stone", Material::STONE);

@@ -43,7 +43,7 @@ impl Encode for RegistryEntry {
 
 impl<T> From<&Registry<T>> for RegistryDataPacket
 where
-    T: Serialize + DeserializeOwned + Clone,
+    T: Serialize + DeserializeOwned + Clone + Send + Sync,
 {
     fn from(value: &Registry<T>) -> Self {
         let registry_id = value.key().to_key();
@@ -53,9 +53,6 @@ where
                 .iter()
                 .map(|(key, v)| RegistryEntry {
                     entry_id: key.clone(),
-                    // Most registry entries are objects (an NBT compound), but some are
-                    // bare values (e.g. context float/int providers, or lists like
-                    // block transformers), so the root tag type isn't fixed.
                     data: Some(v.serialize(shulkr_nbt::Serializer).unwrap()),
                 })
                 .collect(),

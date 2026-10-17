@@ -1998,9 +1998,9 @@ impl SoundEvent {
     pub const BLOCK_RED_SHRUB_BREAK: SoundEvent = SoundEvent::new();
     pub const BLOCK_RED_SHRUB_PLACE: SoundEvent = SoundEvent::new();
 }
-pub(crate) fn register_all(registry: &mut Registry<SoundEvent>) {
-    let mut register = |key: &'static str, value: SoundEvent| {
-        Registry::register(registry, key.into(), value);
+pub(crate) fn register_all(registry: &Registry<SoundEvent>) {
+    let register = |key: &'static str, value: SoundEvent| {
+        registry.register(key.into(), value).expect("vanilla registries are filled before freezing");
     };
     register("minecraft:entity.allay.ambient_with_item", SoundEvent::ENTITY_ALLAY_AMBIENT_WITH_ITEM);
     register("minecraft:entity.allay.ambient_without_item", SoundEvent::ENTITY_ALLAY_AMBIENT_WITHOUT_ITEM);

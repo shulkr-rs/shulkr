@@ -1,6 +1,6 @@
 use crate::{
-    registry::{Registry, RegistryKey},
-    util::HashMap,
+    registry::{Registry, registries},
+    util::{HashMap, Key},
     world::{
         biome::Biome,
         block::{Block, BlockState},
@@ -78,7 +78,7 @@ impl PolarLoader {
             other => return Err(PolarError::UnknownCompression(other)),
         };
 
-        let biomes = crate::registry::load_datapack("minecraft:worldgen/biome");
+        let biomes = &registries::BIOME;
 
         let min_section = read_i8(&mut body)?;
         let max_section = read_i8(&mut body)?;
@@ -103,7 +103,7 @@ impl PolarLoader {
         let mut chunk_user_data = HashMap::default();
         for _ in 0..chunk_count {
             let (chunk, chunk_data) =
-                read_chunk(&mut body, version, min_section, section_count, &biomes)?;
+                read_chunk(&mut body, version, min_section, section_count, biomes)?;
             let key = (chunk.x(), chunk.z());
             if !chunk_data.is_empty() {
                 chunk_user_data.insert(key, chunk_data);
@@ -258,7 +258,7 @@ fn read_section(
         let name = read_string(body)?;
         let lookup = name.strip_prefix("minecraft:").unwrap_or(&name);
         let id = biomes
-            .get_id(RegistryKey::new(lookup.to_owned()))
+            .get_id(&Key::vanilla(lookup.to_owned()))
             .ok_or(PolarError::Malformed)? as i32;
         ids.push(id);
     }
@@ -337,7 +337,7 @@ fn parse_block(entry: &str) -> Result<BlockState, PolarError> {
         None => (entry, None),
     };
 
-    let mut state = Block::from_key(name)
+    let mut state = Block::from_key(Key::of(name.to_owned()))
         .ok_or(PolarError::Malformed)?
         .default_state();
 
@@ -577,6 +577,7 @@ mod tests {
 
     #[test]
     fn loads_solid_stone_chunk() {
+        crate::registry::registries::register_all();
         let bytes = sample_world();
         let mut loader = PolarLoader::from_bytes(&bytes).expect("parse");
         assert_eq!(loader.min_section(), 0);

@@ -1,6 +1,6 @@
 use crate::{
     item::ItemStack,
-    registry::{Id, Registries},
+    registry::{Id, registries},
     text::{
         TextComponent,
         color::{Rgb, Rgba},
@@ -257,7 +257,7 @@ impl HoverEvent {
     pub fn show_item(stack: ItemStack, show_amount: bool, show_components: bool) -> Self {
         Self {
             ty: HoverEventType::ShowItem {
-                id: Registries::MATERIAL
+                id: registries::MATERIAL
                     .key_of(Id::from(stack.material()))
                     .unwrap_or_else(|| panic!("{:?} has no key", stack.material()))
                     .to_string(),

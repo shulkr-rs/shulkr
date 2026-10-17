@@ -1,4 +1,5 @@
 mod axis;
+mod bounding_box;
 mod color;
 mod direction;
 mod dye_color;
@@ -13,6 +14,7 @@ mod viewable;
 mod world_pos;
 
 pub use axis::*;
+pub use bounding_box::*;
 pub use color::*;
 pub use direction::*;
 pub use dye_color::*;

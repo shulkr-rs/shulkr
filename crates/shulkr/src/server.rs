@@ -3,7 +3,6 @@ use crate::{
     command::dispatcher::CommandDispatcher,
     entity::Player,
     event::Events,
-    registry::Registries,
     util::Mutex,
 };
 use std::sync::{Arc, OnceLock, atomic::Ordering};
@@ -16,11 +15,8 @@ pub struct Server(Arc<imp::Server>);
 
 impl Server {
     pub fn new(auth_mode: AuthMode) -> Self {
-        Self::with_registries(auth_mode, Registries::new())
-    }
-
-    pub fn with_registries(auth_mode: AuthMode, registries: Registries) -> Self {
-        let imp = Arc::new(imp::Server::new(auth_mode, registries));
+        crate::registry::registries::register_all();
+        let imp = Arc::new(imp::Server::new(auth_mode));
 
         CURRENT
             .set(imp.clone())
@@ -48,10 +44,6 @@ impl Server {
 
     pub fn auth_mode(&self) -> &AuthMode {
         &self.auth_mode
-    }
-
-    pub fn registries(&self) -> &Registries {
-        &self.registries
     }
 
     pub fn players(&self) -> &Arc<Mutex<Vec<Player>>> {
@@ -105,7 +97,6 @@ mod imp {
         entity::Player,
         event::Events,
         network::client::Connection,
-        registry::Registries,
         server::ServerError,
         tickable::Ticker,
         util::Mutex,
@@ -121,7 +112,6 @@ mod imp {
         pub(super) closed: AtomicBool,
 
         pub(super) auth_mode: AuthMode,
-        pub(super) registries: Registries,
         pub(super) key_store: Arc<KeyStore>,
         pub(super) events: Events,
         pub(super) players: Arc<Mutex<Vec<Player>>>,
@@ -130,7 +120,7 @@ mod imp {
     }
 
     impl Server {
-        pub(super) fn new(auth_mode: AuthMode, registries: Registries) -> Self {
+        pub(super) fn new(auth_mode: AuthMode) -> Self {
             let runtime = tokio::runtime::Builder::new_multi_thread()
                 .enable_all()
                 .build()
@@ -141,7 +131,6 @@ mod imp {
                 closed: AtomicBool::new(false),
 
                 auth_mode,
-                registries,
                 key_store: Arc::new(KeyStore::new()),
                 events: Events::new(),
                 players: Arc::new(Mutex::new(Vec::new())),
@@ -154,6 +143,7 @@ mod imp {
             self: Arc<Self>,
             addr: impl ToSocketAddrs,
         ) -> Result<(), ServerError> {
+            crate::registry::freeze();
             let listener = TcpListener::bind(addr).await?;
             tracing::debug!("Listening on {}", listener.local_addr()?);
 

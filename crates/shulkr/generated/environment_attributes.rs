@@ -58,9 +58,9 @@ impl EnvironmentAttribute {
     pub const VILLAGER_ACTIVITY: EnvironmentAttribute = EnvironmentAttribute::new("gameplay/villager_activity", AttributeType::Activity, AttributeValue::Activity(Key::const_vanilla("idle")));
     pub const BABY_VILLAGER_ACTIVITY: EnvironmentAttribute = EnvironmentAttribute::new("gameplay/baby_villager_activity", AttributeType::Activity, AttributeValue::Activity(Key::const_vanilla("idle")));
 }
-pub(crate) fn register_all(registry: &mut Registry<EnvironmentAttribute>) {
-    let mut register = |key: &'static str, value: EnvironmentAttribute| {
-        Registry::register(registry, key.into(), value);
+pub(crate) fn register_all(registry: &Registry<EnvironmentAttribute>) {
+    let register = |key: &'static str, value: EnvironmentAttribute| {
+        registry.register(key.into(), value).expect("vanilla registries are filled before freezing");
     };
     register("minecraft:visual/fog_color", EnvironmentAttribute::FOG_COLOR);
     register("minecraft:visual/fog_start_distance", EnvironmentAttribute::FOG_START_DISTANCE);

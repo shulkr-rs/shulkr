@@ -10,7 +10,7 @@ use parking_lot::RwLock;
 use crate::{
     entity::{Hand, Player},
     item::ItemStack,
-    registry::Registries,
+    registry::registries,
     util::{BlockPosition, Direction, HashMap, Point},
     world::{
         World,
@@ -138,7 +138,7 @@ impl BlockPlaceRegistry {
         };
 
         // TODO: proper registration
-        for block in Registries::BLOCK.values() {
+        for block in registries::BLOCK.values() {
             if block.default_state().get(Properties::AXIS).is_some() {
                 this.register(*block, rotated_pillar::RotatedPillar);
             }
@@ -147,14 +147,14 @@ impl BlockPlaceRegistry {
                 this.register(*block, sign::SignBlock);
             }
 
-            if Registries::BLOCK
+            if registries::BLOCK
                 .key_of(block.0)
                 .is_some_and(|k| k.to_string().contains("trapdoor"))
             {
                 this.register(*block, trapdoor::TrapDoorBlock);
             }
 
-            if Registries::BLOCK
+            if registries::BLOCK
                 .key_of(block.0)
                 .is_some_and(|k| k.to_string().contains("bed"))
             {

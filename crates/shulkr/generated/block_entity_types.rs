@@ -56,9 +56,9 @@ impl BlockEntityType {
     pub const COPPER_GOLEM_STATUE: BlockEntityType = BlockEntityType::new();
     pub const POTENT_SULFUR: BlockEntityType = BlockEntityType::new();
 }
-pub(crate) fn register_all(registry: &mut Registry<BlockEntityType>) {
-    let mut register = |key: &'static str, value: BlockEntityType| {
-        Registry::register(registry, key.into(), value);
+pub(crate) fn register_all(registry: &Registry<BlockEntityType>) {
+    let register = |key: &'static str, value: BlockEntityType| {
+        registry.register(key.into(), value).expect("vanilla registries are filled before freezing");
     };
     register("minecraft:furnace", BlockEntityType::FURNACE);
     register("minecraft:chest", BlockEntityType::CHEST);

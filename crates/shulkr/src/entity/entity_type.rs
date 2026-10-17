@@ -1,6 +1,6 @@
 use super::EntityDimensions;
 use crate::{
-    registry::{Id, Registries},
+    registry::{Id, registries},
     util::Key,
 };
 
@@ -41,7 +41,7 @@ impl EntityType {
     }
 
     pub fn from_key(key: Key) -> Option<EntityType> {
-        Registries::ENTITY_TYPE.by_key(&key).copied()
+        registries::ENTITY_TYPE.by_key(&key).map(|entry| **entry)
     }
 }
 
@@ -57,7 +57,7 @@ impl TryFrom<Id> for EntityType {
 
     #[inline]
     fn try_from(value: Id) -> Result<Self, Self::Error> {
-        if (value as usize) < Registries::ENTITY_TYPE.len() {
+        if (value as usize) < registries::ENTITY_TYPE.len() {
             Ok(EntityType(value))
         } else {
             Err(())

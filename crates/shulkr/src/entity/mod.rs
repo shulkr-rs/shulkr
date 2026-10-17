@@ -325,15 +325,16 @@ impl EntityDimensions {
         self.eye_height
     }
 
-    pub const fn aabb(&self, x: f32, y: f32, z: f32) -> Aabb {
-        let half_width = self.width / 2.0;
+    pub fn aabb(&self, x: f32, y: f32, z: f32) -> Aabb {
+        let half_width = f64::from(self.width) / 2.0;
+        let (x, y, z) = (f64::from(x), f64::from(y), f64::from(z));
 
         Aabb::new(
             x - half_width,
             y,
             z - half_width,
             x + half_width,
-            y + self.height,
+            y + f64::from(self.height),
             z + half_width,
         )
     }

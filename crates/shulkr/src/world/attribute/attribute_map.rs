@@ -128,6 +128,7 @@ mod tests {
 
     #[test]
     fn round_trip() {
+        crate::registry::registries::register_all();
         let map = EnvironmentAttributeMap::new()
             .with(EnvironmentAttribute::SKY_COLOR, Cow::Borrowed("#7BA4FF"))
             .with(EnvironmentAttribute::FAST_LAVA, true)

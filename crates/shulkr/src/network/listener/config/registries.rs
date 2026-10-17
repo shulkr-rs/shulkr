@@ -1,115 +1,75 @@
 use crate::{
     network::client::Connection,
     protocol::packet::{Tag, TagRegistry},
-    registry::{Registries, Registry, RegistryKey},
-    util::{HashMap, HashSet, Key},
+    registry::{Registry, registries},
 };
-use serde::Deserialize;
 
-#[derive(Debug, Deserialize)]
-pub struct TagSection {
-    pub values: Vec<String>,
-}
-
-fn resolve_tag(
-    tag_name: &str,
-    all_tags: &HashMap<String, TagSection>,
-    output: &mut HashSet<String>,
-) {
-    let section = all_tags
-        .get(tag_name)
-        .unwrap_or_else(|| panic!("missing tag: {}", tag_name));
-
-    for value in &section.values {
-        if let Some(stripped) = value.strip_prefix('#') {
-            resolve_tag(stripped, all_tags, output);
-        } else {
-            output.insert(value.clone());
-        }
-    }
-}
-
-fn load_tags(registry: &str) -> HashMap<String, Vec<String>> {
-    let sections: HashMap<String, TagSection> = shulkr_data::load_json(&format!("tags/{registry}"))
-        .into_iter()
-        .map(|(name, section)| (format!("minecraft:{name}"), section))
-        .collect();
-
-    let mut result = HashMap::default();
-
-    for tag_name in sections.keys() {
-        let mut resolved = HashSet::default();
-        resolve_tag(tag_name, &sections, &mut resolved);
-
-        result.insert(tag_name.clone(), resolved.into_iter().collect());
-    }
-
-    result
-}
-
-pub fn tags<T>(registry: &'static str, reg: &Registry<T>) -> TagRegistry {
-    let resolved_tags = load_tags(registry);
-
-    let packet_tags: Vec<Tag> = resolved_tags
-        .into_iter()
-        .map(|(name, values)| Tag {
-            tag_name: Key::of(name),
-            entries: values
-                .into_iter()
-                .filter_map(|v| reg.get_id(RegistryKey::of(v)).map(|id| id as i32))
+pub fn tags<T: Send + Sync>(reg: &Registry<T>) -> TagRegistry {
+    let packet_tags: Vec<Tag> = reg
+        .tags()
+        .iter()
+        .map(|(name, tag)| Tag {
+            tag_name: name.clone(),
+            entries: tag
+                .keys()
+                .iter()
+                .filter_map(|key| reg.get_id(key).map(i32::from))
                 .collect(),
         })
         .collect();
 
     TagRegistry {
-        registry: Key::vanilla(registry),
+        registry: reg.key().to_key(),
         tags: packet_tags,
     }
 }
 
 #[rustfmt::skip]
-pub(super) fn send_registries(c: &Connection, registries: &Registries) {
-    use crate::protocol::packet::RegistryDataPacket;
+pub(super) fn send_registries(c: &Connection) {
 
-    c.send_packet(&RegistryDataPacket::from(&registries.cat_variant));
-    c.send_packet(&RegistryDataPacket::from(&registries.cat_sound_variant));
-    c.send_packet(&RegistryDataPacket::from(&registries.chicken_variant));
-    c.send_packet(&RegistryDataPacket::from(&registries.chicken_sound_variant));
-    c.send_packet(&RegistryDataPacket::from(&registries.cow_variant));
-    c.send_packet(&RegistryDataPacket::from(&registries.cow_sound_variant));
-    c.send_packet(&RegistryDataPacket::from(&registries.frog_variant));
-    c.send_packet(&RegistryDataPacket::from(&registries.painting_variant));
-    c.send_packet(&RegistryDataPacket::from(&registries.pig_variant));
-    c.send_packet(&RegistryDataPacket::from(&registries.pig_sound_variant));
-    c.send_packet(&RegistryDataPacket::from(&registries.wolf_sound_variant));
-    c.send_packet(&RegistryDataPacket::from(&registries.wolf_variant));
-    c.send_packet(&RegistryDataPacket::from(&registries.zombie_nautilus_variant));
-    c.send_packet(&RegistryDataPacket::from(&registries.damage_type));
-    c.send_packet(&RegistryDataPacket::from(&*Registries::biomes()));
-    c.send_packet(&RegistryDataPacket::from(&registries.world_clock));
-    c.send_packet(&RegistryDataPacket::from(&registries.timeline));
-    c.send_packet(&RegistryDataPacket::from(&registries.dimension_type));
-    c.send_packet(&RegistryDataPacket::from(&registries.trim_material));
-    c.send_packet(&RegistryDataPacket::from(&registries.jukebox_song));
-    c.send_packet(&RegistryDataPacket::from(&registries.banner_pattern));
-    c.send_packet(&RegistryDataPacket::from(&registries.instrument));
-    c.send_packet(&RegistryDataPacket::from(&registries.block_transformer));
-    c.send_packet(&RegistryDataPacket::from(&registries.context_float_provider));
-    c.send_packet(&RegistryDataPacket::from(&registries.context_int_provider));
-    c.send_packet(&RegistryDataPacket::from(&registries.decorated_pot_pattern));
-    c.send_packet(&RegistryDataPacket::from(&registries.predicate));
+        use crate::protocol::packet::RegistryDataPacket;
+
+
+    c.send_packet(&RegistryDataPacket::from(&registries::CAT_VARIANT));
+    c.send_packet(&RegistryDataPacket::from(&registries::CAT_SOUND_VARIANT));
+    c.send_packet(&RegistryDataPacket::from(&registries::CHICKEN_VARIANT));
+    c.send_packet(&RegistryDataPacket::from(&registries::CHICKEN_SOUND_VARIANT));
+    c.send_packet(&RegistryDataPacket::from(&registries::COW_VARIANT));
+    c.send_packet(&RegistryDataPacket::from(&registries::COW_SOUND_VARIANT));
+    c.send_packet(&RegistryDataPacket::from(&registries::FROG_VARIANT));
+    c.send_packet(&RegistryDataPacket::from(&registries::PAINTING_VARIANT));
+    c.send_packet(&RegistryDataPacket::from(&registries::PIG_VARIANT));
+    c.send_packet(&RegistryDataPacket::from(&registries::PIG_SOUND_VARIANT));
+    c.send_packet(&RegistryDataPacket::from(&registries::WOLF_SOUND_VARIANT));
+    c.send_packet(&RegistryDataPacket::from(&registries::WOLF_VARIANT));
+    c.send_packet(&RegistryDataPacket::from(&registries::ZOMBIE_NAUTILUS_VARIANT));
+    c.send_packet(&RegistryDataPacket::from(&registries::DAMAGE_TYPE));
+    c.send_packet(&RegistryDataPacket::from(&registries::BIOME));
+    c.send_packet(&RegistryDataPacket::from(&registries::WORLD_CLOCK));
+    c.send_packet(&RegistryDataPacket::from(&registries::TIMELINE));
+    c.send_packet(&RegistryDataPacket::from(&registries::DIMENSION_TYPE));
+    c.send_packet(&RegistryDataPacket::from(&registries::TRIM_MATERIAL));
+    c.send_packet(&RegistryDataPacket::from(&registries::JUKEBOX_SONG));
+    c.send_packet(&RegistryDataPacket::from(&registries::BANNER_PATTERN));
+    c.send_packet(&RegistryDataPacket::from(&registries::INSTRUMENT));
+    c.send_packet(&RegistryDataPacket::from(&registries::BLOCK_TRANSFORMER));
+    c.send_packet(&RegistryDataPacket::from(&registries::CONTEXT_FLOAT_PROVIDER));
+    c.send_packet(&RegistryDataPacket::from(&registries::CONTEXT_INT_PROVIDER));
+    c.send_packet(&RegistryDataPacket::from(&registries::DECORATED_POT_PATTERN));
+    c.send_packet(&RegistryDataPacket::from(&registries::PREDICATE));
 }
 
-pub(super) fn send_registry_tags(c: &Connection, registries: &Registries) {
+pub(super) fn send_registry_tags(c: &Connection) {
     use crate::protocol::packet::UpdateTagsPacket;
 
     c.send_packet(&UpdateTagsPacket {
         registries: vec![
-            tags("timeline", &registries.timeline),
-            tags("damage_type", &registries.damage_type),
-            tags("banner_pattern", &registries.banner_pattern),
-            tags("instrument", &registries.instrument),
-            tags("block", Registries::BLOCK),
+            tags(&registries::TIMELINE),
+            tags(&registries::DAMAGE_TYPE),
+            tags(&registries::BANNER_PATTERN),
+            tags(&registries::INSTRUMENT),
+            tags(&registries::PAINTING_VARIANT),
+            tags(&registries::BLOCK),
         ],
     });
 }

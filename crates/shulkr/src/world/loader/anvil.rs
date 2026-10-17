@@ -1,6 +1,6 @@
 use crate::{
-    registry::{Registry, RegistryKey},
-    util::HashMap,
+    registry::{Registry, registries},
+    util::{HashMap, Key},
     world::{
         biome::Biome,
         block::{Block, BlockState},
@@ -29,7 +29,6 @@ pub struct AnvilLoader {
     min_section: i32,
     regions: HashMap<(i32, i32), Region>,
     decompress_buf: Vec<u8>,
-    biomes: Registry<Biome>,
 }
 
 impl AnvilLoader {
@@ -39,7 +38,6 @@ impl AnvilLoader {
             min_section: -4,
             regions: HashMap::default(),
             decompress_buf: Vec::new(),
-            biomes: crate::registry::load_datapack("minecraft:worldgen/biome"),
         }
     }
 
@@ -69,7 +67,7 @@ impl AnvilLoader {
             .read_chunk(cx, cz, &mut self.decompress_buf, &self.path)
             .ok()??;
 
-        parse_chunk(cx, cz, raw.data, &self.biomes, self.min_section)
+        parse_chunk(cx, cz, raw.data, &registries::BIOME, self.min_section)
     }
 }
 
@@ -351,7 +349,7 @@ fn parse_block(entry: NbtTag) -> Option<BlockState> {
     let NbtTag::String(name) = comp.remove("Name")? else {
         return None;
     };
-    let mut state = Block::from_key(name)?.default_state();
+    let mut state = Block::from_key(Key::of(name))?.default_state();
 
     if let Some(NbtTag::Compound(props)) = comp.remove("Properties") {
         for (key, value) in props.children {
@@ -398,7 +396,7 @@ fn parse_biomes(
         };
 
         let lookup = name.strip_prefix("minecraft:").unwrap_or(&name);
-        ids.push(biomes.get_id(RegistryKey::new(lookup.to_owned()))? as i32);
+        ids.push(biomes.get_id(&Key::vanilla(lookup.to_owned()))? as i32);
     }
 
     if ids.len() == 1 {

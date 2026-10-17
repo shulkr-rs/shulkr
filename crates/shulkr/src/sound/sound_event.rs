@@ -1,5 +1,5 @@
 use crate::{
-    registry::{Id, Registries},
+    registry::{Id, registries},
     util::Key,
 };
 
@@ -28,11 +28,11 @@ impl SoundEvent {
     }
 
     pub fn from_key(key: Key) -> Option<SoundEvent> {
-        Registries::SOUND_EVENT.by_key(&key).copied()
+        registries::SOUND_EVENT.by_key(&key).map(|entry| **entry)
     }
 
     pub fn key(&self) -> Option<&'static Key> {
-        Registries::SOUND_EVENT.key_of(self.0)
+        registries::SOUND_EVENT.key_of(self.0)
     }
 }
 
@@ -58,7 +58,7 @@ impl TryFrom<Id> for SoundEvent {
 
     #[inline]
     fn try_from(value: Id) -> Result<Self, Self::Error> {
-        if (value as usize) < Registries::SOUND_EVENT.len() {
+        if (value as usize) < registries::SOUND_EVENT.len() {
             Ok(SoundEvent(value))
         } else {
             Err(())

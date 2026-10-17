@@ -20,6 +20,7 @@ mod r#static {
     pub mod block_entity_type;
     pub mod entity_type;
     pub mod environment_attribute;
+    pub mod fluid;
     pub mod material;
     pub mod sound_event;
 }
@@ -72,8 +73,14 @@ fn main() {
     block_entity_type::generate();
     entity_type::generate();
     environment_attribute::generate();
+    fluid::generate();
     material::generate();
     sound_event::generate();
+}
+
+pub fn fluid_ident(key: &str) -> proc_macro2::Ident {
+    let path = key.split_once(':').map_or(key, |(_, path)| path);
+    format_ident!("{}", path.to_case(Case::Constant))
 }
 
 fn ensure_assets() {
