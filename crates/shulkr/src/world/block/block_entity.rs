@@ -1,6 +1,5 @@
-use shulkr_nbt::Nbt;
-
 use crate::registry::Id;
+use shulkr_nbt::Nbt;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 pub struct BlockEntityType(Id);

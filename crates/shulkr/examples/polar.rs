@@ -1,5 +1,3 @@
-use std::path::PathBuf;
-
 use shulkr::{
     Server,
     auth::AuthMode,
@@ -7,10 +5,13 @@ use shulkr::{
     event::player::{PlayerConfigEvent, PlayerEvent as _, PlayerSpawnEvent},
     world::{DimensionType, World, loader::polar::PolarLoader},
 };
+use std::path::PathBuf;
 
 const RADIUS: i32 = 12;
 
 fn main() {
+    tracing_subscriber::fmt::init();
+
     let arg = std::env::args().nth(1).expect("usage: polar <file>");
 
     let server = Server::new(AuthMode::Online);

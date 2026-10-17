@@ -1,25 +1,24 @@
-use std::any::Any;
-use std::sync::Arc;
-use std::{any::TypeId, marker::PhantomData};
-
-use crate::entity::meta::{
-    AxolotlVariant, FoxVariant, HorseVariant, LlamaVariant, MooshroomVariant, ParrotVariant,
-    RabbitVariant, TropicalFishPattern, VillagerVariant,
-};
-use crate::protocol::decode::{DecodeError, PacketRead};
-use crate::protocol::encode::{EncodeError, PacketWrite};
-
-use crate::util::HashMap;
 use crate::{
     entity::meta::{
-        CatVariant, ChickenVariant, CowVariant, FrogVariant, PaintingVariant, PigVariant,
-        WolfSoundVariant, WolfVariant,
+        AxolotlVariant, CatVariant, ChickenVariant, CowVariant, FoxVariant, FrogVariant,
+        HorseVariant, LlamaVariant, MooshroomVariant, PaintingVariant, ParrotVariant, PigVariant,
+        RabbitVariant, TropicalFishPattern, VillagerVariant, WolfSoundVariant, WolfVariant,
     },
     item::ItemStack,
+    protocol::{
+        decode::{DecodeError, PacketRead},
+        encode::{EncodeError, PacketWrite},
+        types::VarInt,
+    },
     text::TextComponent,
-    util::{DyeColor, Key},
+    util::{DyeColor, HashMap, Key},
 };
 use shulkr_nbt::Nbt;
+use std::{
+    any::{Any, TypeId},
+    marker::PhantomData,
+    sync::Arc,
+};
 
 mod armor_trim;
 mod consumable;
@@ -200,7 +199,7 @@ macro_rules! encode {
 
 // See: https://minecraft.wiki/w/Java_Edition_protocol/Slot_data#Structured_components
 define_components! {
-    const CUSTOM_DATA: DataComponent<Nbt>                               = DataComponent::new(0, "minecraft:custom_data");
+    const CUSTOM_DATA: DataComponent<Nbt>                               = DataComponent::new(0i32, "minecraft:custom_data");
     const MAX_STACK_SIZE: DataComponent<i32, VarInt>                    = DataComponent::new(1, "minecraft:max_stack_size");
     const MAX_DAMAGE: DataComponent<i32, VarInt>                        = DataComponent::new(2, "minecraft:max_damage");
     const DAMAGE: DataComponent<i32, VarInt>                            = DataComponent::new(3, "minecraft:damage");
@@ -298,18 +297,6 @@ define_components! {
     const SHULKER_COLOR: DataComponent<DyeColor>                        = DataComponent::new(95, "minecraft:shulker/color");
 }
 
-pub struct VarInt;
-
-impl DataType<i32> for VarInt {
-    fn decode<R: PacketRead>(r: &mut R) -> Result<i32, DecodeError> {
-        r.read_varint()
-    }
-
-    fn encode<W: PacketWrite>(w: &mut W, this: &i32) -> Result<(), EncodeError> {
-        w.write_varint(*this)
-    }
-}
-
 pub struct ItemBlockState {
     pub properties: HashMap<String, String>,
 }
@@ -364,11 +351,11 @@ impl DataType for Nbt {
 
 impl DataType for Key {
     fn decode<R: PacketRead>(r: &mut R) -> Result<Self, DecodeError> {
-        r.read_identifier()
+        r.read_key()
     }
 
     fn encode<W: PacketWrite>(w: &mut W, this: &Self) -> Result<(), EncodeError> {
-        w.write_identifier(this)
+        w.write_key(this)
     }
 }
 

@@ -132,7 +132,7 @@ impl<S: Clone> CommandDispatcher<S> {
                                 successful_forks += 1;
                             }
                             Err(error) if forked => {
-                                log::debug!("forked command failed for one source: {error}");
+                                tracing::debug!("forked command failed for one source: {error}");
                             }
                             Err(error) => return Err(error),
                         }
@@ -153,7 +153,7 @@ impl<S: Clone> CommandDispatcher<S> {
                             next.extend(sources.into_iter().map(|source| child.copy_for(source)));
                         }
                         Err(error) if forked => {
-                            log::debug!("forked redirect modifier failed: {error}");
+                            tracing::debug!("forked redirect modifier failed: {error}");
                         }
                         Err(error) => return Err(error),
                     },

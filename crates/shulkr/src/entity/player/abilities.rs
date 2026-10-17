@@ -1,9 +1,9 @@
-use std::sync::atomic::{AtomicBool, Ordering};
-
-use parking_lot::Mutex;
-
 use super::Player;
-use crate::protocol::packet::{PlayerAbilities, server::PlayerAbilitiesPacket};
+use crate::{
+    protocol::packet::{PlayerAbilities, server::PlayerAbilitiesPacket},
+    util::Mutex,
+};
+use std::sync::atomic::{AtomicBool, Ordering};
 
 pub struct Abilities {
     flying: AtomicBool,

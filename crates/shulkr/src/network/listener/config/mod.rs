@@ -1,22 +1,19 @@
-use std::{io::Cursor, sync::Arc};
-
-use crate::entity::{EntityLike as _, GameMode, MAX_VIEW_DISTANCE, Player};
-use crate::event::player::PlayerSpawnEvent;
-use crate::protocol::packet::CommandsPacket;
-use crate::util::{TeleportFlags, Velocity, Viewable};
-use crate::world::{DimensionType, chunk::Chunk};
-use crate::{event::player::PlayerConfigEvent, network::client::Connection};
 use crate::{
+    entity::{EntityLike as _, GameMode, MAX_VIEW_DISTANCE, Player},
+    event::player::{PlayerConfigEvent, PlayerSpawnEvent},
+    network::client::Connection,
     protocol::{
         ProtocolState,
         decode::{Decode as _, DecodeError},
         packet::{
-            AcknowledgeFinishConfigPacket, ClientInfoPacket, FeatureFlagsPacket,
+            AcknowledgeFinishConfigPacket, ClientInfoPacket, CommandsPacket, FeatureFlagsPacket,
             FinishConfigPacket, GameEventPacket, LoginPacket, SetCenterChunkPacket, client, server,
         },
     },
-    util::Key,
+    util::{Key, TeleportFlags, Velocity, Viewable},
+    world::{DimensionType, chunk::Chunk},
 };
+use std::{io::Cursor, sync::Arc};
 
 mod registries;
 
@@ -55,9 +52,8 @@ fn handle_client_info(client: Arc<Connection>, packet: ClientInfoPacket) {
         feature_flags: vec![Key::vanilla("vanilla")],
     });
 
-    let registries = server.registries();
-    registries::send_registries(&client, registries);
-    registries::send_registry_tags(&client, registries);
+    registries::send_registries(&client);
+    registries::send_registry_tags(&client);
 
     client.send_packet(&FinishConfigPacket {});
 }
@@ -103,8 +99,6 @@ fn handle_acknowledge_finish_config(
 
     let dimension = DimensionType::OVERWORLD;
 
-    let registries = client.server().registries();
-
     client.send_packet(&LoginPacket {
         entity_id: player.id(),
         is_hardcore: false,
@@ -115,11 +109,13 @@ fn handle_acknowledge_finish_config(
         reduced_debug_info: false,
         enable_respawn_screen: true,
         do_limited_crafting: false,
-        dimension_type: registries.dimension_type.get_id(&dimension).unwrap_or(0) as i32,
+        dimension_type: crate::registry::registries::DIMENSION_TYPE
+            .get_id(&dimension)
+            .unwrap_or(0) as i32,
         dimension_name: dimension.into(),
         hashed_seed: 93522819,
         game_mode: GameMode::Survival,
-        previous_game_mode: -1,
+        previous_game_mode: None,
         is_debug: false,
         is_flat: false,
         death_location: None,

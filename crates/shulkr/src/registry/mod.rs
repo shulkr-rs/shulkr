@@ -1,3 +1,32 @@
+pub(crate) mod generated;
+
+mod banner_pattern;
+mod block_transformer;
+mod context_float_provider;
+mod context_int_provider;
+mod damage_type;
+mod decorated_pot_pattern;
+mod instrument;
+mod jukebox_song;
+mod predicate;
+mod reference;
+pub mod registries;
+mod registry_key;
+mod tag;
+
+pub use banner_pattern::*;
+pub use block_transformer::*;
+pub use context_float_provider::*;
+pub use context_int_provider::*;
+pub use damage_type::*;
+pub use decorated_pot_pattern::*;
+pub use instrument::*;
+pub use jukebox_song::*;
+pub use predicate::*;
+pub use reference::*;
+pub use registry_key::*;
+pub use tag::*;
+
 use crate::{
     entity::{
         EntityType,
@@ -8,169 +37,234 @@ use crate::{
         },
     },
     item::{Material, trim_material::TrimMaterial},
-    util::{HashMap, Key},
+    sound::SoundEvent,
+    util::{HashMap, Key, Mutex},
     world::{
         DimensionType,
         attribute::EnvironmentAttribute,
         biome::Biome,
         block::{Block, BlockEntityType},
         clock::WorldClock,
+        fluid::Fluid,
         timeline::Timeline,
     },
 };
 use indexmap::IndexMap;
-use serde::{Serialize, de::DeserializeOwned};
-use std::sync::LazyLock;
+use rustc_hash::FxBuildHasher;
+use serde::de::DeserializeOwned;
+use std::sync::{
+    Arc, OnceLock,
+    atomic::{AtomicBool, Ordering},
+};
 
-mod banner_pattern;
-mod damage_type;
-pub(crate) mod generated;
-mod instrument;
-mod jukebox_song;
-mod registries;
-mod registry_key;
-mod tag;
-
-pub use banner_pattern::*;
-pub use damage_type::*;
-pub use instrument::*;
-pub use jukebox_song::*;
-pub use registries::*;
-pub use registry_key::*;
-pub use tag::*;
-
-// Use this instead of u16. This makes it possible to swap the underlying type in the future if it is not big enough.
 pub type Id = u16;
 
-pub struct RegistryKeys;
+static FROZEN: AtomicBool = AtomicBool::new(false);
 
-type RegisteredKey<T> = RegistryKey<Registry<T>>;
-
-#[rustfmt::skip]
-impl RegistryKeys {
-    pub const ROOT: Key = Key::const_vanilla("root");
-    pub const BLOCK: RegisteredKey<Block>                                = RegistryKey::const_vanilla("block");
-    pub const BLOCK_ENTITY_TYPE: RegisteredKey<BlockEntityType>          = RegistryKey::const_vanilla("block_entity_type");
-    pub const MATERIAL: RegisteredKey<Material>                          = RegistryKey::const_vanilla("material");
-    pub const ENTITY_TYPE: RegisteredKey<EntityType>                     = RegistryKey::const_vanilla("entity_type");
-    pub const ENVIRONMENT_ATTRIBUTE: RegisteredKey<EnvironmentAttribute> = RegistryKey::const_vanilla("environment_attribute");
-    pub const BIOME: RegisteredKey<Biome>                                = RegistryKey::const_vanilla("worldgen/biome");
+pub fn freeze() {
+    FROZEN.store(true, Ordering::SeqCst);
 }
 
-pub struct Registry<T> {
-    key: RegistryKey<Registry<T>>,
-
-    values: Vec<T>,
-    keys: Vec<Key>,
-    by_key: HashMap<Key, usize>,
+pub fn is_frozen() -> bool {
+    FROZEN.load(Ordering::SeqCst)
 }
 
-impl<T> Registry<T> {
-    pub fn new(key: RegistryKey<Registry<T>>) -> Self {
+#[derive(thiserror::Error, Debug)]
+#[error(
+    "registry {registry} is frozen; entries can only be registered before shulkr::registry::freeze()"
+)]
+pub struct RegistryFrozen {
+    pub registry: Key,
+}
+
+struct Entries<T: 'static> {
+    refs: Vec<&'static Ref<T>>,
+    by_key: HashMap<Key, Id>,
+    tags: Option<Arc<Tags>>,
+}
+
+impl<T: 'static> Entries<T> {
+    const fn new() -> Self {
+        Self {
+            refs: Vec::new(),
+            by_key: HashMap::with_hasher(FxBuildHasher),
+            tags: None,
+        }
+    }
+}
+
+pub struct Registry<T: 'static> {
+    key: &'static str,
+    loading: Mutex<Entries<T>>,
+    frozen: OnceLock<Entries<T>>,
+}
+
+impl<T: Send + Sync + 'static> Registry<T> {
+    pub const fn new(key: &'static str) -> Self {
         Self {
             key,
-            values: Vec::new(),
-            keys: Vec::new(),
-            by_key: HashMap::default(),
+            loading: Mutex::new(Entries::new()),
+            frozen: OnceLock::new(),
         }
     }
 
-    pub fn key(&self) -> &RegistryKey<Registry<T>> {
-        &self.key
+    pub fn key(&self) -> RegistryKey<Registry<T>> {
+        RegistryKey::of(self.key.to_owned())
     }
 
-    pub fn register(this: &mut Self, key: Key, value: T) -> Id {
-        if let Some(&id) = this.by_key.get(&key) {
-            this.values[id] = value;
-            return id as Id;
+    fn with<R>(&self, f: impl FnOnce(&Entries<T>) -> R) -> R {
+        if let Some(entries) = self.frozen.get() {
+            return f(entries);
+        }
+        if !is_frozen() {
+            return f(&self.loading.lock());
         }
 
-        let id = this.values.len();
-        this.values.push(value);
-        this.keys.push(key.clone());
-        this.by_key.insert(key, id);
-        id as Id
+        f(self.frozen.get_or_init(|| {
+            let mut entries = self.loading.lock();
+            if entries.tags.is_none() {
+                entries.tags = Some(Arc::new(self.load_bundled_tags(&entries)));
+            }
+            std::mem::replace(&mut *entries, Entries::new())
+        }))
+    }
+
+    fn write<R>(&self, f: impl FnOnce(&mut Entries<T>) -> R) -> Result<R, RegistryFrozen> {
+        let mut entries = self.loading.lock();
+        if is_frozen() {
+            return Err(RegistryFrozen {
+                registry: self.key().to_key(),
+            });
+        }
+        Ok(f(&mut entries))
+    }
+
+    pub fn register(&self, key: Key, value: T) -> Result<Id, RegistryFrozen> {
+        self.write(|entries| {
+            let id = match entries.by_key.get(&key) {
+                Some(&id) => id,
+                None => Id::try_from(entries.refs.len()).expect("registry id out of range"),
+            };
+            let entry: &'static Ref<T> = Box::leak(Box::new(Ref::new(key.clone(), id, value)));
+
+            if (id as usize) < entries.refs.len() {
+                entries.refs[id as usize] = entry;
+            } else {
+                entries.refs.push(entry);
+                entries.by_key.insert(key, id);
+            }
+            id
+        })
     }
 
     pub fn len(&self) -> usize {
-        self.values.len()
+        self.with(|entries| entries.refs.len())
     }
 
     pub fn is_empty(&self) -> bool {
-        self.values.is_empty()
+        self.len() == 0
     }
 
-    pub fn by_id(&self, id: Id) -> Option<&T> {
-        self.values.get(id as usize)
+    pub fn by_id(&self, id: Id) -> Option<&'static Ref<T>> {
+        self.with(|entries| entries.refs.get(id as usize).copied())
     }
 
-    pub fn by_key(&self, key: &Key) -> Option<&T> {
-        let id = self.by_key.get(key)?;
-        self.by_id(*id as Id)
+    pub fn by_key(&self, key: &Key) -> Option<&'static Ref<T>> {
+        self.with(|entries| entries.by_key.get(key).map(|&id| entries.refs[id as usize]))
     }
 
-    pub fn key_of(&self, id: Id) -> Option<&Key> {
-        self.keys.get(id as usize)
+    pub fn key_of(&self, id: Id) -> Option<&'static Key> {
+        self.by_id(id).map(Ref::key)
     }
 
-    pub fn iter(&self) -> impl Iterator<Item = (&Key, &T)> {
-        self.keys.iter().zip(self.values.iter())
+    pub fn get_id(&self, key: &Key) -> Option<Id> {
+        self.with(|entries| entries.by_key.get(key).copied())
     }
 
-    pub fn get_id<'a>(&self, value: impl Into<Holder<'a, T>>) -> Option<Id>
-    where
-        T: 'a,
-    {
-        match value.into() {
-            Holder::Direct(t) => self
-                .values
-                .iter()
-                .position(|v| std::ptr::eq(v, t))
-                .map(|v| v as Id),
-            Holder::Ref(key) => self.by_key.get(&key.to_key()).copied().map(|id| id as Id),
-        }
+    pub fn iter(&self) -> impl Iterator<Item = (&'static Key, &'static T)> + use<T> {
+        self.refs().map(|entry| (entry.key(), entry.value()))
     }
 
-    pub fn get_key<'a>(&self, value: impl Into<Holder<'a, T>>) -> Option<&Key>
-    where
-        T: 'a,
-    {
-        match value.into() {
-            Holder::Direct(t) => {
-                let id = self.values.iter().position(|v| std::ptr::eq(v, t))?;
-                self.keys.get(id)
+    pub fn values(&self) -> impl Iterator<Item = &'static T> + use<T> {
+        self.refs().map(Ref::value)
+    }
+
+    fn refs(&self) -> impl Iterator<Item = &'static Ref<T>> + use<T> {
+        self.with(|entries| entries.refs.clone()).into_iter()
+    }
+
+    pub fn tags(&self) -> Arc<Tags> {
+        self.with_tags(|_, tags| tags.clone())
+    }
+
+    fn with_tags<R>(&self, f: impl FnOnce(&Entries<T>, &Arc<Tags>) -> R) -> R {
+        if self.frozen.get().is_none() && !is_frozen() {
+            let mut entries = self.loading.lock();
+            if entries.tags.is_none() {
+                entries.tags = Some(Arc::new(self.load_bundled_tags(&entries)));
             }
-            Holder::Ref(key) => {
-                let id = *self.by_key.get(&key.to_key())?;
-                self.keys.get(id)
-            }
+            let tags = entries.tags.clone().expect("tags were just loaded");
+            return f(&entries, &tags);
         }
+        self.with(|entries| {
+            f(
+                entries,
+                entries.tags.as_ref().expect("frozen registries have tags"),
+            )
+        })
     }
 
-    pub fn values(&self) -> &Vec<T> {
-        &self.values
+    fn load_bundled_tags(&self, entries: &Entries<T>) -> Tags {
+        let directory = format!("tags/{}", self.key().path());
+        if !shulkr_data::has_json(&directory) {
+            return Tags::default();
+        }
+
+        let mut loader = TagLoader::new();
+        for (path, file) in shulkr_data::load_json::<TagFile>(&directory) {
+            loader.add(Key::vanilla(path), file);
+        }
+        loader.build(|key| entries.by_key.contains_key(key))
+    }
+
+    pub fn set_tags(&self, tags: Tags) -> Result<(), RegistryFrozen> {
+        self.write(|entries| entries.tags = Some(Arc::new(tags)))
+    }
+
+    pub fn has_tag(&self, key: &Key, tag: &Key) -> bool {
+        self.with_tags(|_, tags| tags.contains(tag, key))
+    }
+
+    pub fn iter_tag(&self, tag: &Key) -> impl Iterator<Item = (&'static Key, &'static T)> + use<T> {
+        let refs: Vec<_> = self.with_tags(|entries, tags| {
+            tags.get(tag)
+                .map(|tag| {
+                    tag.keys()
+                        .iter()
+                        .filter_map(|key| entries.by_key.get(key))
+                        .map(|&id| entries.refs[id as usize])
+                        .collect()
+                })
+                .unwrap_or_default()
+        });
+        refs.into_iter().map(|entry| (entry.key(), entry.value()))
     }
 }
 
-pub enum Holder<'a, T> {
-    Ref(RegistryKey<T>),
-    Direct(&'a T),
-}
+const FIRST_KEY: Key = Key::const_vanilla("plains");
 
-impl<'a, T: 'a> From<&'a T> for Holder<'a, T> {
-    fn from(value: &'a T) -> Self {
-        Holder::Direct(value)
+pub(crate) fn load_json<T: DeserializeOwned + Send + Sync>(registry: &Registry<T>) {
+    let mut entries: IndexMap<Key, T> = shulkr_data::load_json(registry.key().path())
+        .into_iter()
+        .map(|(name, value)| (Key::of(name), value))
+        .collect();
+    if let Some(index) = entries.get_index_of(&FIRST_KEY) {
+        entries.move_index(index, 0);
     }
-}
 
-impl<'a, T: 'a> From<RegistryKey<T>> for Holder<'a, T> {
-    fn from(key: RegistryKey<T>) -> Self {
-        Holder::Ref(key)
-    }
-}
-
-impl<'a, T: 'a> From<&RegistryKey<T>> for Holder<'a, T> {
-    fn from(key: &RegistryKey<T>) -> Self {
-        Holder::Ref(key.clone())
+    for (key, value) in entries {
+        registry
+            .register(key, value)
+            .expect("vanilla registries are filled before freezing");
     }
 }

@@ -1,12 +1,12 @@
 use super::{ChunkGraph, ChunkGraphSource, DynamicGraph};
-use std::collections::HashMap;
+use crate::util::{HashMap, HashSet};
 
 struct ViewSource {
     levels: HashMap<(i32, i32), i32>,
     players_per_chunk: HashMap<(i32, i32), u32>,
     max_level: i32,
     view_distance: i32,
-    touched: std::collections::HashSet<(i32, i32)>,
+    touched: HashSet<(i32, i32)>,
 }
 
 impl ChunkGraphSource for ViewSource {
@@ -34,7 +34,7 @@ impl ChunkGraphSource for ViewSource {
 
 pub struct ViewTracker {
     graph: ChunkGraph<ViewSource>,
-    reported_visible: std::collections::HashSet<(i32, i32)>,
+    reported_visible: HashSet<(i32, i32)>,
 }
 
 impl ViewTracker {
@@ -43,14 +43,14 @@ impl ViewTracker {
             graph: ChunkGraph::new(
                 max_level + 1,
                 ViewSource {
-                    levels: HashMap::new(),
-                    players_per_chunk: HashMap::new(),
+                    levels: HashMap::default(),
+                    players_per_chunk: HashMap::default(),
                     max_level,
                     view_distance,
-                    touched: std::collections::HashSet::new(),
+                    touched: HashSet::default(),
                 },
             ),
-            reported_visible: std::collections::HashSet::new(),
+            reported_visible: HashSet::default(),
         }
     }
 

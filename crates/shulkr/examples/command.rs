@@ -1,11 +1,18 @@
-use shulkr::Server;
-use shulkr::auth::AuthMode;
-use shulkr::command::arguments::{DoubleArg, IntArg, StringArg};
-use shulkr::command::{CommandContext, CommandSource, argument, literal};
-use shulkr::event::player::PlayerConfigEvent;
-use shulkr::world::{DimensionType, World, block::Block};
+use shulkr::{
+    Server,
+    auth::AuthMode,
+    command::{
+        CommandContext, CommandSource, argument,
+        arguments::{DoubleArg, IntArg, StringArg},
+        literal,
+    },
+    event::player::PlayerConfigEvent,
+    world::{DimensionType, World, block::Block},
+};
 
 fn main() {
+    tracing_subscriber::fmt::init();
+
     let server = Server::new(AuthMode::Online);
     let world = World::new(DimensionType::OVERWORLD);
 

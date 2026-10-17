@@ -1,6 +1,5 @@
-use serde::{Deserialize, Serialize};
-
 use crate::text::TextComponent;
+use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct JukeboxSong {

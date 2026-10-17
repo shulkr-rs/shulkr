@@ -1,12 +1,15 @@
-use std::borrow::Cow;
-
-use serde::{Serialize, Serializer};
-
-use crate::util::Key;
-use crate::world::Particle;
-use crate::world::attribute::{
-    AmbientParticle, AmbientSounds, BackgroundMusic, BedRule, MoonPhase, TriState,
+use crate::{
+    util::Key,
+    world::{
+        Particle,
+        attribute::{
+            AmbientParticle, AmbientSounds, BackgroundMusic, BedRule, MobSpawnSettings, MoonPhase,
+            TriState,
+        },
+    },
 };
+use serde::{Serialize, Serializer};
+use std::borrow::Cow;
 
 #[derive(Debug, Clone)]
 pub enum AttributeValue {
@@ -21,6 +24,7 @@ pub enum AttributeValue {
     AmbientParticles(Vec<AmbientParticle>),
     BackgroundMusic(BackgroundMusic),
     AmbientSounds(AmbientSounds),
+    MobSpawnSettings(MobSpawnSettings),
 }
 
 impl Serialize for AttributeValue {
@@ -37,6 +41,7 @@ impl Serialize for AttributeValue {
             AttributeValue::AmbientParticles(value) => value.serialize(serializer),
             AttributeValue::BackgroundMusic(value) => value.serialize(serializer),
             AttributeValue::AmbientSounds(value) => value.serialize(serializer),
+            AttributeValue::MobSpawnSettings(value) => value.serialize(serializer),
         }
     }
 }
@@ -85,6 +90,7 @@ attribute_value_type!(Particle, Particle);
 attribute_value_type!(Vec<AmbientParticle>, AmbientParticles);
 attribute_value_type!(BackgroundMusic, BackgroundMusic);
 attribute_value_type!(AmbientSounds, AmbientSounds);
+attribute_value_type!(MobSpawnSettings, MobSpawnSettings);
 
 impl AttributeValueType for Key {
     fn into_value(self) -> AttributeValue {

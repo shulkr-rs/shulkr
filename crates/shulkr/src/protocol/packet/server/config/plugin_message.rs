@@ -17,7 +17,7 @@ impl ServerPacket for PluginMessagePacket {}
 
 impl Encode for PluginMessagePacket {
     fn encode<W: PacketWrite>(w: &mut W, this: &Self) -> Result<(), EncodeError> {
-        w.write_identifier(&this.identifier)?;
+        w.write_key(&this.identifier)?;
         w.write_boxed_slice(&this.data)?;
         Ok(())
     }

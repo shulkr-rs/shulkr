@@ -1,9 +1,8 @@
-use bitflags::bitflags;
-
 use crate::protocol::{
     decode::{Decode, DecodeError, PacketRead},
     packet::{ClientPacket, Packet},
 };
+use bitflags::bitflags;
 
 #[derive(Debug, Clone)]
 pub struct PlayerInputPacket {

@@ -1,5 +1,3 @@
-use parking_lot::RwLock;
-
 use crate::{
     entity::Player,
     protocol::packet::{
@@ -8,7 +6,7 @@ use crate::{
     },
     scoreboard::RenderType,
     text::TextComponent,
-    util::{HashMap, Viewable, Viewers},
+    util::{HashMap, RwLock, Viewable, Viewers},
 };
 
 pub struct BelowName {

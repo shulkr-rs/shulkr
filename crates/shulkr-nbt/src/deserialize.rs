@@ -1,12 +1,11 @@
+use crate::{
+    BYTE_ARRAY_ID, BYTE_ID, COMPOUND_ID, END_ID, Error, INT_ARRAY_ID, INT_ID, LIST_ID,
+    LONG_ARRAY_ID, LONG_ID, NbtTag, Result,
+};
 use bytes::Buf;
 use serde::{
     Deserialize,
     de::{self, DeserializeSeed, IntoDeserializer as _, MapAccess, SeqAccess, Visitor},
-};
-
-use crate::{
-    BYTE_ARRAY_ID, BYTE_ID, COMPOUND_ID, END_ID, Error, INT_ARRAY_ID, INT_ID, LIST_ID,
-    LONG_ARRAY_ID, LONG_ID, NbtTag, Result,
 };
 
 #[allow(unused)]
@@ -55,7 +54,7 @@ impl<R: Buf> ReadExt for R {}
 
 macro_rules! unsupported_type {
     ($ty:ty) => {
-        paste::paste! {
+        pastey::paste! {
             fn [<deserialize_ $ty>]<V>(self, _: V) -> Result<V::Value>
             where
                 V: de::Visitor<'de>,

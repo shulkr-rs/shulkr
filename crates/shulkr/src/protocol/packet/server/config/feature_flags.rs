@@ -16,7 +16,7 @@ impl ServerPacket for FeatureFlagsPacket {}
 
 impl Encode for FeatureFlagsPacket {
     fn encode<W: PacketWrite>(w: &mut W, this: &Self) -> Result<(), EncodeError> {
-        w.write_array(&this.feature_flags, |w, v| w.write_identifier(v))?;
+        w.write_array(&this.feature_flags, |w, v| w.write_key(v))?;
         Ok(())
     }
 }

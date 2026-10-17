@@ -3,10 +3,9 @@ use crate::protocol::{
     encode::{Encode, EncodeError, PacketWrite},
 };
 
-pub mod packet;
-
 pub mod decode;
 pub mod encode;
+pub mod packet;
 pub mod types;
 
 mod chunk;

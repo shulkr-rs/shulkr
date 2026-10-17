@@ -1,6 +1,5 @@
-use shulkr_macros::{DataType, Enumeration};
-
 use crate::entity::meta::{MetaAccessor, MetadataHolder, refs::tropical_fish::VARIANT};
+use shulkr_macros::{DataType, Enumeration};
 
 pub struct TropicalFishMeta {
     holder: MetadataHolder,
@@ -8,7 +7,7 @@ pub struct TropicalFishMeta {
 
 impl TropicalFishMeta {
     pub fn get_pattern(&self) -> TropicalFishPattern {
-        TropicalFishPattern::try_from(self.holder.get(VARIANT)).unwrap_or(TropicalFishPattern::Kob)
+        TropicalFishPattern::try_from(self.holder.get(VARIANT)).unwrap_or_default()
     }
 
     pub fn set_pattern(&self, value: TropicalFishPattern) {
@@ -22,8 +21,9 @@ impl MetaAccessor for TropicalFishMeta {
     }
 }
 
-#[derive(Enumeration, DataType)]
+#[derive(Enumeration, DataType, Default)]
 pub enum TropicalFishPattern {
+    #[default]
     Kob,
     Sunstreak,
     Snooper,

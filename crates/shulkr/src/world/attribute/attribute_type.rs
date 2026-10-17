@@ -1,11 +1,14 @@
-use serde::de::DeserializeSeed;
-use serde::{Deserialize, Deserializer};
-
-use crate::util::{Key, deserialize_color};
-use crate::world::Particle;
-use crate::world::attribute::{
-    AmbientSounds, AttributeValue, BackgroundMusic, BedRule, MoonPhase, TriState,
+use crate::{
+    util::{Key, deserialize_color},
+    world::{
+        Particle,
+        attribute::{
+            AmbientSounds, AttributeValue, BackgroundMusic, BedRule, MobSpawnSettings, MoonPhase,
+            TriState,
+        },
+    },
 };
+use serde::{Deserialize, Deserializer, de::DeserializeSeed};
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 pub enum AttributeType {
@@ -22,6 +25,7 @@ pub enum AttributeType {
     AmbientParticles,
     BackgroundMusic,
     AmbientSounds,
+    MobSpawnSettings,
 }
 
 pub(crate) struct ValueSeed(pub(crate) AttributeType);
@@ -59,6 +63,9 @@ impl<'de> DeserializeSeed<'de> for ValueSeed {
             }
             AttributeType::AmbientSounds => {
                 AttributeValue::AmbientSounds(AmbientSounds::deserialize(deserializer)?)
+            }
+            AttributeType::MobSpawnSettings => {
+                AttributeValue::MobSpawnSettings(MobSpawnSettings::deserialize(deserializer)?)
             }
         })
     }

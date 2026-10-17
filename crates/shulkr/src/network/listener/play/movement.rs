@@ -8,7 +8,7 @@ use crate::{
 };
 
 pub(crate) fn handle_confirm_teleportation(_player: Player, _packet: ConfirmTeleportationPacket) {
-    log::warn!("todo: handle_confirm_teleportation");
+    tracing::warn!("todo: handle_confirm_teleportation");
 }
 
 pub(crate) fn handle_player_position(player: Player, packet: PlayerPositionPacket) {
@@ -54,5 +54,5 @@ fn handle_movement(player: Player, new_position: Position, on_ground: bool) {
 }
 
 pub(crate) fn handle_player_movement_flags(_player: Player, _packet: PlayerMovementFlagsPacket) {
-    log::warn!("todo: handle_player_movement_flags");
+    tracing::warn!("todo: handle_player_movement_flags");
 }

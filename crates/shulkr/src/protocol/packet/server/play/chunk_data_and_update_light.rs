@@ -49,14 +49,22 @@ pub struct LightData {}
 impl Encode for LightData {
     fn encode<W: PacketWrite>(w: &mut W, _this: &Self) -> Result<(), EncodeError> {
         let num_sections: usize = 26;
-        let all_set: u64 = (1 << num_sections) - 1; // 0x3FFFFFF
+        let sky_y_mask_bytes = num_sections.div_ceil(8);
 
         // skyYMask: all 26 sections have sky light data
-        w.write_varint(1)?; // 1 long follows
-        w.write_u64(all_set)?;
+        w.write_varint(sky_y_mask_bytes as i32)?;
+        for i in 0..sky_y_mask_bytes {
+            let remaining_bits = num_sections - i * 8;
+            let byte = if remaining_bits >= 8 {
+                0xFF
+            } else {
+                (1u16 << remaining_bits) as u8 - 1
+            };
+            w.write_u8(byte)?;
+        }
 
         // blockYMask: no block light sections
-        w.write_varint(0)?; // 0 longs (empty BitSet)
+        w.write_varint(0)?; // empty byte array
 
         // emptySkyYMask: no empty sky sections
         w.write_varint(0)?;

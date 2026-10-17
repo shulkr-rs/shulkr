@@ -1,6 +1,6 @@
 use crate::world::block::property::Property;
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Copy)]
 pub struct BoolProperty {
     pub name: &'static str,
 }
@@ -72,7 +72,7 @@ const NUM_STR: [&str; 26] = [
     "17", "18", "19", "20", "21", "22", "23", "24", "25",
 ];
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Copy)]
 pub struct IntProperty {
     pub min: u8,
     pub max: u8,
@@ -140,10 +140,18 @@ impl Property for IntProperty {
     }
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug)]
 pub struct EnumProperty<T: PropertyEnum + 'static> {
     pub name: &'static str,
     pub possible_values: &'static [T],
+}
+
+impl<T: PropertyEnum + 'static> Copy for EnumProperty<T> {}
+
+impl<T: PropertyEnum + 'static> Clone for EnumProperty<T> {
+    fn clone(&self) -> Self {
+        *self
+    }
 }
 
 impl<T: PropertyEnum + 'static> EnumProperty<T> {

@@ -1,6 +1,3 @@
-use serde::{Serialize, de::DeserializeOwned};
-use std::fmt::Debug;
-
 use crate::{
     protocol::{
         encode::{Encode, EncodeError, PacketWrite},
@@ -9,7 +6,9 @@ use crate::{
     registry::Registry,
     util::Key,
 };
-use shulkr_nbt::{Nbt, to_nbt_compound};
+use serde::{Serialize, de::DeserializeOwned};
+use shulkr_nbt::NbtTag;
+use std::fmt::Debug;
 
 #[derive(Debug, Clone)]
 pub struct RegistryDataPacket {
@@ -22,7 +21,7 @@ impl ServerPacket for RegistryDataPacket {}
 
 impl Encode for RegistryDataPacket {
     fn encode<W: PacketWrite>(w: &mut W, this: &Self) -> Result<(), EncodeError> {
-        w.write_identifier(&this.registry_id)?;
+        w.write_key(&this.registry_id)?;
         w.write_array(&this.entries, RegistryEntry::encode)?;
         Ok(())
     }
@@ -31,20 +30,20 @@ impl Encode for RegistryDataPacket {
 #[derive(Debug, Clone)]
 pub struct RegistryEntry {
     pub entry_id: Key,
-    pub data: Option<Nbt>,
+    pub data: Option<NbtTag>,
 }
 
 impl Encode for RegistryEntry {
     fn encode<W: PacketWrite>(w: &mut W, this: &Self) -> Result<(), EncodeError> {
-        w.write_identifier(&this.entry_id)?;
-        w.write_option(&this.data, |w, v| w.write_nbt(v))?;
+        w.write_key(&this.entry_id)?;
+        w.write_option(&this.data, |w, v| w.write_nbt_tag(v))?;
         Ok(())
     }
 }
 
 impl<T> From<&Registry<T>> for RegistryDataPacket
 where
-    T: Serialize + DeserializeOwned + Clone,
+    T: Serialize + DeserializeOwned + Clone + Send + Sync,
 {
     fn from(value: &Registry<T>) -> Self {
         let registry_id = value.key().to_key();
@@ -54,7 +53,7 @@ where
                 .iter()
                 .map(|(key, v)| RegistryEntry {
                     entry_id: key.clone(),
-                    data: Some(to_nbt_compound(v).unwrap().into()),
+                    data: Some(v.serialize(shulkr_nbt::Serializer).unwrap()),
                 })
                 .collect(),
         }

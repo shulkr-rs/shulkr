@@ -1,7 +1,3 @@
-use std::borrow::Cow;
-
-use serde::{Deserialize, Serialize};
-
 use crate::{
     text::{
         color::{Rgb, Rgba},
@@ -9,6 +5,8 @@ use crate::{
     },
     util::Key,
 };
+use serde::{Deserialize, Serialize};
+use std::borrow::Cow;
 
 /// A wrapper around a [TextComponent](https://minecraft.wiki/w/Java_Edition_protocol/Packets#Type:Text_Component).
 ///

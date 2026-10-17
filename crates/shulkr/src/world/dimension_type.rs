@@ -1,8 +1,6 @@
-use std::borrow::Cow;
-use std::collections::BTreeMap;
-
 use crate::world::attribute::EnvironmentAttributeMap;
 use serde::{Deserialize, Serialize};
+use std::{borrow::Cow, collections::BTreeMap};
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct DimensionType {

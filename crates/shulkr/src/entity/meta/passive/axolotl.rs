@@ -1,9 +1,8 @@
-use shulkr_macros::{DataType, Enumeration};
-
 use crate::entity::meta::{
     MetaAccessor, MetadataHolder,
     refs::axolotl::{PLAYING_DEAD, SPAWNED_FROM_BUCKET, VARIANT},
 };
+use shulkr_macros::{DataType, Enumeration};
 
 pub struct AxolotlMeta {
     holder: MetadataHolder,
@@ -11,7 +10,7 @@ pub struct AxolotlMeta {
 
 impl AxolotlMeta {
     pub fn get_variant(&self) -> AxolotlVariant {
-        AxolotlVariant::try_from(self.holder.get(VARIANT)).unwrap_or(AxolotlVariant::Lucy)
+        AxolotlVariant::try_from(self.holder.get(VARIANT)).unwrap_or_default()
     }
 
     pub fn set_variant(&self, value: AxolotlVariant) {
@@ -41,8 +40,9 @@ impl MetaAccessor for AxolotlMeta {
     }
 }
 
-#[derive(Enumeration, DataType)]
+#[derive(Enumeration, DataType, Default)]
 pub enum AxolotlVariant {
+    #[default]
     Lucy,
     Wild,
     Gold,

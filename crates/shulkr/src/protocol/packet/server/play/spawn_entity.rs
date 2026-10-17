@@ -1,5 +1,3 @@
-use uuid::Uuid;
-
 use crate::{
     protocol::{
         encode::{Encode, EncodeError, PacketWrite},
@@ -8,6 +6,7 @@ use crate::{
     },
     util::Position,
 };
+use uuid::Uuid;
 
 #[derive(Debug, Clone)]
 pub struct SpawnEntityPacket {

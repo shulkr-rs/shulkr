@@ -1,6 +1,3 @@
-use shulkr_macros::{DataType, Enumeration};
-use uuid::Uuid;
-
 use crate::entity::meta::{
     MetaAccessor, MetadataHolder,
     refs::fox::{
@@ -8,6 +5,8 @@ use crate::entity::meta::{
         IS_SITTING, IS_SLEEPING, SECOND_UUID, VARIANT,
     },
 };
+use shulkr_macros::{DataType, Enumeration};
+use uuid::Uuid;
 
 pub struct FoxMeta {
     holder: MetadataHolder,
@@ -15,7 +14,7 @@ pub struct FoxMeta {
 
 impl FoxMeta {
     pub fn get_variant(&self) -> FoxVariant {
-        FoxVariant::try_from(self.holder.get(VARIANT)).unwrap_or(FoxVariant::Red)
+        FoxVariant::try_from(self.holder.get(VARIANT)).unwrap_or_default()
     }
 
     pub fn set_variant(&self, value: FoxVariant) {
@@ -101,8 +100,9 @@ impl MetaAccessor for FoxMeta {
     }
 }
 
-#[derive(Enumeration, DataType)]
+#[derive(Enumeration, DataType, Default)]
 pub enum FoxVariant {
+    #[default]
     Red,
     Snow,
 }

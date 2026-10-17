@@ -66,7 +66,7 @@ pub fn expand(input: ItemImpl) -> TokenStream {
 
     let mut consts = Vec::new();
     let mut statics = Vec::new();
-    let mut match_arms = Vec::new();
+    let mut table_entries = Vec::new();
     let mut next_id: u16 = 0;
 
     for impl_item in &input.items {
@@ -89,11 +89,10 @@ pub fn expand(input: ItemImpl) -> TokenStream {
             pub static #ident: #data_ty = #ctor;
         });
 
-        // 0 => &static_objects::AIR,
-        match_arms.push(quote! {
-            #id_lit => &#mod_ident::#ident,
-        });
+        table_entries.push(quote! { &#mod_ident::#ident });
     }
+
+    let count = LitInt::new(&next_id.to_string(), Span::call_site());
 
     quote! {
         impl #self_ty {
@@ -104,15 +103,14 @@ pub fn expand(input: ItemImpl) -> TokenStream {
             use super::*;
 
             #(#statics)*
+
+            pub static DATA: [&#data_ty; #count] = [#(#table_entries),*];
         }
 
         impl #self_ty {
             #[inline]
             pub const fn data(self) -> &'static #data_ty {
-                match self.0 {
-                    #(#match_arms)*
-                    _ => unreachable!(),
-                }
+                #mod_ident::DATA[self.0 as usize]
             }
         }
     }

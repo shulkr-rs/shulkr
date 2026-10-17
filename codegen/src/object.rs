@@ -142,9 +142,9 @@ impl StaticObject {
                 #const_variants
             }
 
-            pub(crate) fn register_all(registry: &mut Registry<#name>) {
-                let mut register = |key: &'static str, value: #name| {
-                    Registry::register(registry, key.into(), value);
+            pub(crate) fn register_all(registry: &Registry<#name>) {
+                let register = |key: &'static str, value: #name| {
+                    registry.register(key.into(), value).expect("vanilla registries are filled before freezing");
                 };
 
                 #register_variants

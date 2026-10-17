@@ -1,5 +1,3 @@
-use std::{io::Cursor, sync::Arc};
-
 use crate::{
     network::client::Connection,
     protocol::{
@@ -8,6 +6,7 @@ use crate::{
         packet::HandshakePacket,
     },
 };
+use std::{io::Cursor, sync::Arc};
 
 #[rustfmt::skip]
 pub fn handle_packet(client: Arc<Connection>, id: i32, data: &mut Cursor<&[u8]>) -> Result<(), DecodeError> {

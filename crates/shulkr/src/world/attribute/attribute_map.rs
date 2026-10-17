@@ -1,12 +1,15 @@
+use crate::{
+    util::Key,
+    world::attribute::{
+        AttributeArgument, AttributeEntry, AttributeModifier, AttributeValueType,
+        EnvironmentAttribute, modifier::EntrySeed,
+    },
+};
 use indexmap::IndexMap;
-use serde::de::{MapAccess, Visitor};
-use serde::ser::SerializeMap;
-use serde::{Deserialize, Deserializer, Serialize, Serializer};
-
-use crate::util::Key;
-use crate::world::attribute::modifier::EntrySeed;
-use crate::world::attribute::{
-    AttributeArgument, AttributeEntry, AttributeModifier, AttributeValueType, EnvironmentAttribute,
+use serde::{
+    Deserialize, Deserializer, Serialize, Serializer,
+    de::{MapAccess, Visitor},
+    ser::SerializeMap,
 };
 
 #[derive(Debug, Clone, Default)]
@@ -125,6 +128,7 @@ mod tests {
 
     #[test]
     fn round_trip() {
+        crate::registry::registries::register_all();
         let map = EnvironmentAttributeMap::new()
             .with(EnvironmentAttribute::SKY_COLOR, Cow::Borrowed("#7BA4FF"))
             .with(EnvironmentAttribute::FAST_LAVA, true)

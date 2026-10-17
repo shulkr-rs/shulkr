@@ -1,5 +1,4 @@
-use parking_lot::Mutex;
-use std::collections::HashMap;
+use crate::util::{HashMap, Mutex};
 use std::hash::Hash;
 use tokio::sync::watch;
 
@@ -11,8 +10,8 @@ pub struct AsyncDedup<K, V> {
 impl<K: Eq + Hash + Clone, V: Clone> AsyncDedup<K, V> {
     pub fn new() -> Self {
         Self {
-            receivers: Mutex::new(HashMap::new()),
-            senders: Mutex::new(HashMap::new()),
+            receivers: Mutex::new(HashMap::default()),
+            senders: Mutex::new(HashMap::default()),
         }
     }
 
@@ -45,8 +44,10 @@ impl<K: Eq + Hash + Clone, V: Clone> Default for AsyncDedup<K, V> {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use std::sync::Arc;
-    use std::sync::atomic::{AtomicUsize, Ordering};
+    use std::sync::{
+        Arc,
+        atomic::{AtomicUsize, Ordering},
+    };
 
     #[tokio::test]
     async fn concurrent_requests_for_the_same_key_share_one_unit_of_work() {

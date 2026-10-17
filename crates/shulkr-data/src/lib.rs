@@ -8,6 +8,13 @@ struct Assets;
 
 const NAMESPACE: &str = "minecraft";
 
+pub const DATAPACK_DIR: &str = concat!(env!("CARGO_MANIFEST_DIR"), "/assets/datapack/minecraft");
+
+pub fn has_json(registry: &str) -> bool {
+    let prefix = format!("{NAMESPACE}/{registry}/");
+    Assets::iter().any(|path| path.starts_with(&prefix) && path.ends_with(".json"))
+}
+
 pub fn load_json<T: DeserializeOwned>(registry: &str) -> BTreeMap<String, T> {
     let prefix = format!("{NAMESPACE}/{registry}/");
 

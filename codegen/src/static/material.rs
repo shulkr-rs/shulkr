@@ -4,8 +4,7 @@ use quote::{format_ident, quote};
 use serde_json::Value;
 use syn::Ident;
 
-use crate::object::StaticObjectBuilder;
-use crate::write_wide_file;
+use crate::{object::StaticObjectBuilder, write_wide_file};
 
 pub fn generate() {
     let object = StaticObjectBuilder::new("Material")

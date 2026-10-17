@@ -1,13 +1,14 @@
 use crate::{
-    entity::{EntityAnimation, EntityLike as _, EntityType, GameMode, Hand, Player},
+    entity::{EntityAnimation, EntityLike as _, EntityType, GameMode, Player},
     event::player::{PlayerAttackEvent, PlayerPickBlockEvent, PlayerPickEntityEvent},
     protocol::packet::{
         AcknowledgeBlockChangePacket, AttackPacket, EntityAnimationPacket, InteractPacket,
         PickItemFromBlockPacket, PickItemFromEntityPacket, PlayerActionPacket, PlayerDiggingState,
-        SetBlockDestroyStagePacket, SwingArmPacket, UseItemOnPacket, UseItemPacket,
+        PunchPacket, SetBlockDestroyStagePacket, UseItemOnPacket, UseItemPacket,
     },
     registry::Id,
     util::{BlockPosition, Viewable as _},
+    world::block::placement::{BlockPlaceContext, REG, state_for_placement},
 };
 
 pub(crate) fn handle_attack(player: Player, packet: AttackPacket) {
@@ -27,7 +28,7 @@ pub(crate) fn handle_attack(player: Player, packet: AttackPacket) {
 }
 
 pub(crate) fn handle_interact(_player: Player, _packet: InteractPacket) {
-    log::warn!("todo: handle_interact");
+    tracing::warn!("todo: handle_interact");
 }
 
 pub(crate) fn handle_pick_item_from_block(player: Player, packet: PickItemFromBlockPacket) {
@@ -53,6 +54,7 @@ pub(crate) fn handle_player_action(player: Player, packet: PlayerActionPacket) {
     let status = packet.status;
     let position = packet.position;
     let face = packet.face;
+    let sequence = packet.sequence;
 
     let destroy_stage = match status {
         PlayerDiggingState::StartDigging => {
@@ -81,32 +83,78 @@ pub(crate) fn handle_player_action(player: Player, packet: PlayerActionPacket) {
             destroy_stage,
         });
     }
+
+    player.send_packet(&AcknowledgeBlockChangePacket {
+        sequence_id: sequence,
+    });
 }
 
-pub(crate) fn handle_swing_arm(player: Player, packet: SwingArmPacket) {
+pub(crate) fn handle_punch(player: Player, _packet: PunchPacket) {
     player.broadcast_packet(&EntityAnimationPacket {
         entity_id: player.id(),
-        animation: if packet.hand == Hand::Main {
-            EntityAnimation::SwingMainArm
-        } else {
-            EntityAnimation::SwingOffhand
-        },
+        animation: EntityAnimation::SwingMainArm,
     });
 }
 
 pub(crate) fn handle_use_item_on(player: Player, packet: UseItemOnPacket) {
     let world = player.world();
-    let position = packet.position;
 
-    let Some(placed_block) = player.get_item_in_hand(packet.hand) else {
+    let Some(item_stack) = player.get_item_in_hand(packet.hand) else {
         return;
     };
 
-    let Some(block) = placed_block.material().data().block else {
+    let Some(block) = item_stack.material().data().block else {
         return;
     };
 
-    world.place_block(player.clone(), position, packet.face, block.default_state());
+    let cx = BlockPlaceContext::new(
+        Some(player.clone()),
+        world.clone(),
+        packet.hand,
+        item_stack,
+        packet.hit_result,
+    );
+
+    let Some(state) = state_for_placement(block, &cx) else {
+        return;
+    };
+
+    for entity in world.entities() {
+        let dimensions = entity.r#type().dimensions();
+        let position = entity.position();
+
+        if state.collision_shape().intersects(
+            &dimensions,
+            position.x() as f32,
+            position.y() as f32,
+            position.z() as f32,
+        ) {
+            return;
+        }
+    }
+
+    let block_pos = cx.position();
+
+    for player in player.server().players().lock().iter() {
+        if player.game_mode() == GameMode::Spectator {
+            continue;
+        }
+
+        let dimensions = player.r#type().dimensions();
+        let position = player.position();
+
+        let x = position.x() as f32 - block_pos.x() as f32;
+        let y = position.y() as f32 - block_pos.y() as f32;
+        let z = position.z() as f32 - block_pos.z() as f32;
+
+        if state.collision_shape().intersects(&dimensions, x, y, z) {
+            return;
+        }
+    }
+
+    world.place_block(player.clone(), cx.position(), state);
+    REG.after_place(block, state, &cx);
+
     player.send_packet(&AcknowledgeBlockChangePacket {
         sequence_id: packet.sequence,
     });

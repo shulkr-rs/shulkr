@@ -1,6 +1,5 @@
-use shulkr_macros::{DataType, Enumeration};
-
 use crate::entity::meta::{MetaAccessor, MetadataHolder, refs::horse::VARIANT};
+use shulkr_macros::{DataType, Enumeration};
 
 pub struct HorseMeta {
     holder: MetadataHolder,
@@ -8,7 +7,7 @@ pub struct HorseMeta {
 
 impl HorseMeta {
     pub fn get_variant(&self) -> HorseVariant {
-        HorseVariant::try_from(self.holder.get(VARIANT)).unwrap_or(HorseVariant::White)
+        HorseVariant::try_from(self.holder.get(VARIANT)).unwrap_or_default()
     }
 
     pub fn set_variant(&self, value: HorseVariant) {
@@ -22,8 +21,9 @@ impl MetaAccessor for HorseMeta {
     }
 }
 
-#[derive(Enumeration, DataType)]
+#[derive(Enumeration, DataType, Default)]
 pub enum HorseVariant {
+    #[default]
     White,
     Creamy,
     Chestnut,

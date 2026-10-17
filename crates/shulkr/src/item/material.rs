@@ -1,5 +1,5 @@
 use crate::{
-    registry::{Id, Registries},
+    registry::{Id, registries},
     util::Key,
     world::block::Block,
 };
@@ -25,14 +25,10 @@ impl Material {
     }
 
     pub fn from_key(key: Key) -> Option<Material> {
-        Registries::MATERIAL.by_key(&key).copied()
+        registries::MATERIAL.by_key(&key).map(|entry| **entry)
     }
 
     /// Returns the vanilla default max stack size for this material.
-    ///
-    /// Most items stack to 64; tools, armor, buckets, boats, minecarts, etc.
-    /// only stack to 1, and a handful of items (signs, banners, ender pearls,
-    /// …) stack to 16.
     pub fn max_stack_size(&self) -> i32 {
         match *self {
             Material::ENDER_PEARL
@@ -43,7 +39,7 @@ impl Material {
             | Material::HONEY_BOTTLE
             | Material::POTION => 16,
             _ => {
-                let name = Registries::MATERIAL
+                let name = registries::MATERIAL
                     .key_of(Id::from(*self))
                     .map(Key::path)
                     .unwrap_or_default();
@@ -118,7 +114,7 @@ impl TryFrom<Id> for Material {
 
     #[inline]
     fn try_from(value: Id) -> Result<Self, Self::Error> {
-        if (value as usize) < Registries::MATERIAL.len() {
+        if (value as usize) < registries::MATERIAL.len() {
             Ok(Material(value))
         } else {
             Err(())

@@ -1,13 +1,12 @@
-use bytes::Buf;
-use std::string::FromUtf8Error;
-use thiserror::Error;
-use uuid::Uuid;
-
 use crate::{
     text::TextComponent,
     util::{BlockPosition, InvalidEnumVariant, Key},
 };
+use bytes::Buf;
 use shulkr_nbt::Nbt;
+use std::string::FromUtf8Error;
+use thiserror::Error;
+use uuid::Uuid;
 
 pub trait Decode
 where
@@ -65,9 +64,11 @@ pub trait PacketRead {
 
     fn read_varint(&mut self) -> Result<i32>;
 
+    fn read_varlong(&mut self) -> Result<i64>;
+
     fn read_uuid(&mut self) -> Result<Uuid>;
 
-    fn read_identifier(&mut self) -> Result<Key>;
+    fn read_key(&mut self) -> Result<Key>;
 
     fn read_nbt(&mut self) -> Result<Nbt>;
 
@@ -90,7 +91,7 @@ pub trait PacketRead {
 
 macro_rules! read_impl {
     ($ty:ty) => {
-        paste::paste! {
+        pastey::paste! {
             fn [<read_ $ty>](&mut self) -> Result<$ty> {
                 self.[<try_get_ $ty>]()
                     .map_err(|e| DecodeError::NotEnoughBytes(e.available, e.requested))
@@ -143,11 +144,23 @@ impl<R: Buf> PacketRead for R {
         Err(DecodeError::Decode("VarInt too large"))
     }
 
+    fn read_varlong(&mut self) -> Result<i64> {
+        let mut value = 0;
+        for i in 0..10 {
+            let byte = self.read_u8()?;
+            value |= (i64::from(byte) & 0b01111111) << (i * 7);
+            if byte & 0b10000000 == 0 {
+                return Ok(value);
+            }
+        }
+        Err(DecodeError::Decode("VarLong too large"))
+    }
+
     fn read_uuid(&mut self) -> Result<Uuid> {
         Ok(Uuid::from_u128(self.read_u128()?))
     }
 
-    fn read_identifier(&mut self) -> Result<Key> {
+    fn read_key(&mut self) -> Result<Key> {
         let identifier = self.read_string()?;
 
         match identifier.split_once(":") {

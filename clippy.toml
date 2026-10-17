@@ -1,0 +1,6 @@
+disallowed-types = [
+    { path = "std::collections::HashMap", reason = "use crate::util::HashMap instead" },
+    { path = "std::collections::HashSet", reason = "use crate::util::HashSet instead" },
+    { path = "std::sync::Mutex", reason = "use crate::util::Mutex instead" },
+    { path = "std::sync::RwLock", reason = "use crate::util::RwLock instead" },
+]

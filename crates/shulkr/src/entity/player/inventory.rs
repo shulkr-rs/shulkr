@@ -1,5 +1,3 @@
-use std::sync::{Arc, atomic::Ordering};
-
 use super::Player;
 use crate::{
     entity::Hand,
@@ -12,6 +10,7 @@ use crate::{
     protocol::packet::server::SetHeldItemPacket,
     util::Viewable,
 };
+use std::sync::{Arc, atomic::Ordering};
 
 impl Player {
     /// Returns the player's inventory.

@@ -1,5 +1,4 @@
-use std::any::Any;
-use std::sync::Arc;
+use std::{any::Any, sync::Arc};
 
 /// Anything that can invoke a command, such as a player or the server console.
 ///

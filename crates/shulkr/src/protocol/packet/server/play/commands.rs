@@ -1,14 +1,16 @@
 use std::sync::Arc;
 
-use crate::command::{
-    dispatcher::CommandDispatcher,
-    tree::{CommandNode, NodeKind},
+use crate::{
+    command::{
+        dispatcher::CommandDispatcher,
+        tree::{CommandNode, NodeKind},
+    },
+    protocol::{
+        encode::{Encode, EncodeError, PacketWrite},
+        packet::{Packet, ServerPacket},
+    },
+    util::{HashMap, Key},
 };
-use crate::protocol::{
-    encode::{Encode, EncodeError, PacketWrite},
-    packet::{Packet, ServerPacket},
-};
-use crate::util::{HashMap, Key};
 
 const NODE_TYPE_ROOT: u8 = 0x00;
 const NODE_TYPE_LITERAL: u8 = 0x01;
@@ -108,7 +110,7 @@ impl WireNode {
         }
 
         if let Some(suggestions_type) = &self.suggestions_type {
-            w.write_identifier(suggestions_type)?;
+            w.write_key(suggestions_type)?;
         }
 
         Ok(())

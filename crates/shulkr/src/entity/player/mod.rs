@@ -1,7 +1,26 @@
-use parking_lot::Mutex;
+use crate::{
+    Server,
+    auth::GameProfile,
+    command::CommandSender,
+    entity::{Entity, EntityLike, EntityType, GameMode, entity_status},
+    inventory::{Inventory, PlayerInventory},
+    network::client::Connection,
+    protocol::packet::{
+        EntityEventPacket, EntitySoundEffectPacket, GameEventPacket, Packet, PlayerAction,
+        PlayerEntry, PlayerInfoFlags, PlayerInfoRemovePacket, PlayerInfoUpdatePacket,
+        RespawnPacket, ServerPacket, SetCenterChunkPacket, SetTablistHeaderFooterPacket,
+        SoundEffectPacket, StopSoundPacket, SystemChatMessagePacket, server::play::KeepAlivePacket,
+    },
+    registry::registries,
+    sound::{Sound, SoundCategory},
+    text::TextComponent,
+    tickable::Tickable,
+    util::{BlockPosition, HashMap, HashSet, Key, Mutex, Position, Viewable, Viewers},
+    world::{World, chunk::Chunk},
+};
 use std::{
     any::Any,
-    collections::{HashMap, HashSet},
+    hash::Hash,
     net::SocketAddr,
     sync::{
         Arc,
@@ -11,29 +30,6 @@ use std::{
 };
 use tokio::sync::Notify;
 use uuid::Uuid;
-
-use crate::{
-    Server,
-    auth::GameProfile,
-    command::CommandSender,
-    entity::{
-        EntityType, GameMode,
-        entity::{Entity, EntityLike},
-        entity_status,
-    },
-    inventory::{Inventory, PlayerInventory},
-    network::client::Connection,
-    protocol::packet::{
-        EntityEventPacket, GameEventPacket, Packet, PlayerAction, PlayerEntry, PlayerInfoFlags,
-        PlayerInfoRemovePacket, PlayerInfoUpdatePacket, RespawnPacket, ServerPacket,
-        SetCenterChunkPacket, SetTablistHeaderFooterPacket, SystemChatMessagePacket,
-        server::play::KeepAlivePacket,
-    },
-    text::TextComponent,
-    tickable::Tickable,
-    util::{Position, Viewable, Viewers},
-    world::{World, chunk::Chunk},
-};
 
 mod abilities;
 mod chunks;
@@ -96,6 +92,41 @@ impl Player {
         *self.0.game_mode.lock() = game_mode;
     }
 
+    pub fn play_sound_at(&self, position: impl Into<BlockPosition>, sound: impl Into<Sound>) {
+        let sound = sound.into();
+        let position = position.into();
+
+        self.send_packet(&SoundEffectPacket {
+            sound: sound.event(),
+            category: sound.category(),
+            position: position.into(),
+            volume: sound.volume(),
+            pitch: sound.pitch(),
+            seed: sound.seed_or_random(),
+        });
+    }
+
+    pub fn play_sound(&self, entity: &impl EntityLike, sound: impl Into<Sound>) {
+        let sound = sound.into();
+
+        self.send_packet(&EntitySoundEffectPacket {
+            sound: sound.event(),
+            category: sound.category(),
+            entity_id: entity.id(),
+            volume: sound.volume(),
+            pitch: sound.pitch(),
+            seed: sound.seed_or_random(),
+        });
+    }
+
+    pub fn stop_sound(&self, category: Option<SoundCategory>, sound: Option<Key>) {
+        self.send_packet(&StopSoundPacket { category, sound });
+    }
+
+    pub fn stop_sounds(&self) {
+        self.stop_sound(None, None);
+    }
+
     pub fn send_message(&self, message: impl Into<TextComponent>) {
         self.send_packet(&SystemChatMessagePacket {
             content: message.into(),
@@ -148,20 +179,14 @@ impl Player {
         self.set_world(world.clone());
 
         let dimension = world.dimension();
-        let dimension_type = self
-            .0
-            .server
-            .registries()
-            .dimension_type
-            .get_id(&dimension)
-            .unwrap_or(0) as i32;
+        let dimension_type = registries::DIMENSION_TYPE.get_id(&dimension).unwrap_or(0) as i32;
 
         self.send_packet(&RespawnPacket {
             dimension_type,
             dimension_name: dimension.into(),
             hashed_seed: 93522819,
             game_mode: self.game_mode(),
-            previous_game_mode: -1,
+            previous_game_mode: None,
             is_debug: false,
             is_flat: false,
             death_location: None,
@@ -296,6 +321,14 @@ impl PartialEq for Player {
     }
 }
 
+impl Eq for Player {}
+
+impl Hash for Player {
+    fn hash<H: std::hash::Hasher>(&self, state: &mut H) {
+        self.uuid().hash(state);
+    }
+}
+
 impl Tickable for Player {
     fn tick(&self) {
         self.process_view_changes();
@@ -350,7 +383,7 @@ mod imp {
         pub(super) connection: Arc<Connection>,
         pub(super) game_profile: GameProfile,
         pub(super) entity: Entity,
-        pub(super) world: Mutex<Option<World>>,
+        pub(crate) world: Mutex<Option<World>>,
         pub(super) last_keep_alive: Mutex<Instant>,
         pub(super) game_mode: Mutex<GameMode>,
         pub(crate) chunk_queue: Mutex<ChunkQueue>,
@@ -388,8 +421,8 @@ mod imp {
                 teleport_id: AtomicI32::default(),
                 permission_level: AtomicU8::default(),
                 last_view: Mutex::new(None),
-                tracked_chunks: Mutex::new(HashMap::new()),
-                pending_loads: Mutex::new(HashSet::new()),
+                tracked_chunks: Mutex::new(HashMap::default()),
+                pending_loads: Mutex::new(HashSet::default()),
                 pending_notify: Notify::new(),
                 dispatcher_started: AtomicBool::new(false),
                 abilities: Abilities::new(),

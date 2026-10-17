@@ -22,7 +22,7 @@ pub struct LoginPacket {
     pub dimension_name: Key,
     pub hashed_seed: i64,
     pub game_mode: GameMode,
-    pub previous_game_mode: i8,
+    pub previous_game_mode: Option<GameMode>,
     pub is_debug: bool,
     pub is_flat: bool,
     pub death_location: Option<DeathLocation>,
@@ -39,7 +39,7 @@ impl Encode for LoginPacket {
     fn encode<W: PacketWrite>(w: &mut W, this: &Self) -> Result<(), EncodeError> {
         w.write_i32(this.entity_id)?;
         w.write_bool(this.is_hardcore)?;
-        w.write_array(&this.dimension_names, |w, v| w.write_identifier(v))?;
+        w.write_array(&this.dimension_names, |w, v| w.write_key(v))?;
         w.write_varint(this.max_players)?;
         w.write_varint(this.view_distance)?;
         w.write_varint(this.simulation_distance)?;
@@ -47,10 +47,10 @@ impl Encode for LoginPacket {
         w.write_bool(this.enable_respawn_screen)?;
         w.write_bool(this.do_limited_crafting)?;
         w.write_varint(this.dimension_type)?;
-        w.write_identifier(&this.dimension_name)?;
+        w.write_key(&this.dimension_name)?;
         w.write_i64(this.hashed_seed)?;
-        w.write_u8(this.game_mode as u8)?;
-        w.write_u8(this.previous_game_mode as u8)?;
+        w.write_varint(this.game_mode as i32)?;
+        w.write_varint(this.previous_game_mode.map_or(0, |gm| gm as i32 + 1))?;
         w.write_bool(this.is_debug)?;
         w.write_bool(this.is_flat)?;
         w.write_option(&this.death_location, DeathLocation::encode)?;

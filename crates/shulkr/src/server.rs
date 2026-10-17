@@ -1,14 +1,12 @@
-use parking_lot::Mutex;
-use std::sync::{Arc, OnceLock, atomic::Ordering};
-use tokio::net::ToSocketAddrs;
-
 use crate::{
     auth::{AuthMode, KeyStore},
     command::{CommandDispatcher, CommandSource},
     entity::Player,
     event::Events,
-    registry::Registries,
+    util::Mutex,
 };
+use std::sync::{Arc, OnceLock, atomic::Ordering};
+use tokio::net::ToSocketAddrs;
 
 static CURRENT: OnceLock<Arc<imp::Server>> = OnceLock::new();
 
@@ -17,11 +15,8 @@ pub struct Server(Arc<imp::Server>);
 
 impl Server {
     pub fn new(auth_mode: AuthMode) -> Self {
-        Self::with_registries(auth_mode, Registries::new())
-    }
-
-    pub fn with_registries(auth_mode: AuthMode, registries: Registries) -> Self {
-        let imp = Arc::new(imp::Server::new(auth_mode, registries));
+        crate::registry::registries::register_all();
+        let imp = Arc::new(imp::Server::new(auth_mode));
 
         CURRENT
             .set(imp.clone())
@@ -43,8 +38,8 @@ impl Server {
 
     #[cfg(test)]
     pub(crate) fn test_server() -> Self {
-        static LOCK: std::sync::Mutex<()> = std::sync::Mutex::new(());
-        let _guard = LOCK.lock().unwrap_or_else(|poisoned| poisoned.into_inner());
+        static LOCK: crate::util::Mutex<()> = crate::util::Mutex::new(());
+        let _guard = LOCK.lock();
         Self::try_current().unwrap_or_else(|| Self::new(crate::auth::AuthMode::Offline))
     }
 
@@ -56,10 +51,6 @@ impl Server {
 
     pub fn auth_mode(&self) -> &AuthMode {
         &self.auth_mode
-    }
-
-    pub fn registries(&self) -> &Registries {
-        &self.registries
     }
 
     pub fn players(&self) -> &Arc<Mutex<Vec<Player>>> {
@@ -107,30 +98,27 @@ pub enum ServerError {
 }
 
 mod imp {
-    use parking_lot::Mutex;
-    use std::sync::{
-        Arc,
-        atomic::{AtomicBool, Ordering},
-    };
-    use tokio::net::{TcpListener, ToSocketAddrs};
-
     use crate::{
         auth::{AuthMode, KeyStore},
         command::{CommandDispatcher, CommandSource},
         entity::Player,
         event::Events,
         network::client::Connection,
-        registry::Registries,
         server::ServerError,
         tickable::Ticker,
+        util::Mutex,
     };
+    use std::sync::{
+        Arc,
+        atomic::{AtomicBool, Ordering},
+    };
+    use tokio::net::{TcpListener, ToSocketAddrs};
 
     pub struct Server {
         pub(super) runtime: tokio::runtime::Runtime,
         pub(super) closed: AtomicBool,
 
         pub(super) auth_mode: AuthMode,
-        pub(super) registries: Registries,
         pub(super) key_store: Arc<KeyStore>,
         pub(super) events: Events,
         pub(super) players: Arc<Mutex<Vec<Player>>>,
@@ -139,7 +127,7 @@ mod imp {
     }
 
     impl Server {
-        pub(super) fn new(auth_mode: AuthMode, registries: Registries) -> Self {
+        pub(super) fn new(auth_mode: AuthMode) -> Self {
             let runtime = tokio::runtime::Builder::new_multi_thread()
                 .enable_all()
                 .build()
@@ -150,7 +138,6 @@ mod imp {
                 closed: AtomicBool::new(false),
 
                 auth_mode,
-                registries,
                 key_store: Arc::new(KeyStore::new()),
                 events: Events::new(),
                 players: Arc::new(Mutex::new(Vec::new())),
@@ -163,11 +150,9 @@ mod imp {
             self: Arc<Self>,
             addr: impl ToSocketAddrs,
         ) -> Result<(), ServerError> {
-            #[cfg(debug_assertions)]
-            let _ = env_logger::try_init();
-
+            crate::registry::freeze();
             let listener = TcpListener::bind(addr).await?;
-            log::debug!("Listening on {}", listener.local_addr()?);
+            tracing::debug!("Listening on {}", listener.local_addr()?);
 
             let rt_handle = self.runtime.handle().clone();
             let this = self.clone();

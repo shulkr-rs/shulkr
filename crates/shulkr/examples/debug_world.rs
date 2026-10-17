@@ -1,12 +1,14 @@
-use shulkr::Server;
-use shulkr::auth::AuthMode;
-use shulkr::entity::GameMode;
-use shulkr::event::player::{
-    PlayerConfigEvent, PlayerEvent, PlayerRequestGameModeEvent, PlayerSpawnEvent,
+use shulkr::{
+    Server,
+    auth::AuthMode,
+    entity::GameMode,
+    event::player::{PlayerConfigEvent, PlayerEvent, PlayerRequestGameModeEvent, PlayerSpawnEvent},
+    world::{DimensionType, World, block::BlockState},
 };
-use shulkr::world::{DimensionType, World, block::BlockState};
 
 fn main() {
+    tracing_subscriber::fmt::init();
+
     let server = Server::new(AuthMode::Online);
     let world = World::new(DimensionType::OVERWORLD);
 

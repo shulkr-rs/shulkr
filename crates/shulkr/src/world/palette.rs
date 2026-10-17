@@ -1,4 +1,5 @@
-use std::collections::{HashMap, hash_map::Entry};
+use crate::util::HashMap;
+use std::collections::hash_map::Entry;
 
 #[derive(Debug, Clone)]
 pub enum PaletteFormat {
@@ -32,11 +33,11 @@ impl Palette {
     }
 
     pub fn biome_direct_bpe() -> u8 {
-        Palette::required_bpe(crate::registry::Registries::biomes().len() as i32).max(1) as u8
+        Palette::required_bpe(crate::registry::registries::BIOME.len() as i32).max(1) as u8
     }
 
-    fn empty(dim: usize, min_bpe: u8, max_bpe: u8, direct_bpe: u8) -> Self {
-        let mut count = HashMap::with_capacity(1);
+    pub fn empty(dim: usize, min_bpe: u8, max_bpe: u8, direct_bpe: u8) -> Self {
+        let mut count = HashMap::with_capacity_and_hasher(1, Default::default());
         count.insert(0, (dim * dim * dim) as i32);
 
         Self {
@@ -67,9 +68,17 @@ impl Palette {
         self.data[self.index(x, y, z)]
     }
 
-    pub fn set(&mut self, x: usize, y: usize, z: usize, value: u16) {
-        let index = self.index(x, y, z);
+    #[inline]
+    pub fn get_index(&self, index: usize) -> u16 {
+        debug_assert!(index < self.data.len());
+        self.data[index]
+    }
+
+    pub fn set_index(&mut self, index: usize, value: u16) {
         let original = self.data[index];
+        if original == value {
+            return;
+        }
 
         if let Entry::Occupied(mut entry) = self.count.entry(original) {
             let count = entry.get_mut();
@@ -86,11 +95,54 @@ impl Palette {
             .or_insert(1);
     }
 
+    pub fn uniform(&self) -> Option<u16> {
+        if self.count.len() == 1 {
+            self.count.keys().next().copied()
+        } else {
+            None
+        }
+    }
+
+    pub fn fill(&mut self, value: u16) {
+        self.data.fill(value);
+        self.count.clear();
+        self.count.insert(value, self.data.len() as i32);
+    }
+
+    #[inline]
+    pub fn data_mut(&mut self) -> &mut [u16] {
+        &mut self.data
+    }
+
+    pub fn recount(&mut self) {
+        self.count.clear();
+        for &value in &self.data {
+            *self.count.entry(value).or_insert(0) += 1;
+        }
+    }
+
+    pub fn distinct(&self) -> impl Iterator<Item = u16> + '_ {
+        self.count.keys().copied()
+    }
+
+    pub fn counts(&self) -> impl Iterator<Item = (u16, i32)> + '_ {
+        self.count.iter().map(|(value, count)| (*value, *count))
+    }
+
+    pub fn set(&mut self, x: usize, y: usize, z: usize, value: u16) {
+        let index = self.index(x, y, z);
+        self.set_index(index, value);
+    }
+
     /// Returns the number of non-air blocks in the palette.
     pub fn count(&self) -> i32 {
         self.count
             .iter()
-            .map(|(k, v)| if *k == 0 { 0 } else { *v }) // todo: add cave- and void air
+            .map(|(state_id, count)| {
+                let is_air = crate::world::block::BlockState::from_id(*state_id)
+                    .is_some_and(|state| state.is_air());
+                if is_air { 0 } else { *count }
+            })
             .sum()
     }
 
@@ -194,7 +246,47 @@ mod tests {
     }
 
     #[test]
+    fn uniform_reports_the_single_value_and_nothing_else() {
+        let mut palette = Palette::blocks();
+        assert_eq!(palette.uniform(), Some(0));
+
+        palette.set(0, 0, 0, 5);
+        assert_eq!(palette.uniform(), None);
+
+        palette.fill(5);
+        assert_eq!(palette.uniform(), Some(5));
+    }
+
+    #[test]
+    fn recount_rebuilds_counts_after_a_bulk_write() {
+        crate::registry::registries::register_all();
+        let mut palette = Palette::blocks();
+        let volume = palette.data.len();
+
+        palette.data_mut()[0] = 7;
+        palette.data_mut()[1] = 7;
+        palette.recount();
+
+        assert_eq!(palette.count.get(&7).copied(), Some(2));
+        assert_eq!(palette.count.get(&0).copied(), Some(volume as i32 - 2));
+        assert_eq!(palette.count(), 2);
+    }
+
+    #[test]
+    fn set_index_matches_set() {
+        let mut by_xyz = Palette::blocks();
+        let mut by_index = Palette::blocks();
+
+        by_xyz.set(3, 4, 5, 9);
+        by_index.set_index(4 * 16 * 16 + 5 * 16 + 3, 9);
+
+        assert_eq!(by_xyz.data, by_index.data);
+        assert_eq!(by_xyz.get_index(4 * 16 * 16 + 5 * 16 + 3), 9);
+    }
+
+    #[test]
     fn test_palette_count() {
+        crate::registry::registries::register_all();
         let mut palette = Palette::blocks();
         assert_eq!(palette.count(), 0);
 

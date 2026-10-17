@@ -14,7 +14,7 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v7
     - name: Build
       run: cargo build --verbose
     - name: Run tests
@@ -23,8 +23,10 @@ jobs:
   lint:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v7
+    - name: Install nightly rustfmt
+      run: rustup toolchain install nightly --component rustfmt --profile minimal
     - name: Check formatting
-      run: cargo fmt --all -- --check
+      run: cargo +nightly fmt --all -- --check
     - name: Clippy
       run: cargo clippy --workspace --all-targets -- -D warnings

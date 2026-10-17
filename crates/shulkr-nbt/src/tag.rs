@@ -1,17 +1,15 @@
-use std::io::Write;
-
-use bytes::Buf;
-use serde::{
-    Serialize,
-    ser::{self, SerializeSeq},
-};
-
 use crate::{
     BYTE_ARRAY_ID, BYTE_ID, COMPOUND_ID, DOUBLE_ID, END_ID, Error, FLOAT_ID, INT_ARRAY_ID, INT_ID,
     LIST_ID, LONG_ARRAY_ID, LONG_ID, NbtCompound, SHORT_ID, STRING_ID,
     deserialize::{ReadExt, get_nbt_string},
     serialize::WriteExt,
 };
+use bytes::Buf;
+use serde::{
+    Serialize,
+    ser::{self, SerializeSeq},
+};
+use std::io::Write;
 
 #[derive(Clone, Debug, PartialEq, PartialOrd)]
 #[repr(u8)]

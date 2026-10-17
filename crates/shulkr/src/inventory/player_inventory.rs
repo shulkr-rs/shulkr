@@ -1,8 +1,5 @@
-use parking_lot::Mutex;
+use crate::{inventory::DragState, item::ItemStack, util::Mutex};
 use std::sync::atomic::{AtomicI32, Ordering};
-
-use crate::inventory::DragState;
-use crate::item::ItemStack;
 
 pub const PLAYER_INVENTORY_SIZE: i32 = 46;
 

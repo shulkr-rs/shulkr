@@ -1,10 +1,12 @@
 use super::login::DeathLocation;
-use crate::entity::GameMode;
-use crate::protocol::{
-    encode::{Encode, EncodeError, PacketWrite},
-    packet::{Packet, ServerPacket},
+use crate::{
+    entity::GameMode,
+    protocol::{
+        encode::{Encode, EncodeError, PacketWrite},
+        packet::{Packet, ServerPacket},
+    },
+    util::Key,
 };
-use crate::util::Key;
 
 pub const KEEP_ATTRIBUTE_MODIFIERS: u8 = 1;
 pub const KEEP_ENTITY_DATA: u8 = 2;
@@ -16,7 +18,7 @@ pub struct RespawnPacket {
     pub dimension_name: Key,
     pub hashed_seed: i64,
     pub game_mode: GameMode,
-    pub previous_game_mode: i8,
+    pub previous_game_mode: Option<GameMode>,
     pub is_debug: bool,
     pub is_flat: bool,
     pub death_location: Option<DeathLocation>,
@@ -31,10 +33,10 @@ impl ServerPacket for RespawnPacket {}
 impl Encode for RespawnPacket {
     fn encode<W: PacketWrite>(w: &mut W, this: &Self) -> Result<(), EncodeError> {
         w.write_varint(this.dimension_type)?;
-        w.write_identifier(&this.dimension_name)?;
+        w.write_key(&this.dimension_name)?;
         w.write_i64(this.hashed_seed)?;
-        w.write_u8(this.game_mode as u8)?;
-        w.write_u8(this.previous_game_mode as u8)?;
+        w.write_varint(this.game_mode as i32)?;
+        w.write_varint(this.previous_game_mode.map_or(0, |gm| gm as i32 + 1))?;
         w.write_bool(this.is_debug)?;
         w.write_bool(this.is_flat)?;
         w.write_option(&this.death_location, DeathLocation::encode)?;

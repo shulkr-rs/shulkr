@@ -1,8 +1,7 @@
+use crate::util::{Either, Key};
 use serde::{Deserialize, Serialize};
 use shulkr_macros::Enumeration;
 use uuid::Uuid;
-
-use crate::util::{Either, Key};
 
 #[derive(Debug, Clone, Deserialize, Serialize)]
 pub struct GameProfile {

@@ -1,6 +1,5 @@
-use shulkr_macros::{DataType, Enumeration};
-
 use crate::entity::meta::{MetaAccessor, MetadataHolder, refs::parrot::VARIANT};
+use shulkr_macros::{DataType, Enumeration};
 
 pub struct ParrotMeta {
     holder: MetadataHolder,
@@ -8,7 +7,7 @@ pub struct ParrotMeta {
 
 impl ParrotMeta {
     pub fn get_variant(&self) -> ParrotVariant {
-        ParrotVariant::try_from(self.holder.get(VARIANT)).unwrap_or(ParrotVariant::RedBlue)
+        ParrotVariant::try_from(self.holder.get(VARIANT)).unwrap_or_default()
     }
 
     pub fn set_variant(&self, value: ParrotVariant) {
@@ -22,8 +21,9 @@ impl MetaAccessor for ParrotMeta {
     }
 }
 
-#[derive(Enumeration, DataType)]
+#[derive(Enumeration, DataType, Default)]
 pub enum ParrotVariant {
+    #[default]
     RedBlue,
     Blue,
     Green,

@@ -1,5 +1,3 @@
-use std::io::Cursor;
-
 use crate::{
     command::StringReader,
     entity::{GameMode, Player},
@@ -17,7 +15,7 @@ use crate::{
             PlayerCommand, PlayerCommandPacket, PlayerInputFlags, PlayerInputPacket,
             PlayerLoadedPacket, PlayerMovementFlagsPacket, PlayerPositionAndRotationPacket,
             PlayerPositionPacket, PlayerRequestGameModePacket, PlayerRotationPacket,
-            PlayerSessionPacket, SeenAdvancementsPacket, SetCreativeModeSlotPacket, SwingArmPacket,
+            PlayerSessionPacket, PunchPacket, SeenAdvancementsPacket, SetCreativeModeSlotPacket,
             UseItemOnPacket, UseItemPacket,
             client::{
                 self,
@@ -30,6 +28,7 @@ use crate::{
     },
     text::NamedColor,
 };
+use std::io::Cursor;
 
 mod interaction;
 mod inventory;
@@ -69,11 +68,11 @@ pub fn handle_packet(player: Player, id: i32, data: &mut Cursor<&[u8]>) -> Resul
         0x2A => handle_player_command(player, PlayerCommandPacket::decode(data)?),
         0x2B => handle_player_input(player, PlayerInputPacket::decode(data)?),
         0x2C => handle_player_loaded(player, PlayerLoadedPacket::decode(data)?),
-        0x2E => hande_change_recipe_book_settings(player, ChangeRecipeBookSettingsPacket::decode(data)?),
-        0x32 => handle_seen_advancements(player, SeenAdvancementsPacket::decode(data)?),
-        0x35 => handle_set_held_item(player, SetHeldItemPacket::decode(data)?),
-        0x38 => handle_set_creative_mode_slot(player, SetCreativeModeSlotPacket::decode(data)?),
-        0x3F => handle_swing_arm(player, SwingArmPacket::decode(data)?),
+        0x2E => handle_punch(player, PunchPacket::decode(data)?),
+        0x2F => hande_change_recipe_book_settings(player, ChangeRecipeBookSettingsPacket::decode(data)?),
+        0x33 => handle_seen_advancements(player, SeenAdvancementsPacket::decode(data)?),
+        0x36 => handle_set_held_item(player, SetHeldItemPacket::decode(data)?),
+        0x39 => handle_set_creative_mode_slot(player, SetCreativeModeSlotPacket::decode(data)?),
         0x42 => handle_use_item_on(player, UseItemOnPacket::decode(data)?),
         0x43 => handle_use_item(player, UseItemPacket::decode(data)?),
         _ => return Err(DecodeError::UnkownPacket(id)),
@@ -137,7 +136,7 @@ fn handle_chat_message(player: Player, packet: ChatMessagePacket) {
 }
 
 fn handle_player_session(_player: Player, _packet: PlayerSessionPacket) {
-    log::warn!("todo: handle_player_session");
+    tracing::warn!("todo: handle_player_session");
 }
 
 fn handle_chunk_batch_received(player: Player, packet: ChunkBatchReceivedPacket) {
@@ -164,15 +163,15 @@ fn handle_client_info(player: Player, packet: ClientInfoPacket) {
 }
 
 fn handle_plugin_message(_player: Player, _packet: client::play::PluginMessagePacket) {
-    log::warn!("todo: handle_plugin_message");
+    tracing::warn!("todo: handle_plugin_message");
 }
 
 fn handle_keep_alive(_player: Player, _packet: KeepAlivePacket) {
-    log::warn!("todo: handle_keep_alive");
+    tracing::warn!("todo: handle_keep_alive");
 }
 
 fn handle_ping_request(_player: Player, _packet: PingRequestPacket) {
-    log::warn!("todo: handle_ping_request");
+    tracing::warn!("todo: handle_ping_request");
 }
 
 fn handle_player_abilities(player: Player, packet: PlayerAbilitiesPacket) {
@@ -219,11 +218,11 @@ fn handle_player_input(player: Player, packet: PlayerInputPacket) {
 }
 
 fn handle_player_loaded(_player: Player, _packet: PlayerLoadedPacket) {
-    log::warn!("todo: handle_player_loaded");
+    tracing::warn!("todo: handle_player_loaded");
 }
 
 fn hande_change_recipe_book_settings(_player: Player, _packet: ChangeRecipeBookSettingsPacket) {
-    log::warn!("todo: hande_change_recipe_book_settings");
+    tracing::warn!("todo: hande_change_recipe_book_settings");
 }
 
 fn handle_seen_advancements(_player: Player, _packet: SeenAdvancementsPacket) {}

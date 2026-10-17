@@ -1,13 +1,16 @@
-use std::borrow::Cow;
-
-use crate::registry::{Id, Registries};
-use crate::text::TextComponent;
-use crate::util::Key;
-use crate::world::Particle;
-use crate::world::attribute::{
-    AmbientSounds, AttributeType, AttributeValue, BackgroundMusic, BedRule, BedRuleKind, MoonPhase,
-    TriState,
+use crate::{
+    registry::{Id, registries},
+    text::TextComponent,
+    util::Key,
+    world::{
+        Particle,
+        attribute::{
+            AmbientSounds, AttributeType, AttributeValue, BackgroundMusic, BedRule, BedRuleKind,
+            MobSpawnSettings, MoonPhase, TriState,
+        },
+    },
 };
+use std::borrow::Cow;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 pub struct EnvironmentAttribute(Id);
@@ -56,7 +59,9 @@ impl EnvironmentAttribute {
     }
 
     pub fn from_key(key: &Key) -> Option<EnvironmentAttribute> {
-        Registries::ENVIRONMENT_ATTRIBUTE.by_key(key).copied()
+        registries::ENVIRONMENT_ATTRIBUTE
+            .by_key(key)
+            .map(|entry| **entry)
     }
 }
 
@@ -72,7 +77,7 @@ impl TryFrom<Id> for EnvironmentAttribute {
 
     #[inline]
     fn try_from(value: Id) -> Result<Self, Self::Error> {
-        if (value as usize) < Registries::ENVIRONMENT_ATTRIBUTE.len() {
+        if (value as usize) < registries::ENVIRONMENT_ATTRIBUTE.len() {
             Ok(EnvironmentAttribute(value))
         } else {
             Err(())
