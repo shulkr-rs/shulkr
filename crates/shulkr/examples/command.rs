@@ -3,10 +3,10 @@ use shulkr::{
     auth::AuthMode,
     command::{
         CommandContext, CommandSource, argument,
-        arguments::{DoubleArg, IntArg, StringArg},
+        arguments::{DoubleArg, FloatArg, IntArg, StringArg},
         literal,
     },
-    event::player::PlayerConfigEvent,
+    event::player::{PlayerConfigEvent, PlayerEvent, PlayerRequestGameModeEvent, PlayerSpawnEvent},
     world::{DimensionType, World, block::Block},
 };
 
@@ -68,7 +68,7 @@ fn main() {
     dispatcher.register(
         literal("msg").then(
             argument("target", StringArg::single_word())
-                .suggests(|cx: &CommandContext<CommandSource>, mut builder| {
+                .suggests(|mut builder, cx: &CommandContext<CommandSource>| {
                     let Ok(player) = cx.source().as_player() else {
                         return builder.build();
                     };
@@ -96,27 +96,32 @@ fn main() {
         ),
     );
 
-    dispatcher.register(
-        literal("op")
-            .requires(|source: &CommandSource| {
-                source
-                    .as_player()
-                    .is_ok_and(|player| player.name() == "garfxld")
-            })
-            .then(argument("count", IntArg::new()).executes(
-                |cx: &CommandContext<CommandSource>| {
-                    let count = cx.get::<IntArg>("count")?;
-                    cx.source().as_player()?.send_message(format!("op {count}"));
-                    Ok(1)
-                },
-            )),
-    );
+    dispatcher.register(literal("flyspeed").then(
+        argument("multiplier", FloatArg::between(0.1, 20.0)).executes(
+            |cx: &CommandContext<CommandSource>| {
+                let multiplier = cx.get::<FloatArg>("multiplier")?;
+                if let Ok(player) = cx.source().as_player() {
+                    player.set_flying_speed(0.05 * multiplier);
+                    player.send_message(format!("fly speed set to {multiplier}x"));
+                }
+                Ok(1)
+            },
+        ),
+    ));
 
     server
         .events()
         .subscribe(move |event: &mut PlayerConfigEvent| {
             event.set_world(world.clone());
             event.set_position([0.5, 75.0, 0.5]);
+        })
+        .subscribe(|event: &mut PlayerSpawnEvent| {
+            event.get_player().set_permission_level(4);
+        })
+        .subscribe(|event: &mut PlayerRequestGameModeEvent| {
+            event
+                .get_player()
+                .set_game_mode(event.requested_game_mode());
         });
 
     server.bind("127.0.0.1:25565").unwrap();

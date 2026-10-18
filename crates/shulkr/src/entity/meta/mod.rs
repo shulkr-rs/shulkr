@@ -257,14 +257,14 @@ impl AnyValue {
 #[derive(Debug, Clone, Copy)]
 pub struct ValueType<T> {
     id: i32,
-    __phantom: PhantomData<T>,
+    _marker: PhantomData<T>,
 }
 
 impl<T> ValueType<T> {
     pub const fn new(id: i32) -> Self {
         Self {
             id,
-            __phantom: PhantomData,
+            _marker: PhantomData,
         }
     }
 }

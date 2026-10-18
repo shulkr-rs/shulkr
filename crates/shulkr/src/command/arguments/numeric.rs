@@ -19,35 +19,35 @@ macro_rules! numeric_argument {
     ) => {
         #[derive(Debug, Clone, Copy, PartialEq)]
         pub struct $name {
-            minimum: $value,
-            maximum: $value,
+            min: $value,
+            max: $value,
         }
 
         impl $name {
             pub fn new() -> Self {
                 Self {
-                    minimum: <$value>::MIN,
-                    maximum: <$value>::MAX,
+                    min: <$value>::MIN,
+                    max: <$value>::MAX,
                 }
             }
 
-            pub fn at_least(minimum: $value) -> Self {
+            pub fn at_least(min: $value) -> Self {
                 Self {
-                    minimum,
-                    maximum: <$value>::MAX,
+                    min,
+                    max: <$value>::MAX,
                 }
             }
 
-            pub fn between(minimum: $value, maximum: $value) -> Self {
-                Self { minimum, maximum }
+            pub fn between(min: $value, max: $value) -> Self {
+                Self { min, max }
             }
 
-            pub fn minimum(&self) -> $value {
-                self.minimum
+            pub fn min(&self) -> $value {
+                self.min
             }
 
-            pub fn maximum(&self) -> $value {
-                self.maximum
+            pub fn max(&self) -> $value {
+                self.max
             }
         }
 
@@ -64,24 +64,24 @@ macro_rules! numeric_argument {
             fn parse(&self, reader: &mut StringReader) -> Result<$value, Error> {
                 let start = reader.cursor();
                 let value = reader.$read()?;
-                if value < self.minimum {
+                if value < self.min {
                     reader.set_cursor(start);
                     return Err(error::$too_low
-                        .create([error::arg(self.minimum), error::arg(value)])
+                        .create([error::arg(self.min), error::arg(value)])
                         .with_context(reader.string(), start));
                 }
-                if value > self.maximum {
+                if value > self.max {
                     reader.set_cursor(start);
                     return Err(error::$too_high
-                        .create([error::arg(self.maximum), error::arg(value)])
+                        .create([error::arg(self.max), error::arg(value)])
                         .with_context(reader.string(), start));
                 }
                 Ok(value)
             }
 
             fn encode_properties<W: PacketWrite>(&self, w: &mut W) -> Result<(), EncodeError> {
-                let has_min = self.minimum != <$value>::MIN;
-                let has_max = self.maximum != <$value>::MAX;
+                let has_min = self.min != <$value>::MIN;
+                let has_max = self.max != <$value>::MAX;
 
                 let mut flags = 0u8;
                 if has_min {
@@ -93,10 +93,10 @@ macro_rules! numeric_argument {
                 w.write_u8(flags)?;
 
                 if has_min {
-                    w.$write(self.minimum)?;
+                    w.$write(self.min)?;
                 }
                 if has_max {
-                    w.$write(self.maximum)?;
+                    w.$write(self.max)?;
                 }
                 Ok(())
             }

@@ -65,7 +65,7 @@ impl AnyDataComponent {
         if TypeId::of::<T>() == self.type_id {
             Ok(DataComponent {
                 inner: self,
-                __phantom: PhantomData,
+                _marker: PhantomData,
             })
         } else {
             Err(self)
@@ -90,7 +90,7 @@ impl AnyDataComponent {
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct DataComponent<T> {
     inner: AnyDataComponent,
-    __phantom: PhantomData<T>,
+    _marker: PhantomData<T>,
 }
 
 impl<T> DataComponent<T> {
@@ -104,7 +104,7 @@ impl<T> DataComponent<T> {
                 key,
                 type_id: TypeId::of::<T>(),
             },
-            __phantom: PhantomData,
+            _marker: PhantomData,
         }
     }
 

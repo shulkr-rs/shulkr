@@ -20,7 +20,7 @@ impl<S> RequiredArgumentBuilder<S> {
 
     pub fn suggests<F>(mut self, provider: F) -> Self
     where
-        F: Fn(&CommandContext<S>, SuggestionsBuilder) -> Suggestions + Send + Sync + 'static,
+        F: Fn(SuggestionsBuilder, &CommandContext<S>) -> Suggestions + Send + Sync + 'static,
     {
         self.custom_suggestions = Some(Arc::new(provider));
         self

@@ -8,35 +8,35 @@ use std::{
 #[derive(Debug)]
 pub struct RegistryKey<T> {
     key: Key,
-    _phantom: PhantomData<T>,
+    _marker: PhantomData<T>,
 }
 
 impl<T> RegistryKey<T> {
     pub fn new(path: String) -> Self {
         Self {
             key: Key::vanilla(path),
-            _phantom: PhantomData,
+            _marker: PhantomData,
         }
     }
 
     pub fn of(path: String) -> Self {
         Self {
             key: Key::of(path),
-            _phantom: PhantomData,
+            _marker: PhantomData,
         }
     }
 
     pub const fn const_new(namespace: &'static str, path: &'static str) -> Self {
         Self {
             key: Key::const_new(namespace, path),
-            _phantom: PhantomData,
+            _marker: PhantomData,
         }
     }
 
     pub const fn const_vanilla(path: &'static str) -> Self {
         Self {
             key: Key::const_vanilla(path),
-            _phantom: PhantomData,
+            _marker: PhantomData,
         }
     }
 
@@ -63,7 +63,7 @@ impl<T> From<Key> for RegistryKey<T> {
     fn from(value: Key) -> Self {
         Self {
             key: value,
-            _phantom: PhantomData,
+            _marker: PhantomData,
         }
     }
 }
@@ -86,7 +86,7 @@ impl<T> Clone for RegistryKey<T> {
     fn clone(&self) -> Self {
         Self {
             key: self.key.clone(),
-            _phantom: PhantomData,
+            _marker: PhantomData,
         }
     }
 }

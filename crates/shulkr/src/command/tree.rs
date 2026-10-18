@@ -16,7 +16,7 @@ pub type RedirectModifier<S> =
     Arc<dyn Fn(&CommandContext<S>) -> Result<Vec<S>, Error> + Send + Sync>;
 
 pub type SuggestionProvider<S> =
-    Arc<dyn Fn(&CommandContext<S>, SuggestionsBuilder) -> Suggestions + Send + Sync>;
+    Arc<dyn Fn(SuggestionsBuilder, &CommandContext<S>) -> Suggestions + Send + Sync>;
 
 pub enum NodeKind<S> {
     Root,
@@ -195,7 +195,7 @@ impl<S> CommandNode<S> {
                 custom_suggestions,
                 ..
             } => match custom_suggestions {
-                Some(provider) => provider(context, builder),
+                Some(provider) => provider(builder, context),
                 None => argument_type.list_suggestions(builder),
             },
         }
