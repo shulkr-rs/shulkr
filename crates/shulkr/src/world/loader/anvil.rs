@@ -334,9 +334,11 @@ fn parse_block_states(chunk: &mut Chunk, sect_y: u32, tag: NbtTag) -> Option<()>
         let z = i / 16 % 16;
         let y = i / (16 * 16);
         chunk.set_block(
-            x as i32,
-            chunk.min_y() + (sect_y * 16) as i32 + y as i32,
-            z as i32,
+            [
+                x as i32,
+                chunk.min_y() + (sect_y * 16) as i32 + y as i32,
+                z as i32,
+            ],
             &blocks[idx],
         );
     })
@@ -389,33 +391,35 @@ fn parse_biomes(
         return None;
     }
 
-    let mut ids = Vec::with_capacity(palette.len());
+    let mut entries = Vec::with_capacity(palette.len());
     for entry in palette {
         let NbtTag::String(name) = entry else {
             return None;
         };
 
         let lookup = name.strip_prefix("minecraft:").unwrap_or(&name);
-        ids.push(biomes.get_id(&Key::vanilla(lookup.to_owned()))? as i32);
+        entries.push(biomes.by_key(&Key::vanilla(lookup.to_owned()))?);
     }
 
-    if ids.len() == 1 {
-        chunk.fill_biome_section(sect_y, ids[0] as u16);
+    if entries.len() == 1 {
+        chunk.fill_biome_section(sect_y, entries[0].id());
         return Some(());
     }
 
     let NbtTag::LongArray(data) = comp.remove("data")? else {
         return None;
     };
-    unpack(&data, BIOMES_PER_SECTION, ids.len(), 1, |i, idx| {
+    unpack(&data, BIOMES_PER_SECTION, entries.len(), 1, |i, idx| {
         let x = i % 4;
         let z = i / 4 % 4;
         let y = i / (4 * 4);
         chunk.set_biome(
-            (x * 4) as i32,
-            (sect_y as usize * 16 + y * 4) as i32,
-            (z * 4) as i32,
-            ids[idx],
+            [
+                (x * 4) as i32,
+                (sect_y as usize * 16 + y * 4) as i32,
+                (z * 4) as i32,
+            ],
+            entries[idx],
         );
     })
 }

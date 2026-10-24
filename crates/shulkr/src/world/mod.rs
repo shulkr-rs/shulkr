@@ -17,9 +17,10 @@ use crate::{
     Server,
     entity::{Entity, Player},
     protocol::packet::{BlockUpdatePacket, WorldEventPacket},
-    registry::RegistryKey,
+    registry::{Ref, RegistryKey},
     util::{BlockPosition, Direction, HashMap},
     world::{
+        biome::Biome,
         block::{Block, BlockState},
         chunk::Chunk,
     },
@@ -110,35 +111,59 @@ impl World {
         self.0.remove_viewer(chunk_x, chunk_z);
     }
 
-    pub fn get_block(&self, position: impl Into<BlockPosition>) -> BlockState {
-        let position = position.into();
-        let [x, y, z] = position.into();
+    // Returns the chunk containing `position`, panicking if it isn't loaded.
+    fn expect_chunk(&self, position: BlockPosition) -> Chunk {
+        let cx = position.x().div_euclid(16);
+        let cz = position.z().div_euclid(16);
 
-        let cx = x.div_euclid(16);
-        let cz = z.div_euclid(16);
-
-        let chunk = self.get_chunk(cx, cz).unwrap_or_else(|| {
-            panic!("Chunk ({},{}) is not loaded!", cx, cz);
-        });
-
-        BlockState::from_id(chunk.get_block(x, y, z)).unwrap()
+        self.get_chunk(cx, cz)
+            .unwrap_or_else(|| panic!("Chunk ({},{}) is not loaded!", cx, cz))
     }
 
+    /// Returns the [BlockState] at `position`.
+    ///
+    /// Panics if the chunk containing `position` is not loaded.
+    pub fn get_block(&self, position: impl Into<BlockPosition>) -> BlockState {
+        let position = position.into();
+        let chunk = self.expect_chunk(position);
+
+        BlockState::from_id(chunk.get_block(position)).unwrap()
+    }
+
+    /// Changes the [BlockState] at `position` to `block`.
+    ///
+    /// Panics if the chunk containing `position` is not loaded.
     pub fn set_block(&self, position: impl Into<BlockPosition>, block: impl Into<BlockState>) {
         let position = position.into();
-        let [x, y, z] = position.into();
-
-        let cx = x.div_euclid(16);
-        let cz = z.div_euclid(16);
-
-        let chunk = match self.get_chunk(cx, cz) {
-            Some(chunk) => chunk,
-            None => self.load_chunk(cx, cz),
-        };
+        let chunk = self.expect_chunk(position);
 
         let block = block.into();
-        chunk.set_block(x, y, z, &block);
+        chunk.set_block(position, &block);
 
+        self.update_block(position, &block);
+    }
+
+    /// Returns the [Biome] at `position`.
+    ///
+    /// Panics if the chunk containing `position` is not loaded.
+    pub fn get_biome(&self, position: impl Into<BlockPosition>) -> &'static Ref<Biome> {
+        let position = position.into();
+        let chunk = self.expect_chunk(position);
+
+        chunk.get_biome(position)
+    }
+
+    /// Changes the [Biome] at `position` to `biome`.
+    ///
+    /// Panics if the chunk containing `position` is not loaded.
+    pub fn set_biome(&self, position: impl Into<BlockPosition>, biome: &Ref<Biome>) {
+        let position = position.into();
+        let chunk = self.expect_chunk(position);
+
+        chunk.set_biome(position, biome);
+    }
+
+    fn update_block(&self, position: BlockPosition, block: &BlockState) {
         // todo: should be only sent to players that are viewing the block/chunk
         for player in Server::current().players().lock().iter() {
             let Some(world) = player.0.world.lock().clone() else {
@@ -153,17 +178,6 @@ impl World {
                 block_id: block.state_id(),
             });
         }
-    }
-
-    pub fn get_biome(&self, position: impl Into<BlockPosition>) -> u16 {
-        let position = position.into();
-        self.0.get_biome(position.x(), position.y(), position.z())
-    }
-
-    pub fn set_biome(&self, position: impl Into<BlockPosition>, biome: i32) {
-        let position = position.into();
-        self.0
-            .set_biome(position.x(), position.y(), position.z(), biome)
     }
 
     pub fn spawn_entity(&self, entity: Entity) {
@@ -353,28 +367,6 @@ mod imp {
                 return;
             }
             slot.viewers = slot.viewers.saturating_sub(1);
-        }
-
-        pub(super) fn get_biome(&self, x: i32, y: i32, z: i32) -> u16 {
-            let cx = x.div_euclid(16);
-            let cz = z.div_euclid(16);
-
-            let chunk = self.get_chunk(cx, cz).unwrap_or_else(|| {
-                panic!("Chunk ({},{}) is not loaded!", cx, cz);
-            });
-
-            chunk.get_biome(x, y, z)
-        }
-
-        pub(super) fn set_biome(&self, x: i32, y: i32, z: i32, biome: i32) {
-            let cx = x.div_euclid(16);
-            let cz = z.div_euclid(16);
-
-            let chunk = match self.get_chunk(cx, cz) {
-                Some(chunk) => chunk,
-                None => self.load_chunk(cx, cz),
-            };
-            chunk.set_biome(x, y, z, biome);
         }
 
         pub(super) fn spawn_entity(&self, entity: Entity) {

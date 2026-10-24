@@ -203,8 +203,8 @@ impl ChunkSection {
     // Biome
 
     #[inline]
-    pub fn set_biome(&mut self, x: usize, y: usize, z: usize, biome: i32) {
-        self.biomes.set(x, y, z, biome as u16);
+    pub fn set_biome(&mut self, x: usize, y: usize, z: usize, biome: u16) {
+        self.biomes.set(x, y, z, biome);
     }
 
     #[inline]

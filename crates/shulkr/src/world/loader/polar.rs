@@ -239,9 +239,11 @@ fn read_section(
                 let z = cell / 16 % 16;
                 let y = cell / (16 * 16);
                 chunk.set_block(
-                    x as i32,
-                    chunk.min_y() + (section * 16) as i32 + y as i32,
-                    z as i32,
+                    [
+                        x as i32,
+                        chunk.min_y() + (section * 16) as i32 + y as i32,
+                        z as i32,
+                    ],
                     &blocks[idx],
                 );
             }
@@ -253,19 +255,19 @@ fn read_section(
     if palette_len < 1 {
         return Err(PolarError::Malformed);
     }
-    let mut ids = Vec::with_capacity(palette_len);
+    let mut entries = Vec::with_capacity(palette_len);
     for _ in 0..palette_len {
         let name = read_string(body)?;
         let lookup = name.strip_prefix("minecraft:").unwrap_or(&name);
-        let id = biomes
-            .get_id(&Key::vanilla(lookup.to_owned()))
-            .ok_or(PolarError::Malformed)? as i32;
-        ids.push(id);
+        let entry = biomes
+            .by_key(&Key::vanilla(lookup.to_owned()))
+            .ok_or(PolarError::Malformed)?;
+        entries.push(entry);
     }
 
     if palette_len == 1 {
         if in_range {
-            chunk.fill_biome_section(section, ids[0] as u16);
+            chunk.fill_biome_section(section, entries[0].id());
         }
     } else {
         let data = read_long_array(body)?;
@@ -275,10 +277,12 @@ fn read_section(
                 let z = cell / 4 % 4;
                 let y = cell / (4 * 4);
                 chunk.set_biome(
-                    (x * 4) as i32,
-                    (section as usize * 16 + y * 4) as i32,
-                    (z * 4) as i32,
-                    ids[idx],
+                    [
+                        (x * 4) as i32,
+                        (section as usize * 16 + y * 4) as i32,
+                        (z * 4) as i32,
+                    ],
+                    entries[idx],
                 );
             }
         })?;
@@ -591,8 +595,8 @@ mod tests {
 
         let chunk = loader.load_chunk(0, 0).expect("chunk present");
         let stone = Block::from_key("minecraft:stone").unwrap().default_state();
-        assert_eq!(chunk.get_block(0, 0, 0), stone.state_id());
-        assert_eq!(chunk.get_block(15, 15, 15), stone.state_id());
+        assert_eq!(chunk.get_block([0, 0, 0]), stone.state_id());
+        assert_eq!(chunk.get_block([15, 15, 15]), stone.state_id());
         assert_eq!(seen.borrow().as_slice(), &[b"chunk-meta".to_vec()]);
 
         assert!(loader.load_chunk(0, 0).is_none());

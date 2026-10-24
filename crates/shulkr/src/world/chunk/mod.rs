@@ -1,22 +1,26 @@
 mod async_dedup;
-mod chunk_section;
 mod chunk_tracker;
 mod graph;
+mod section;
 mod ticket;
 mod ticket_storage;
 mod view_tracker;
 
 pub use async_dedup::AsyncDedup;
-pub use chunk_section::*;
 pub use chunk_tracker::{ChunkGraph, ChunkGraphSource};
 pub use graph::{DynamicGraph, GraphState};
+pub use section::*;
 pub use ticket::{Ticket, TicketType};
 pub use ticket_storage::TicketStorage;
 pub use view_tracker::ViewTracker;
 
 use crate::{
+    registry::{Id, Ref, registries},
     util::{BlockPosition, HashMap, RwLock},
-    world::block::{BlockEntity, BlockState},
+    world::{
+        biome::Biome,
+        block::{BlockEntity, BlockState},
+    },
 };
 use std::sync::Arc;
 
@@ -55,41 +59,100 @@ impl Chunk {
             .collect::<Vec<_>>()
     }
 
-    pub fn get_block(&self, x: i32, y: i32, z: i32) -> u16 {
-        self.0.read().get_block(x, y, z)
+    /// Returns the [BlockState] id at `position`.
+    ///
+    /// Panics if `position` is outside this chunk's height range.
+    pub fn get_block(&self, position: impl Into<BlockPosition>) -> u16 {
+        let [x, y, z] = Into::<BlockPosition>::into(position).into();
+
+        let chunk = self.0.read();
+        let section = chunk.expect_section(y);
+
+        section.get_block(to_relative(x), to_relative(y), to_relative(z))
     }
 
-    pub fn set_block(&self, x: i32, y: i32, z: i32, block: &BlockState) {
-        self.0.write().set_block(x, y, z, block)
-    }
+    /// Changes the [BlockState] at `position` to `block`.
+    ///
+    /// Panics if `position` is outside this chunk's height range.
+    pub fn set_block(&self, position: impl Into<BlockPosition>, block: &BlockState) {
+        let [x, y, z] = Into::<BlockPosition>::into(position).into();
 
-    pub fn get_biome(&self, x: i32, y: i32, z: i32) -> u16 {
-        self.0.read().get_biome(x, y, z)
-    }
+        let mut chunk = self.0.write();
 
-    pub fn set_biome(&self, x: i32, y: i32, z: i32, biome: i32) {
-        self.0.write().set_biome(x, y, z, biome)
-    }
+        let section = chunk.expect_section_mut(y);
+        section.set_block(
+            to_relative(x),
+            to_relative(y),
+            to_relative(z),
+            block.state_id(),
+        );
 
-    pub fn fill_blocks(&self, blocks: impl IntoIterator<Item = (i32, i32, i32, BlockState)>) {
-        let mut guard = self.0.write();
-        for (x, y, z, state) in blocks {
-            guard.set_block(x, y, z, &state);
+        let packed_xz = pack_xz(x, z);
+        let key = (packed_xz, y as i16);
+        if let Some(info) = block.block_entity() {
+            let block_entity = BlockEntity {
+                packed_xz,
+                y: y as i16,
+                r#type: Id::from(*info) as i32,
+                data: None,
+            };
+
+            chunk.block_entities.insert(key, block_entity);
+        } else {
+            chunk.block_entities.remove(&key);
         }
     }
 
-    pub fn fill_biomes(&self, biomes: impl IntoIterator<Item = (i32, i32, i32, i32)>) {
-        let mut guard = self.0.write();
+    /// Returns the [Biome] at `position`.
+    ///
+    /// Panics if `position` is outside this chunk's height range.
+    pub fn get_biome(&self, position: impl Into<BlockPosition>) -> &'static Ref<Biome> {
+        let [x, y, z] = Into::<BlockPosition>::into(position).into();
+
+        let chunk = self.0.read();
+        let section = chunk.expect_section(y);
+
+        let id = section.get_biome(to_relative(x) / 4, to_relative(y) / 4, to_relative(z) / 4);
+        registries::BIOME
+            .by_id(id)
+            .unwrap_or_else(|| panic!("Unknown biome id: {}", id))
+    }
+
+    /// Changes the [Biome] at `position` to `biome`.
+    ///
+    /// Panics if `position` is outside this chunk's height range.
+    pub fn set_biome(&self, position: impl Into<BlockPosition>, biome: &Ref<Biome>) {
+        let [x, y, z] = Into::<BlockPosition>::into(position).into();
+
+        let mut chunk = self.0.write();
+        let section = chunk.expect_section_mut(y);
+
+        section.set_biome(
+            to_relative(x) / 4,
+            to_relative(y) / 4,
+            to_relative(z) / 4,
+            biome.id(),
+        );
+    }
+
+    pub fn fill_blocks(&self, blocks: impl IntoIterator<Item = (i32, i32, i32, BlockState)>) {
+        for (x, y, z, state) in blocks {
+            self.set_block([x, y, z], &state);
+        }
+    }
+
+    pub fn fill_biomes<'a>(
+        &self,
+        biomes: impl IntoIterator<Item = (i32, i32, i32, &'a Ref<Biome>)>,
+    ) {
         for (x, y, z, biome) in biomes {
-            guard.set_biome(x, y, z, biome);
+            self.set_biome([x, y, z], biome);
         }
     }
 
     pub fn to_chunk_pos(position: impl Into<BlockPosition>) -> (i32, i32) {
         let position = position.into();
-        let chunk_x = position.x().div_euclid(16);
-        let chunk_z = position.z().div_euclid(16);
-        (chunk_x, chunk_z)
+        (position.x().div_euclid(16), position.z().div_euclid(16))
     }
 
     pub(crate) fn in_view(dx: i32, dz: i32, view_distance: i32) -> bool {
@@ -161,9 +224,8 @@ impl Chunk {
         world_y: i32,
         data: shulkr_nbt::Nbt,
     ) -> bool {
-        let key = pack_xz(x as i32, z as i32);
+        let key = (pack_xz(x as i32, z as i32), world_y as i16);
         if let Some(block_entity) = self.0.write().block_entities.get_mut(&key) {
-            block_entity.y = world_y as i16;
             block_entity.data = Some(data);
             true
         } else {
@@ -172,15 +234,72 @@ impl Chunk {
     }
 }
 
+#[inline]
+fn to_relative(value: i32) -> usize {
+    (value & 0x0F) as usize
+}
+
 fn pack_xz(world_x: i32, world_z: i32) -> u8 {
     let block_x = world_x & 0xF;
     let block_z = world_z & 0xF;
     ((block_x << 4) | block_z) as u8
 }
 
+mod imp {
+    use super::*;
+
+    pub(super) struct Chunk {
+        pub(super) chunk_x: i32,
+        pub(super) chunk_z: i32,
+        pub(super) min_y: i32,
+        pub(super) sections: Vec<ChunkSection>,
+        pub(super) block_entities: HashMap<(u8, i16), BlockEntity>,
+    }
+
+    impl Chunk {
+        pub(super) fn new(chunk_x: i32, chunk_z: i32, min_y: i32) -> Self {
+            let mut sections = vec![];
+            for _ in 0..24 {
+                sections.push(ChunkSection::new());
+            }
+
+            Self {
+                chunk_x,
+                chunk_z,
+                min_y,
+                sections,
+                block_entities: HashMap::default(),
+            }
+        }
+
+        // Returns the section containing `y`, panicking if it is out of bounds.
+        #[inline]
+        pub(super) fn expect_section(&self, y: i32) -> &ChunkSection {
+            self.section_index(y)
+                .and_then(|index| self.sections.get(index))
+                .unwrap_or_else(|| panic!("Chunk section out of bounds for y: {}", y))
+        }
+
+        // Returns the section containing `y` mutably, panicking if it is out of bounds.
+        #[inline]
+        pub(super) fn expect_section_mut(&mut self, y: i32) -> &mut ChunkSection {
+            self.section_index(y)
+                .and_then(|index| self.sections.get_mut(index))
+                .unwrap_or_else(|| panic!("Chunk section out of bounds for y: {}", y))
+        }
+
+        // Returns the index of the section containing `y`, or `None` if `y` is below `min_y`.
+        #[inline]
+        fn section_index(&self, y: i32) -> Option<usize> {
+            usize::try_from((y - self.min_y).div_euclid(16)).ok()
+        }
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::Chunk;
+    use crate::world::block::Block;
 
     #[test]
     fn in_view_matches_vanilla_shape() {
@@ -206,111 +325,55 @@ mod tests {
             .count();
         assert_eq!(count, expected);
     }
-}
 
-mod imp {
-    use super::*;
-    use crate::registry::Id;
+    #[test]
+    fn stacked_block_entities_are_kept_apart() {
+        crate::registry::registries::register_all();
+        let chunk = Chunk::new(0, 0, -64);
+        let chest = Block::from_key("minecraft:chest").unwrap().default_state();
+        chunk.set_block([1, 10, 1], &chest);
+        chunk.set_block([1, 11, 1], &chest);
 
-    pub(super) struct Chunk {
-        pub(super) chunk_x: i32,
-        pub(super) chunk_z: i32,
-        pub(super) min_y: i32,
-        pub(super) sections: Vec<ChunkSection>,
-        pub(super) block_entities: HashMap<u8, BlockEntity>,
+        let mut ys = chunk
+            .block_entites()
+            .iter()
+            .map(|e| e.y)
+            .collect::<Vec<_>>();
+        ys.sort();
+        assert_eq!(ys, [10, 11]);
     }
 
-    impl Chunk {
-        pub(super) fn new(chunk_x: i32, chunk_z: i32, min_y: i32) -> Self {
-            let mut sections = vec![];
-            for _ in 0..24 {
-                sections.push(ChunkSection::new());
-            }
+    #[test]
+    fn replacing_a_block_entity_removes_it() {
+        crate::registry::registries::register_all();
+        let chunk = Chunk::new(0, 0, -64);
+        let chest = Block::from_key("minecraft:chest").unwrap().default_state();
+        let stone = Block::from_key("minecraft:stone").unwrap().default_state();
+        chunk.set_block([1, 10, 1], &chest);
+        chunk.set_block([1, 10, 1], &stone);
 
-            Self {
-                chunk_x,
-                chunk_z,
-                min_y,
-                sections,
-                block_entities: HashMap::default(),
-            }
-        }
+        assert!(chunk.block_entites().is_empty());
+    }
 
-        pub(super) fn get_block(&self, x: i32, y: i32, z: i32) -> u16 {
-            let Some(section) = self.section_at(y) else {
-                panic!("Chunk section out of bounds for y: {}", y);
-            };
+    #[test]
+    #[should_panic(expected = "Chunk section out of bounds")]
+    fn a_position_just_below_min_y_is_out_of_bounds() {
+        crate::registry::registries::register_all();
+        let chunk = Chunk::new(0, 0, -64);
+        chunk.get_block([0, -65, 0]);
+    }
 
-            section.get_block(
-                Self::to_relative(x),
-                Self::to_relative(y),
-                Self::to_relative(z),
-            )
-        }
+    #[test]
+    fn an_out_of_bounds_set_block_leaves_block_entities_untouched() {
+        crate::registry::registries::register_all();
+        let chunk = Chunk::new(0, 0, -64);
+        let chest = Block::from_key("minecraft:chest").unwrap().default_state();
 
-        pub(super) fn set_block(&mut self, x: i32, y: i32, z: i32, state: &BlockState) {
-            if let Some(info) = state.block_entity() {
-                let packed_xz = pack_xz(x, z);
-                let block_entity = BlockEntity {
-                    packed_xz,
-                    y: y as i16,
-                    r#type: Id::from(*info) as i32,
-                    data: None,
-                };
+        let result = std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| {
+            chunk.set_block([0, 320, 0], &chest)
+        }));
 
-                self.block_entities.insert(packed_xz, block_entity);
-            }
-
-            let Some(section) = self.section_at_mut(y) else {
-                panic!("Chunk section out of bounds for y: {}", y);
-            };
-
-            section.set_block(
-                Self::to_relative(x),
-                Self::to_relative(y),
-                Self::to_relative(z),
-                state.state_id(),
-            );
-        }
-
-        pub(super) fn get_biome(&self, x: i32, y: i32, z: i32) -> u16 {
-            let Some(section) = self.section_at(y) else {
-                panic!("Chunk section out of bounds for y: {}", y);
-            };
-
-            section.get_biome(
-                Self::to_relative(x) / 4,
-                Self::to_relative(y) / 4,
-                Self::to_relative(z) / 4,
-            )
-        }
-
-        pub(super) fn set_biome(&mut self, x: i32, y: i32, z: i32, biome: i32) {
-            let Some(section) = self.section_at_mut(y) else {
-                panic!("Chunk section out of bounds for y: {}", y);
-            };
-
-            section.set_biome(
-                Self::to_relative(x) / 4,
-                Self::to_relative(y) / 4,
-                Self::to_relative(z) / 4,
-                biome,
-            );
-        }
-
-        #[inline]
-        pub(super) fn to_relative(value: i32) -> usize {
-            (value & 0x0F) as usize
-        }
-
-        #[inline]
-        pub(super) fn section_at(&self, y: i32) -> Option<&ChunkSection> {
-            self.sections.get(((y - self.min_y) / 16) as usize)
-        }
-
-        #[inline]
-        pub(super) fn section_at_mut(&mut self, y: i32) -> Option<&mut ChunkSection> {
-            self.sections.get_mut(((y - self.min_y) / 16) as usize)
-        }
+        assert!(result.is_err());
+        assert!(chunk.block_entites().is_empty());
     }
 }
