@@ -41,6 +41,7 @@ fn main() {
         .events()
         .subscribe(move |event: &mut PlayerConfigEvent| {
             let world = World::new(DimensionType::OVERWORLD);
+            world.load_chunk(0, 0);
             world.set_block(SPAWN, Block::DIAMOND_BLOCK);
 
             let mut state = GameState {
@@ -93,6 +94,7 @@ fn generate_block(start: BlockPosition, world: &World) -> BlockPosition {
     let z = if y > 0 { 3 } else { 4 };
 
     let position = BlockPosition::new(start.x() + x, start.y() + y, start.z() + z);
+    world.load_chunk(position.x().div_euclid(16), position.z().div_euclid(16));
     world.set_block(position, *POSSIBLE_BLOCKS.choose(&mut rand::rng()).unwrap());
     position
 }

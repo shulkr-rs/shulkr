@@ -18,6 +18,7 @@ fn main() {
 
     let server = Server::new(AuthMode::Offline);
     let world = World::new(DimensionType::OVERWORLD);
+    world.load_chunk(0, 0);
 
     for bz in 0..16 {
         for bx in 0..16 {
