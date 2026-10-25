@@ -47,10 +47,12 @@ fn main() {
     let mut states = BlockState::all();
     states.sort_by_key(|s| s.state_id());
 
+    let width = (states.len() as f64).sqrt().ceil() as usize;
     for (pos, block) in states.iter().enumerate() {
-        let bz = ((pos / 168) + 1) as i32;
-        let bx = ((pos % 168) + 1) as i32;
-        world.set_block([(bz * 2) - 1, 70, (bx * 2) - 1], *block);
+        let x = (pos / width * 2 + 1) as i32;
+        let z = (pos % width * 2 + 1) as i32;
+        world.load_chunk(x.div_euclid(16), z.div_euclid(16));
+        world.set_block([x, 70, z], *block);
     }
 
     server
