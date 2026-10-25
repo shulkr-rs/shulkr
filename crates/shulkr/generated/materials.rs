@@ -604,6 +604,11 @@ impl Material {
     pub const BLACK_CARPET: Material = Material::new(Some(Block::BLACK_CARPET));
     pub const TERRACOTTA: Material = Material::new(Some(Block::TERRACOTTA));
     pub const PACKED_ICE: Material = Material::new(Some(Block::PACKED_ICE));
+    pub const PACKED_ICE_BRICKS: Material = Material::new(Some(Block::PACKED_ICE_BRICKS));
+    pub const PACKED_ICE_BRICK_SLAB: Material = Material::new(Some(Block::PACKED_ICE_BRICK_SLAB));
+    pub const PACKED_ICE_BRICK_STAIRS: Material = Material::new(Some(Block::PACKED_ICE_BRICK_STAIRS));
+    pub const PACKED_ICE_BRICK_WALL: Material = Material::new(Some(Block::PACKED_ICE_BRICK_WALL));
+    pub const CHISELED_PACKED_ICE: Material = Material::new(Some(Block::CHISELED_PACKED_ICE));
     pub const DIRT_PATH: Material = Material::new(Some(Block::DIRT_PATH));
     pub const SUNFLOWER: Material = Material::new(Some(Block::SUNFLOWER));
     pub const LILAC: Material = Material::new(Some(Block::LILAC));
@@ -793,6 +798,7 @@ impl Material {
     pub const DEAD_FIRE_CORAL_FAN: Material = Material::new(Some(Block::DEAD_FIRE_CORAL_FAN));
     pub const DEAD_HORN_CORAL_FAN: Material = Material::new(Some(Block::DEAD_HORN_CORAL_FAN));
     pub const BLUE_ICE: Material = Material::new(Some(Block::BLUE_ICE));
+    pub const BRITTLE_ICE: Material = Material::new(Some(Block::BRITTLE_ICE));
     pub const CONDUIT: Material = Material::new(Some(Block::CONDUIT));
     pub const POLISHED_GRANITE_STAIRS: Material = Material::new(Some(Block::POLISHED_GRANITE_STAIRS));
     pub const SMOOTH_RED_SANDSTONE_STAIRS: Material = Material::new(Some(Block::SMOOTH_RED_SANDSTONE_STAIRS));
@@ -1139,6 +1145,7 @@ impl Material {
     pub const LAVA_BUCKET: Material = Material::new(None);
     pub const POWDER_SNOW_BUCKET: Material = Material::new(Some(Block::POWDER_SNOW));
     pub const SNOWBALL: Material = Material::new(None);
+    pub const ICE_BALL: Material = Material::new(None);
     pub const LEATHER: Material = Material::new(None);
     pub const MILK_BUCKET: Material = Material::new(None);
     pub const PUFFERFISH_BUCKET: Material = Material::new(None);
@@ -1332,6 +1339,7 @@ impl Material {
     pub const BOGGED_SPAWN_EGG: Material = Material::new(None);
     pub const CAMEL_HUSK_SPAWN_EGG: Material = Material::new(None);
     pub const DROWNED_SPAWN_EGG: Material = Material::new(None);
+    pub const FROSTBITE_SPAWN_EGG: Material = Material::new(None);
     pub const HUSK_SPAWN_EGG: Material = Material::new(None);
     pub const PARCHED_SPAWN_EGG: Material = Material::new(None);
     pub const SKELETON_SPAWN_EGG: Material = Material::new(None);
@@ -1577,6 +1585,8 @@ impl Material {
     pub const MEDIUM_AMETHYST_BUD: Material = Material::new(Some(Block::MEDIUM_AMETHYST_BUD));
     pub const LARGE_AMETHYST_BUD: Material = Material::new(Some(Block::LARGE_AMETHYST_BUD));
     pub const AMETHYST_CLUSTER: Material = Material::new(Some(Block::AMETHYST_CLUSTER));
+    pub const ICE_CRYSTAL: Material = Material::new(Some(Block::ICE_CRYSTAL));
+    pub const ICICLE: Material = Material::new(Some(Block::ICICLE));
     pub const POINTED_DRIPSTONE: Material = Material::new(Some(Block::POINTED_DRIPSTONE));
     pub const SULFUR_SPIKE: Material = Material::new(Some(Block::SULFUR_SPIKE));
     pub const OCHRE_FROGLIGHT: Material = Material::new(Some(Block::OCHRE_FROGLIGHT));
@@ -2267,6 +2277,11 @@ pub(crate) fn register_all(registry: &Registry<Material>) {
     register("minecraft:black_carpet", Material::BLACK_CARPET);
     register("minecraft:terracotta", Material::TERRACOTTA);
     register("minecraft:packed_ice", Material::PACKED_ICE);
+    register("minecraft:packed_ice_bricks", Material::PACKED_ICE_BRICKS);
+    register("minecraft:packed_ice_brick_slab", Material::PACKED_ICE_BRICK_SLAB);
+    register("minecraft:packed_ice_brick_stairs", Material::PACKED_ICE_BRICK_STAIRS);
+    register("minecraft:packed_ice_brick_wall", Material::PACKED_ICE_BRICK_WALL);
+    register("minecraft:chiseled_packed_ice", Material::CHISELED_PACKED_ICE);
     register("minecraft:dirt_path", Material::DIRT_PATH);
     register("minecraft:sunflower", Material::SUNFLOWER);
     register("minecraft:lilac", Material::LILAC);
@@ -2456,6 +2471,7 @@ pub(crate) fn register_all(registry: &Registry<Material>) {
     register("minecraft:dead_fire_coral_fan", Material::DEAD_FIRE_CORAL_FAN);
     register("minecraft:dead_horn_coral_fan", Material::DEAD_HORN_CORAL_FAN);
     register("minecraft:blue_ice", Material::BLUE_ICE);
+    register("minecraft:brittle_ice", Material::BRITTLE_ICE);
     register("minecraft:conduit", Material::CONDUIT);
     register("minecraft:polished_granite_stairs", Material::POLISHED_GRANITE_STAIRS);
     register("minecraft:smooth_red_sandstone_stairs", Material::SMOOTH_RED_SANDSTONE_STAIRS);
@@ -2802,6 +2818,7 @@ pub(crate) fn register_all(registry: &Registry<Material>) {
     register("minecraft:lava_bucket", Material::LAVA_BUCKET);
     register("minecraft:powder_snow_bucket", Material::POWDER_SNOW_BUCKET);
     register("minecraft:snowball", Material::SNOWBALL);
+    register("minecraft:ice_ball", Material::ICE_BALL);
     register("minecraft:leather", Material::LEATHER);
     register("minecraft:milk_bucket", Material::MILK_BUCKET);
     register("minecraft:pufferfish_bucket", Material::PUFFERFISH_BUCKET);
@@ -2995,6 +3012,7 @@ pub(crate) fn register_all(registry: &Registry<Material>) {
     register("minecraft:bogged_spawn_egg", Material::BOGGED_SPAWN_EGG);
     register("minecraft:camel_husk_spawn_egg", Material::CAMEL_HUSK_SPAWN_EGG);
     register("minecraft:drowned_spawn_egg", Material::DROWNED_SPAWN_EGG);
+    register("minecraft:frostbite_spawn_egg", Material::FROSTBITE_SPAWN_EGG);
     register("minecraft:husk_spawn_egg", Material::HUSK_SPAWN_EGG);
     register("minecraft:parched_spawn_egg", Material::PARCHED_SPAWN_EGG);
     register("minecraft:skeleton_spawn_egg", Material::SKELETON_SPAWN_EGG);
@@ -3240,6 +3258,8 @@ pub(crate) fn register_all(registry: &Registry<Material>) {
     register("minecraft:medium_amethyst_bud", Material::MEDIUM_AMETHYST_BUD);
     register("minecraft:large_amethyst_bud", Material::LARGE_AMETHYST_BUD);
     register("minecraft:amethyst_cluster", Material::AMETHYST_CLUSTER);
+    register("minecraft:ice_crystal", Material::ICE_CRYSTAL);
+    register("minecraft:icicle", Material::ICICLE);
     register("minecraft:pointed_dripstone", Material::POINTED_DRIPSTONE);
     register("minecraft:sulfur_spike", Material::SULFUR_SPIKE);
     register("minecraft:ochre_froglight", Material::OCHRE_FROGLIGHT);

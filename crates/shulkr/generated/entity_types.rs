@@ -63,6 +63,7 @@ impl EntityType {
     pub const FIREWORK_ROCKET: EntityType = EntityType::new(EntityDimensions::new(0.2, 0.2, 0.2));
     pub const FOX: EntityType = EntityType::new(EntityDimensions::new(0.6, 0.7, 0.4));
     pub const FROG: EntityType = EntityType::new(EntityDimensions::new(0.5, 0.5, 0.4));
+    pub const FROSTBITE: EntityType = EntityType::new(EntityDimensions::new(0.6, 1.9, 1.7));
     pub const FURNACE_MINECART: EntityType = EntityType::new(EntityDimensions::new(1.0, 0.7, 0.6));
     pub const GHAST: EntityType = EntityType::new(EntityDimensions::new(4.0, 4.0, 2.6));
     pub const HAPPY_GHAST: EntityType = EntityType::new(EntityDimensions::new(4.0, 4.0, 2.6));
@@ -75,6 +76,7 @@ impl EntityType {
     pub const HOPPER_MINECART: EntityType = EntityType::new(EntityDimensions::new(1.0, 0.7, 0.6));
     pub const HORSE: EntityType = EntityType::new(EntityDimensions::new(1.4, 1.6, 1.5));
     pub const HUSK: EntityType = EntityType::new(EntityDimensions::new(0.6, 1.9, 1.7));
+    pub const ICE_BALL: EntityType = EntityType::new(EntityDimensions::new(0.2, 0.2, 0.2));
     pub const ILLUSIONER: EntityType = EntityType::new(EntityDimensions::new(0.6, 1.9, 1.7));
     pub const INTERACTION: EntityType = EntityType::new(EntityDimensions::new(0.0, 0.0, 0.0));
     pub const IRON_GOLEM: EntityType = EntityType::new(EntityDimensions::new(1.4, 2.7, 2.3));
@@ -229,6 +231,7 @@ pub(crate) fn register_all(registry: &Registry<EntityType>) {
     register("minecraft:firework_rocket", EntityType::FIREWORK_ROCKET);
     register("minecraft:fox", EntityType::FOX);
     register("minecraft:frog", EntityType::FROG);
+    register("minecraft:frostbite", EntityType::FROSTBITE);
     register("minecraft:furnace_minecart", EntityType::FURNACE_MINECART);
     register("minecraft:ghast", EntityType::GHAST);
     register("minecraft:happy_ghast", EntityType::HAPPY_GHAST);
@@ -241,6 +244,7 @@ pub(crate) fn register_all(registry: &Registry<EntityType>) {
     register("minecraft:hopper_minecart", EntityType::HOPPER_MINECART);
     register("minecraft:horse", EntityType::HORSE);
     register("minecraft:husk", EntityType::HUSK);
+    register("minecraft:ice_ball", EntityType::ICE_BALL);
     register("minecraft:illusioner", EntityType::ILLUSIONER);
     register("minecraft:interaction", EntityType::INTERACTION);
     register("minecraft:iron_golem", EntityType::IRON_GOLEM);

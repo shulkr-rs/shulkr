@@ -21,11 +21,13 @@ pub mod client {
         mod login_acknowledged;
         mod login_plugin_response;
         mod login_start;
+        mod options_applied;
 
         pub use encryption_response::EncryptionResponsePacket;
         pub use login_acknowledged::LoginAcknowledgePacket;
         pub use login_plugin_response::LoginPluginResponsePacket;
         pub use login_start::LoginStartPacket;
+        pub use options_applied::OptionsAppliedPacket;
     }
 
     pub mod config {
@@ -132,12 +134,14 @@ pub mod server {
     }
 
     pub mod login {
+        mod apply_options;
         mod encryption_request;
         mod login_disconnect;
         mod login_plugin_request;
         mod login_success;
         mod set_compression;
 
+        pub use apply_options::*;
         pub use encryption_request::*;
         pub use login_disconnect::LoginDisconnectPacket;
         pub use login_plugin_request::LoginPluginRequestPacket;

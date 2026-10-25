@@ -31,6 +31,7 @@ impl Biome {
     pub const FROZEN_PEAKS: RegistryKey<Biome> = RegistryKey::const_vanilla("frozen_peaks");
     pub const FROZEN_RIVER: RegistryKey<Biome> = RegistryKey::const_vanilla("frozen_river");
     pub const GROVE: RegistryKey<Biome> = RegistryKey::const_vanilla("grove");
+    pub const ICE_CAVES: RegistryKey<Biome> = RegistryKey::const_vanilla("ice_caves");
     pub const ICE_SPIKES: RegistryKey<Biome> = RegistryKey::const_vanilla("ice_spikes");
     pub const JAGGED_PEAKS: RegistryKey<Biome> = RegistryKey::const_vanilla("jagged_peaks");
     pub const JUNGLE: RegistryKey<Biome> = RegistryKey::const_vanilla("jungle");

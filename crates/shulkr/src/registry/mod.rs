@@ -1,6 +1,7 @@
 pub(crate) mod generated;
 
 mod banner_pattern;
+mod block_sound_set;
 mod block_transformer;
 mod context_float_provider;
 mod context_int_provider;
@@ -15,6 +16,7 @@ mod registry_key;
 mod tag;
 
 pub use banner_pattern::*;
+pub use block_sound_set::*;
 pub use block_transformer::*;
 pub use context_float_provider::*;
 pub use context_int_provider::*;

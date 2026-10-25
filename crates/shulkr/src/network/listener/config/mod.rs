@@ -113,7 +113,6 @@ fn handle_acknowledge_finish_config(
             .get_id(&dimension)
             .unwrap_or(0) as i32,
         dimension_name: dimension.into(),
-        hashed_seed: 93522819,
         game_mode: GameMode::Survival,
         previous_game_mode: None,
         is_debug: false,

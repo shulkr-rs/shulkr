@@ -34,6 +34,7 @@ const OUT_DIR: &str = "../crates/shulkr/generated";
 
 const DATAPACK_REGISTRIES: &[&str] = &[
     "banner_pattern",
+    "block_sound_set",
     "cat_sound_variant",
     "cat_variant",
     "chicken_sound_variant",

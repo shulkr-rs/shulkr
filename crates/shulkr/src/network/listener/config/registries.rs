@@ -57,6 +57,7 @@ pub(super) fn send_registries(c: &Connection) {
     c.send_packet(&RegistryDataPacket::from(&registries::CONTEXT_INT_PROVIDER));
     c.send_packet(&RegistryDataPacket::from(&registries::DECORATED_POT_PATTERN));
     c.send_packet(&RegistryDataPacket::from(&registries::PREDICATE));
+    c.send_packet(&RegistryDataPacket::from(&registries::BLOCK_SOUND_SET));
 }
 
 pub(super) fn send_registry_tags(c: &Connection) {

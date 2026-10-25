@@ -8,8 +8,9 @@ use crate::{
         ProtocolState,
         decode::{Decode as _, DecodeError},
         packet::{
-            EncryptionRequestPacket, EncryptionResponsePacket, LoginAcknowledgePacket,
-            LoginPluginResponsePacket, LoginStartPacket, LoginSuccessPacket, SetCompressionPacket,
+            ApplyOptionsPacket, ConnectionOptions, EncryptionRequestPacket,
+            EncryptionResponsePacket, LoginAcknowledgePacket, LoginPluginResponsePacket,
+            LoginStartPacket, LoginSuccessPacket, OptionsAppliedPacket, SetCompressionPacket,
         },
     },
 };
@@ -23,8 +24,9 @@ pub async fn handle_packet(client: Arc<Connection>, id: i32, data: &mut Cursor<&
         0x00 => handle_login_start(client, LoginStartPacket::decode(data)?).await,
         0x01 => handle_encryption_response(client, EncryptionResponsePacket::decode(data)?).await,
         0x02 => handle_login_plugin_response(client, LoginPluginResponsePacket::decode(data)?).await,
-        0x03 => handle_login_acknowledged(client, LoginAcknowledgePacket::decode(data)?),
+        0x03 => handle_login_acknowledged(client, LoginAcknowledgePacket::decode(data)?).await,
         0x04 => handle_cookie_response(client),
+        0x05 => handle_options_applied(client, OptionsAppliedPacket::decode(data)?).await,
         _ => return Err(DecodeError::UnkownPacket(id)),
     };
     Ok(())
@@ -67,38 +69,51 @@ fn login_online(conn: &Connection) {
     });
 }
 
+const COMPRESSION_THRESHOLD: i32 = 256;
+
 async fn finish_login(client: Arc<Connection>, game_profile: GameProfile) {
     *client.game_profile.lock() = Some(game_profile.clone());
-    enable_compression(&client).await;
+
+    // Compression is only switched on once the client acknowledges the login.
+    client.send_packet(&SetCompressionPacket {
+        threshold: COMPRESSION_THRESHOLD,
+    });
     client.send_packet(&LoginSuccessPacket {
         game_profile,
         session_id: uuid::Uuid::new_v4(),
+        options: ConnectionOptions::COMPRESSION,
     });
-}
-
-async fn enable_compression(client: &Connection) {
-    const COMPRESSION_THRESHOLD: i32 = 256;
-
-    client
-        .send_packet_now(&SetCompressionPacket {
-            threshold: COMPRESSION_THRESHOLD,
-        })
-        .await;
-    client.set_compression(COMPRESSION_THRESHOLD).await;
 }
 
 async fn handle_encryption_response(client: Arc<Connection>, packet: EncryptionResponsePacket) {
     let shared_secret = client.key_store.decrypt(&packet.shared_secret).unwrap();
-    client.set_encryption(&shared_secret).await;
 
     let username = client.game_profile.lock().as_ref().unwrap().name.clone();
     let hash = client.key_store.digest_secret(&shared_secret);
     let game_profile = auth::authenthicate(&username, &hash, None).unwrap();
 
+    *client.game_profile.lock() = Some(game_profile);
+    *client.pending_secret.lock() = Some(shared_secret);
+
+    // Encryption is only switched on once the client confirms it applied it.
+    client.send_packet(&ApplyOptionsPacket {
+        options: ConnectionOptions::ENCRYPTION,
+    });
+}
+
+async fn handle_options_applied(client: Arc<Connection>, _packet: OptionsAppliedPacket) {
+    let Some(shared_secret) = client.pending_secret.lock().take() else {
+        client.kick("Unexpected options acknowledgement.");
+        return;
+    };
+    client.set_encryption(&shared_secret).await;
+
+    let game_profile = client.game_profile.lock().clone().unwrap();
     finish_login(client, game_profile).await;
 }
 
-fn handle_login_acknowledged(client: Arc<Connection>, _packet: LoginAcknowledgePacket) {
+async fn handle_login_acknowledged(client: Arc<Connection>, _packet: LoginAcknowledgePacket) {
+    client.set_compression(COMPRESSION_THRESHOLD).await;
     client.set_state(ProtocolState::Config);
 }
 

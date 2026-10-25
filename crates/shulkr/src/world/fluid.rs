@@ -105,11 +105,11 @@ impl FluidState {
     }
 
     pub fn is_water(&self) -> bool {
-        self.fluid == Fluid::WATER || self.fluid == Fluid::FLOWING_WATER
+        self.fluid == Fluid::WATER
     }
 
     pub fn is_lava(&self) -> bool {
-        self.fluid == Fluid::LAVA || self.fluid == Fluid::FLOWING_LAVA
+        self.fluid == Fluid::LAVA
     }
 }
 
@@ -147,7 +147,7 @@ mod tests {
             .with(Properties::LEVEL, 1)
             .get_fluid_state();
 
-        assert_eq!(level_1.fluid(), Fluid::FLOWING_WATER);
+        assert_eq!(level_1.fluid(), Fluid::WATER);
         assert!(!level_1.is_source());
         assert_eq!(level_1.amount(), 7);
     }
@@ -194,10 +194,7 @@ mod tests {
     fn fluid_keys_come_from_the_registry() {
         crate::registry::registries::register_all();
         assert_eq!(Fluid::WATER.key().to_string(), "minecraft:water");
-        assert_eq!(
-            Fluid::FLOWING_LAVA.key().to_string(),
-            "minecraft:flowing_lava"
-        );
+        assert_eq!(Fluid::LAVA.key().to_string(), "minecraft:lava");
         assert!(Fluid::EMPTY.is_empty());
     }
 

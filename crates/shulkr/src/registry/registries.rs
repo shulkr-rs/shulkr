@@ -39,6 +39,7 @@ pub fn register_all() {
         load_json(&CONTEXT_INT_PROVIDER);
         load_json(&DECORATED_POT_PATTERN);
         load_json(&PREDICATE);
+        load_json(&BLOCK_SOUND_SET);
     });
 }
 
@@ -90,3 +91,4 @@ pub static CONTEXT_INT_PROVIDER: Registry<ContextIntProvider> =
 pub static DECORATED_POT_PATTERN: Registry<DecoratedPotPattern> =
     Registry::new("minecraft:decorated_pot_pattern");
 pub static PREDICATE: Registry<Predicate> = Registry::new("minecraft:predicate");
+pub static BLOCK_SOUND_SET: Registry<BlockSoundSet> = Registry::new("minecraft:block_sound_set");

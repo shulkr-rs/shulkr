@@ -20,7 +20,6 @@ pub struct LoginPacket {
     pub do_limited_crafting: bool,
     pub dimension_type: i32,
     pub dimension_name: Key,
-    pub hashed_seed: i64,
     pub game_mode: GameMode,
     pub previous_game_mode: Option<GameMode>,
     pub is_debug: bool,
@@ -48,7 +47,6 @@ impl Encode for LoginPacket {
         w.write_bool(this.do_limited_crafting)?;
         w.write_varint(this.dimension_type)?;
         w.write_key(&this.dimension_name)?;
-        w.write_i64(this.hashed_seed)?;
         w.write_varint(this.game_mode as i32)?;
         w.write_varint(this.previous_game_mode.map_or(0, |gm| gm as i32 + 1))?;
         w.write_bool(this.is_debug)?;

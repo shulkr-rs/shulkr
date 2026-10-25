@@ -184,7 +184,6 @@ impl Player {
         self.send_packet(&RespawnPacket {
             dimension_type,
             dimension_name: dimension.into(),
-            hashed_seed: 93522819,
             game_mode: self.game_mode(),
             previous_game_mode: None,
             is_debug: false,

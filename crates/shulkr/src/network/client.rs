@@ -42,6 +42,7 @@ pub struct Connection {
     pub(crate) game_profile: Mutex<Option<GameProfile>>,
     pub(crate) key_store: Arc<KeyStore>,
     pub(crate) verify_token: Mutex<[u8; 4]>,
+    pub(crate) pending_secret: Mutex<Option<Vec<u8>>>,
     pub(crate) player: Mutex<Option<Player>>,
     closed: AtomicBool,
     shutdown: tokio::sync::Notify,
@@ -64,6 +65,7 @@ impl Connection {
             game_profile: Mutex::new(None),
             key_store: server.key_store().clone(),
             verify_token: Mutex::new([0; 4]),
+            pending_secret: Mutex::new(None),
             player: Mutex::new(None),
             closed: AtomicBool::new(false),
             shutdown: tokio::sync::Notify::new(),
@@ -202,21 +204,6 @@ impl Connection {
             );
             self.close();
         }
-    }
-
-    pub async fn send_packet_now<P>(&self, packet: &P)
-    where
-        P: Packet + ServerPacket + 'static,
-    {
-        let data = match self.encode_packet(packet) {
-            Ok(v) => v,
-            Err(_) => {
-                return;
-            }
-        };
-
-        // Write the packet immediately
-        self.write_packet(data).await;
     }
 
     fn encode_packet<P>(&self, packet: &P) -> Result<BytesMut, EncodeError>

@@ -2,6 +2,8 @@
 pub(crate) mod banner_patterns;
 #[path = "../../generated/biomes.rs"]
 pub(crate) mod biomes;
+#[path = "../../generated/block_sound_sets.rs"]
+pub(crate) mod block_sound_sets;
 #[path = "../../generated/cat_sound_variants.rs"]
 pub(crate) mod cat_sound_variants;
 #[path = "../../generated/cat_variants.rs"]

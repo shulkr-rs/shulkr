@@ -11,6 +11,7 @@ use uuid::Uuid;
 pub struct LoginSuccessPacket {
     pub game_profile: GameProfile,
     pub session_id: Uuid,
+    pub options: u8,
 }
 
 impl Packet for LoginSuccessPacket {}
@@ -22,6 +23,7 @@ impl Encode for LoginSuccessPacket {
         w.write_string(&this.game_profile.name)?;
         w.write_array(&this.game_profile.properties, Property::encode)?;
         w.write_uuid(&this.session_id)?;
+        w.write_u8(this.options)?;
         Ok(())
     }
 }

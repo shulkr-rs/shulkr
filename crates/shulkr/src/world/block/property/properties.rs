@@ -44,6 +44,7 @@ impl Properties {
     pub const OMINOUS: BoolProperty         = BoolProperty::new("ominous");
     pub const OPEN: BoolProperty            = BoolProperty::new("open");
     pub const PERSISTENT: BoolProperty      = BoolProperty::new("persistent");
+    pub const PLAYLIST_MODE: BoolProperty   = BoolProperty::new("playlist_mode");
     pub const POWERED: BoolProperty         = BoolProperty::new("powered");
     pub const SHORT: BoolProperty           = BoolProperty::new("short");
     pub const SHRIEKING: BoolProperty       = BoolProperty::new("shrieking");

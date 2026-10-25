@@ -23,6 +23,7 @@ impl EnvironmentAttribute {
     pub const STAR_ANGLE: EnvironmentAttribute = EnvironmentAttribute::new("visual/star_angle", AttributeType::AngleDegrees, AttributeValue::Float(0f32));
     pub const MOON_PHASE: EnvironmentAttribute = EnvironmentAttribute::new("visual/moon_phase", AttributeType::MoonPhase, AttributeValue::MoonPhase(MoonPhase::FullMoon));
     pub const STAR_BRIGHTNESS: EnvironmentAttribute = EnvironmentAttribute::new("visual/star_brightness", AttributeType::Float, AttributeValue::Float(0f32));
+    pub const HAS_SKY_OCCLUDER: EnvironmentAttribute = EnvironmentAttribute::new("visual/has_sky_occluder", AttributeType::Boolean, AttributeValue::Boolean(false));
     pub const BLOCK_LIGHT_TINT: EnvironmentAttribute = EnvironmentAttribute::new("visual/block_light_tint", AttributeType::RgbColor, color("#ffd88c"));
     pub const SKY_LIGHT_COLOR: EnvironmentAttribute = EnvironmentAttribute::new("visual/sky_light_color", AttributeType::RgbColor, color("#ffffff"));
     pub const SKY_LIGHT_FACTOR: EnvironmentAttribute = EnvironmentAttribute::new("visual/sky_light_factor", AttributeType::Float, AttributeValue::Float(1f32));
@@ -79,6 +80,7 @@ pub(crate) fn register_all(registry: &Registry<EnvironmentAttribute>) {
     register("minecraft:visual/star_angle", EnvironmentAttribute::STAR_ANGLE);
     register("minecraft:visual/moon_phase", EnvironmentAttribute::MOON_PHASE);
     register("minecraft:visual/star_brightness", EnvironmentAttribute::STAR_BRIGHTNESS);
+    register("minecraft:visual/has_sky_occluder", EnvironmentAttribute::HAS_SKY_OCCLUDER);
     register("minecraft:visual/block_light_tint", EnvironmentAttribute::BLOCK_LIGHT_TINT);
     register("minecraft:visual/sky_light_color", EnvironmentAttribute::SKY_LIGHT_COLOR);
     register("minecraft:visual/sky_light_factor", EnvironmentAttribute::SKY_LIGHT_FACTOR);
