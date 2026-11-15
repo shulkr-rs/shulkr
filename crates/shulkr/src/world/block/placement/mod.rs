@@ -1,4 +1,5 @@
 mod bed;
+mod horizontal_facing;
 mod rotated_pillar;
 mod sign;
 mod trapdoor;
@@ -137,7 +138,42 @@ impl BlockPlaceRegistry {
             placements: RwLock::new(HashMap::default()),
         };
 
-        // TODO: proper registration
+        this.register_all(
+            &[
+                Block::FURNACE,
+                Block::BLAST_FURNACE,
+                Block::SMOKER,
+                Block::LECTERN,
+                Block::ENDER_CHEST,
+                Block::CHISELED_BOOKSHELF,
+                Block::CARVED_PUMPKIN,
+                Block::JACK_O_LANTERN,
+                Block::BEEHIVE,
+                Block::BEE_NEST,
+                Block::STONECUTTER,
+                Block::LOOM,
+                Block::END_PORTAL_FRAME,
+                Block::VAULT,
+                Block::WHITE_GLAZED_TERRACOTTA,
+                Block::ORANGE_GLAZED_TERRACOTTA,
+                Block::MAGENTA_GLAZED_TERRACOTTA,
+                Block::LIGHT_BLUE_GLAZED_TERRACOTTA,
+                Block::YELLOW_GLAZED_TERRACOTTA,
+                Block::LIME_GLAZED_TERRACOTTA,
+                Block::PINK_GLAZED_TERRACOTTA,
+                Block::GRAY_GLAZED_TERRACOTTA,
+                Block::LIGHT_GRAY_GLAZED_TERRACOTTA,
+                Block::CYAN_GLAZED_TERRACOTTA,
+                Block::PURPLE_GLAZED_TERRACOTTA,
+                Block::BLUE_GLAZED_TERRACOTTA,
+                Block::BROWN_GLAZED_TERRACOTTA,
+                Block::GREEN_GLAZED_TERRACOTTA,
+                Block::RED_GLAZED_TERRACOTTA,
+                Block::BLACK_GLAZED_TERRACOTTA,
+            ],
+            || horizontal_facing::HorizontalFacing,
+        );
+
         for block in registries::BLOCK.values() {
             if block.default_state().get(Properties::AXIS).is_some() {
                 this.register(*block, rotated_pillar::RotatedPillar);
@@ -163,6 +199,12 @@ impl BlockPlaceRegistry {
         }
 
         this
+    }
+
+    fn register_all<P: BlockPlacement + 'static>(&self, blocks: &[Block], rule: impl Fn() -> P) {
+        for block in blocks {
+            self.register(*block, rule());
+        }
     }
 
     pub fn register(&self, block: Block, placement: impl BlockPlacement + 'static) {
